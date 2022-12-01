@@ -18,3 +18,18 @@ This contains the major components for project reconfuse
 
 Project reconfuse is intended to provide a platform for free expression of ideas
 
+# How to run:
+
+Note: this was developed on linux and likely only works on linux. If you try to run it on Windows (or whatever else) and it doesn't work, contact me (Joe / jmacc93) and I might be able to help
+
+Make sure you have the required dependencies, which are: `node` (that's it, you just need node)
+If you use `apt`, you can download and install `node` via the terminal command: `sudo apt install nodejs`
+Alternatively, go to [Node's website](https://nodejs.org/en/download/) and download the binaries there
+
+Download the code by either:
+* Clicking the green `Code` button on the main repository github page and then the `Download ZIP`, OR
+* Opening a terminal and typing `git clone https://github.com/jmacc93/reconfuse`, this will create a new directory with the repo's contents
+
+Now, open a terminal or `cd` into the new directory and in the terminal run: `node fragment-server.js`. You should see 'Fragment server started on port 5502' or similar (note: you can change the port in `server-config.json`)
+
+Now just navigate to `localhost:5502/` in a webbrowser on the same computer and you should see *reconfuse*'s `/index.jhp` page
