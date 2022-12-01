@@ -1,0 +1,9 @@
+
+.file-representation.pagelet > .buttons > button {
+  border: none; 
+  background: unset;
+  color: rgb(28, 147, 251);
+  font-size: 0.75em;
+  margin: 0; padding: 0;
+  cursor: pointer;
+}

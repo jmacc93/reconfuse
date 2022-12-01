@@ -1,0 +1,97 @@
+
+// Was file argument given?
+if(!args.file) {
+  html`<div class="pagelet error">No file argument given to represent-list.jhp</div>`
+  return true
+}
+// else
+
+let serverFile = ctx.addPathDot(ctx.path.relative('./', ctx.addPathDot(args.file)))
+let clientFile = serverFile.slice(1)
+
+// Is the file inside the server
+if(serverFile.startsWith('..')) {
+  html`<div class="pagelet error">Given file is trying to access file outside of server working directory</div>`
+  return true
+}
+// else
+
+// Does it exists?
+if(!ctx.fs.existsSync(serverFile))
+  return ctx.serveJHP('./pagelets/non-existent-file.jhp', request, response, {...args, doneUrl: `/pagelets/represent-list.jhp?file=${args.file}`})
+// else
+
+// Is it a plain text file
+if(ctx.path.extname(serverFile) !== '.txt') {
+  html`<div class="pagelet error">File (${clientFile}) must be a plain text file</div>`
+  return true
+}
+// else
+
+// Set and check ETag 
+let thisStat = ctx.fs.statSync('./pagelets/represent-list.jhp')
+let stat = ctx.fs.statSync(serverFile)
+let etag = ctx.sha256(ctx.sha256(`${thisStat.mtimeMs}${stat.mtimeMs}${JSON.stringify(args)}`))
+response.setHeader('ETag', etag)
+if(request.headers['if-none-match'] === etag) {
+  response.statusCode = 304
+  return true
+}
+// else
+
+let fileContent = ctx.fs.readFileSync(serverFile).toString().trim()
+let fileNames   = new Set(fileContent.split(/[\s\t\n]+/g))
+fileNames.delete('')
+let count = fileNames.size
+
+if(args.username) { // requested about a user, check user voted
+  let userInList = fileNames.has(args.username)
+  html`
+  <div class="pagelet list-representation" data-file="${clientFile}" data-url="/pagelets/represent-list.jhp?file=${clientFile}&username=${args.username}">
+    `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
+    <title>List ${ctx.path.basename(args.file)} (${args.username})</title>
+    <link href="/pagelets/represent-list.css" rel="stylesheet"/>
+    <span class="count">${count}</span>
+    <span class="user-listd" data-inlist="${userInList}">${args.username} ${userInList ? 'is in this list' : "isn't in this list"}</span>
+    <select is="call-selection" class="linklike" style="width: 1em; appearance:none">
+      <option value="" style="color:gray">S</option>
+      <option value="" style="color:gray">List ${clientFile}</option>
+      <option value="/pagelets/represent-list.mjs: refresh">Refresh</option>
+    </select>
+  </div>
+  `
+} else if(args.cookies.username) { // logged in user requested, full controls
+  let userInList = fileNames.has(args.cookies.username)
+  html`
+  <div class="pagelet list-representation" data-file="${clientFile}" data-url="/pagelets/represent-list.jhp?file=${clientFile}">
+    `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
+    <title>List ${ctx.path.basename(args.file)} (${args.cookies.username})</title>
+    <link href="/pagelets/represent-list.css" rel="stylesheet"/>
+    <span class="count">${count}</span>
+    <span class="user-listd" data-inlist="${userInList}">You (${args.cookies.username}) ${userInList ? 'are in this list' : "aren't in this list"}</span>
+    <select is="call-selection" class="linklike" style="width: 1em; appearance:none">
+      <option value="" style="color:gray">S</option>
+      <option value="" style="color:gray">List ${clientFile}</option>
+      <option value="/pagelets/represent-list.mjs: refresh">Refresh</option>
+      ${userInList ?
+        /*html*/`<option value="/pagelets/represent-list.mjs: listOut">Leave list</option>` :
+        /*html*/`<option value="/pagelets/represent-list.mjs: listIn">Join list</option>`
+      }
+    </select>
+  </div>
+  `
+} else { // anonymous user requested, just show count
+  html`
+  <div class="pagelet list-representation" data-file="${clientFile}" data-url="/pagelets/represent-list.jhp?file=${clientFile}">
+    `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
+    <title>List ${ctx.path.basename(args.file)}</title>
+    <link href="/pagelets/represent-list.css" rel="stylesheet"/>
+    <span class="count">${count}</span>
+    <select is="call-selection" class="linklike" style="width: 1em; appearance:none">
+      <option value="" style="color:gray">S</option>
+      <option value="" style="color:gray">List ${clientFile}</option>
+      <option value="/pagelets/represent-list.mjs: refresh">Refresh</option>
+    </select>
+  </div>
+  `
+}

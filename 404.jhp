@@ -1,0 +1,37 @@
+/**
+Arguments:
+  requestPath
+
+Note: this file CANNOT defer to any other files
+*/
+
+if(args.requestPath === undefined) {
+  html`
+  <div class="404 pagelet boxed">
+    <title>404</title>
+    <link rel="stylesheet" href="/lib/general.css"/>
+    <span>The requested file... Uh, no file was given... Ok, well, if a file was given, it would be one that doesn't exist</span>
+    <button class="linklike"> Ok...</button>
+  </div>
+  `
+  return true
+}
+
+let serverFile = ctx.addPathDot(args.requestPath)
+let clientFile = serverFile.slice(1)
+
+html`
+<div class="pagelet boxed">
+  <title>404</title>
+  <link rel="stylesheet" href="/lib/general.css"/>
+
+  <span>The requested file ${clientFile} doesn't exist</span>
+  
+  <button is="call-resource-button" class="linklike"
+    srcfn="/lib/elem-functions.mjs: mixinRemotePagelet"
+    pagelet-src="${ clientFile }"
+    mixin-target="replace this parent .pagelet"
+  >Reload</button>
+  
+</div>
+`

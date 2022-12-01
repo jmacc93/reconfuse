@@ -1,0 +1,29 @@
+html`
+<div class="pagelet">
+  <title>Test .jhp pagelet</title>
+  
+  <span>The time is currently ${Date()}</span>
+  <div>This file was automatically created from a <span style="color:red">.jfp</span> file</div>
+
+  <pre>`
+    for(let i = 0; i < 10; i++) {
+      response.write(`Heres a test:`)
+      response.write(`${i}\n`)
+      response.write(``)
+    }; html`
+    This was generated with javascript
+  </pre>
+
+  <details>
+    <summary>Args given to test.jhp</summary>
+    <ul>`
+    for(const key in args)
+      html`<li>${key} = ${args[key]}</li>`
+    html`
+    </ul>
+  </details>
+
+  <script type="module" src="/lib/mixin.mjs"></script>
+  <html-mixin src="/pagelets/message.jhp?title=a message & message= Hello :) (this is an embedded /pagelet/message.jhp pagelet)"></html-mixin>
+</div>
+`

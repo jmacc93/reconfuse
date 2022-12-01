@@ -1,0 +1,636 @@
+
+if(!args.file) {
+  html`
+  <span class="pagelet file-editor">
+    `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
+    <title>Error</title>
+    <div>No 'file' argument given</div>
+    <div>(client should use <code>&file=...</code> in the url to set the file argument)</div>
+  </div>
+  `
+  return true
+}
+// else
+
+const serverFile = ctx.escapeAllQuotes(ctx.addPathDot(args.file))
+const clientFile = ctx.escapeAllQuotes(serverFile.slice(1))
+const parentDirectory = ctx.path.dirname(serverFile)
+
+const username = args.username ?? args.cookies.username
+const groupLib = await ctx.runScript('./bin/group.s.js')
+let isUpdateAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file'])
+let isRenameAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['renameFile', 'file'])
+let isMoveAllowed   = groupLib.userControlInclusionStatus(username, parentDirectory, ['moveFile',   'file'])
+let isTrashAllowed  = groupLib.userControlInclusionStatus(username, parentDirectory, ['trashFile',  'file'])
+const privilegeClassString = [
+  isUpdateAllowed ? '' : 'update-disallowed', 
+  isRenameAllowed ? '' : 'rename-disallowed',
+  isMoveAllowed   ? '' : 'move-disallowed'  ,
+  isTrashAllowed  ? '' : 'trash-disallowed'
+].join(' ')
+
+if(ctx.fs.existsSync(serverFile)) { // file exists
+  const styleElementStr = /*HTML*/ `
+    <style>
+      .file-editor.pagelet button.done-button[data-clicked] {
+        color: darkred
+      }
+      
+      .file-editor.pagelet.pending-changes button.submit-button::after {
+        content: "*";
+        position: absolute;
+        font-size: 0.6em;
+      }
+      
+      .file-editor.pagelet.update-disallowed button.submit-button { color: red }
+      .file-editor.pagelet.rename-disallowed option[value="rename"] { color: red }
+      .file-editor.pagelet.move-disallowed option[value="move"] { color: red }
+      .file-editor.pagelet.update-disallowed option[value="replace"] { color: red }
+      .file-editor.pagelet.trash-disallowed option[value="trash"] { color: red }
+      
+      .file-editor button.update-preview[data-mode="input"]::after { content: 'I' }
+      .file-editor button.update-preview[data-mode="delayed"]::after { content: 'Id' }
+      .file-editor button.update-preview[data-mode="change"]::after { content: 'C' }
+    </style>
+  `
+  
+  let extContent  = ctx.extContentMap[ctx.path.extname(serverFile)]
+  let [contentType, isBinary] = extContent ?? [undefined, undefined]
+  if(contentType === undefined)
+    [contentType, isBinary] = ctx.extContentMap.default
+      
+  principleContentType = ctx.splitAtFirst(contentType, ';')?.[0] ?? contentType
+  
+  let fileStat  = ctx.fs.statSync(serverFile)
+  let fileMTime = fileStat.mtimeMs
+  
+  if(true) { // can be edited
+    
+    if(fileStat.isDirectory()) { // file is a directory
+      html`
+      <span class="pagelet file-editor ${privilegeClassString}" data-time="${Date.now()}">
+        `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
+        <title>Editing ${ clientFile }</title>
+
+        <script src="/lib/callib/callib0.mjs" type="module"></script>
+        <script src="/lib/mixin.mjs" type="module"></script>
+        
+        ${styleElementStr}
+        
+        <!-- Install behavior -->
+        <script>(()=>{
+          const thisScript = document.currentScript
+          
+          requestIdleCallback(async () => {
+            const lib = await import('/lib/lib.mjs')
+            
+            const pagelet            = thisScript.parentElement
+            
+            const oldRepresentation  = pagelet.querySelector(':scope > .old-representation')
+            
+            const refreshButton      = pagelet.querySelector(':scope > .bottom-bar > .refresh-button')
+            const doneButton         = pagelet.querySelector(':scope > .bottom-bar > .done-button')
+            
+            const operationSelector  = pagelet.querySelector(':scope > .bottom-bar > .operation-area > .operation-selector')
+            const operationInput     = pagelet.querySelector(':scope > .bottom-bar > .operation-area > input[type="text"]')
+            const operationButton    = pagelet.querySelector(':scope > .bottom-bar > .operation-area > button')
+                        
+            refreshButton.addEventListener('click', async () => {
+              const destyle = lib.styleInProgress(pagelet)
+              try {
+                pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=${clientFile}'))
+              } catch(err) {
+                destyle()
+                lib.notificationFrom(pagelet, 'Error: ' + err.message, {error: true})
+              }
+            })
+            
+            doneButton.addEventListener('click', async () => {
+              const destyle = lib.styleInProgress(pagelet)
+              try {
+                pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/represent-file.jhp?file=${ clientFile }'))
+              } catch(err) {
+                destyle()
+                lib.notificationFrom(pagelet, 'Error: ' + err.message, {error: true})
+              }
+            })
+            
+            let operationButtonClickHandler = async () => {}
+            operationButton.addEventListener('click', (...args) => operationButtonClickHandler(...args))
+            
+            operationSelector.addEventListener('input', async inputEvent => {
+              const lib = await import('/lib/lib.mjs')
+              switch(operationSelector.value) {
+                case '':
+                  operationInput.hidden  = true
+                  operationButton.hidden = true
+                  return
+                case 'move':
+                  operationInput.hidden  = false
+                  operationButton.hidden = false
+                  operationInput.value        = "${args.file}"
+                  operationInput.placeholder  = 'New path'
+                  operationButton.textContent = 'Move'
+                  operationButtonClickHandler = async () => {
+                    let newFilePath = operationInput.value
+                    let destyle = lib.styleInProgress(pagelet)
+                    let response = await fetch('/bin/file.s.js/move?from=${args.file}&to=' + newFilePath)
+                    if(response.ok) {
+                      pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=' + newFilePath))
+                    } else {
+                      destyle()
+                      lib.notificationFrom(operationButton, ['Server returned: ', response.status, ', ', response.statusMessage].join(''), {error: true})
+                    }
+                  }
+                  return
+                case 'rename':
+                  operationInput.hidden  = false
+                  operationButton.hidden = false
+                  operationInput.value        = "${ctx.path.basename(args.file)}"
+                  operationInput.placeholder  = 'New name'
+                  operationButton.textContent = 'Rename'
+                  operationButtonClickHandler = async () => {
+                    let newFileName = operationInput.value
+                    let destyle = lib.styleInProgress(pagelet)
+                    let response = await fetch('/bin/file.s.js/rename?file=${args.file}&name=' + newFileName)
+                    if(response.ok) {
+                      pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=${ctx.path.dirname(args.file)}/' + newFileName))
+                    } else {
+                      destyle()
+                      lib.notificationFrom(operationButton, ['Server returned: ', response.status, ', ', response.statusMessage].join(''), {error: true})
+                    }
+                  }
+                  return
+                case 'trash':
+                  operationInput.hidden  = true
+                  operationButton.hidden = false
+                  operationButton.textContent = 'Trash'
+                  operationButtonClickHandler = async () => {
+                    let destyle = lib.styleInProgress(pagelet)
+                    let response = await fetch('/bin/file.s.js/trash?file=${args.file}')
+                    if(response.ok) {
+                      pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=${args.file}'))
+                    } else {
+                      destyle()
+                      lib.notificationFrom(operationButton, ['Server returned: ', response.status, ', ', response.statusMessage].join(''), {error: true})
+                    }
+                  }
+                  return
+              }
+            })
+          })
+        })()</script>
+        
+        <title>Editing directory ${ctx.path.basename(clientFile)} - ${clientFile}</title>
+        <div>Editing directory ${clientFile} </div>
+        
+        <div class="bottom-bar">
+          <button class="refresh-button text-only bluetext clickable">Refresh</button>
+          <button class="done-button text-only bluetext clickable">Done</button>
+          <span class="operation-area boxed lightly-padded"> 
+            <select class="operation-selector no-background no-border" style="appearance: none" value="">
+              <option value="" class="light-color">Operation</option>
+              <option value="move">Move</option>
+              <option value="rename">Rename</option>
+              <option value="trash">Trash</option>
+            </select>
+            <input hidden type="text" class="no-border" placeholder=""/>
+            <button hidden class="linklike"></button>
+          </span>
+        </div>
+        <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>
+      </div>
+      `
+      return true
+    }
+    // else
+    
+    if(isBinary) { // is a binary file
+      html`
+      <span class="pagelet file-editor ${privilegeClassString}" data-time="${Date.now()}">
+        `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
+        <title>Editing ${ clientFile }</title>
+
+        <script src="/lib/callib/callib0.mjs" type="module"></script>
+        <script src="/lib/mixin.mjs" type="module"></script>
+        
+        ${styleElementStr}
+        
+        <!-- Install behavior -->
+        <script>(()=>{
+          const thisScript = document.currentScript
+          
+          requestIdleCallback(async () => {
+            const lib = await import('/lib/lib.mjs')
+            
+            const pagelet            = thisScript.parentElement
+            
+            const oldRepresentation  = pagelet.querySelector(':scope > .old-representation')
+            
+            const refreshButton      = pagelet.querySelector(':scope > .bottom-bar > .refresh-button')
+            const doneButton         = pagelet.querySelector(':scope > .bottom-bar > .done-button')
+            
+            const operationSelector  = pagelet.querySelector(':scope > .bottom-bar > .operation-area > .operation-selector')
+            const operationFile      = pagelet.querySelector(':scope > .bottom-bar > .operation-area > input[type="file"]')
+            const operationInput     = pagelet.querySelector(':scope > .bottom-bar > .operation-area > input[type="text"]')
+            const operationButton    = pagelet.querySelector(':scope > .bottom-bar > .operation-area > button')
+                        
+            refreshButton.addEventListener('click', async () => {
+              let destyle = lib.styleInProgress(pagelet)
+              try {
+                pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=${clientFile}'))
+              } catch(err) {
+                destyle()
+                lib.notificationFrom(refreshButton, 'Error: ' + err.message, {error: true})
+              }
+            })
+            
+            doneButton.addEventListener('click', async () => {
+              let destyle = lib.styleInProgress(pagelet)
+              try {
+                pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/represent-file.jhp?file=${ clientFile }'))
+              } catch(err) {
+                destyle()
+                lib.notificationFrom(doneButton, 'Error: ' + err.message, {error: true})
+              }
+            })
+            
+            let operationButtonClickHandler = async () => {}
+            operationButton.addEventListener('click', (...args) => operationButtonClickHandler(...args))
+            
+            operationSelector.addEventListener('input', async inputEvent => {
+              const lib = await import('/lib/lib.mjs')
+              switch(operationSelector.value) {
+                case '':
+                  operationFile.hidden   = true
+                  operationInput.hidden  = true
+                  operationButton.hidden = true
+                  return
+                case 'move':
+                  operationFile.hidden   = true
+                  operationInput.hidden  = false
+                  operationButton.hidden = false
+                  operationInput.value        = "${args.file}"
+                  operationInput.placeholder  = 'New path'
+                  operationButton.textContent = 'Move'
+                  operationButtonClickHandler = async () => {
+                    let newFilePath = operationInput.value
+                    const destyle = lib.styleInProgress(pagelet)
+                    let response = await fetch('/bin/file.s.js/move?from=${args.file}&to=' + newFilePath)
+                    if(response.ok) {
+                      pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=' + newFilePath))
+                    } else {
+                      destyle()
+                      lib.notificationFrom(operationButton, ['Server returned: ', response.status, ', ', response.statusMessage].join(''), {error: true})
+                    }
+                  }
+                  return
+                case 'rename':
+                  operationFile.hidden   = true
+                  operationInput.hidden  = false
+                  operationButton.hidden = false
+                  operationInput.value        = "${ctx.path.basename(args.file)}"
+                  operationInput.placeholder  = 'New name'
+                  operationButton.textContent = 'Rename'
+                  operationButtonClickHandler = async () => {
+                    let newFileName = operationInput.value
+                    const destyle = lib.styleInProgress(pagelet)
+                    let response = await fetch('/bin/file.s.js/rename?file=${args.file}&name=' + newFileName)
+                    if(response.ok) {
+                      pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=${ctx.path.dirname(args.file)}/' + newFileName))
+                    } else {
+                      destyle()
+                      lib.notificationFrom(operationButton, ['Server returned: ', response.status, ', ', response.statusMessage].join(''), {error: true})
+                    }
+                  }
+                  return
+                case 'trash':
+                  operationFile.hidden   = true
+                  operationInput.hidden  = true
+                  operationButton.hidden = false
+                  operationButton.textContent = 'Trash'
+                  operationButtonClickHandler = async () => {
+                    const destyle = lib.styleInProgress(pagelet)
+                    let response = await fetch('/bin/file.s.js/trash?file=${args.file}')
+                    if(response.ok) {
+                      pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=${args.file}'))
+                    } else {
+                      destyle()
+                      lib.notificationFrom(operationButton, ['Server returned: ', response.status, ', ', response.statusMessage].join(''), {error: true})
+                    }
+                  }
+                  return
+                case 'replace':
+                  operationFile.hidden   = false
+                  operationInput.hidden  = true
+                  operationButton.hidden = false
+                  operationButton.textContent = 'Replace'
+                  operationButtonClickHandler = async () => {
+                    let newContent = operationFile.files.item(0)
+                    if(newContent === undefined)
+                      return lib.notificationFrom(operationFile, 'Please select a file first', {error: true})
+                    // else
+                    const destyle = lib.styleInProgress(pagelet)
+                    let response = await fetch('/bin/file.s.js/update?file=${args.file}', {method:"POST", body: newContent})
+                    if(response.ok) {
+                      pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=${args.file}'))
+                    } else {
+                      destyle()
+                      lib.notificationFrom(operationButton, ['Server returned: ', response.status, ', ', response.statusMessage].join(''), {error: true})
+                    }
+                  }
+                  return
+              }
+            })
+          })
+        })()</script>
+        
+        <title>Editing ${ctx.path.basename(clientFile)} - ${clientFile}</title>
+        <div>Editing ${clientFile} </div>
+        
+        `
+        // note: the fileMTime thing below is a workaround for browser being stupid (or maybe me being stupid)
+        if(principleContentType.startsWith('image/'))
+          html`<img class="current-content" src="${clientFile}?random=${fileMTime}" style="padding: 4px" cache="no-cache" title="Current content"/>`
+        html`
+        
+        <div class="bottom-bar">
+          <button class="refresh-button text-only bluetext clickable">Refresh</button>
+          <button class="done-button text-only bluetext clickable">Done</button>
+          <span class="operation-area boxed lightly-padded"> 
+            <select class="operation-selector no-background no-border" style="appearance: none" value="">
+              <option value="" class="light-color">Operation</option>
+              <option value="move">Move</option>
+              <option value="rename">Rename</option>
+              <option value="trash">Trash</option>
+              <option value="replace">Replace</option>
+            </select>
+            <input hidden type="file"/>
+            <input hidden type="text" class="no-border" placeholder=""/>
+            <button hidden class="linklike"></button>
+          </span>
+        </div>
+        <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>
+      </div>
+      `
+    } else { // is a textual file
+      html`
+      <span class="pagelet file-editor ${privilegeClassString}">
+        `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
+
+        <script src="/lib/callib/callib0.mjs" type="module"></script>
+        <script src="/lib/mixin.mjs" type="module"></script>
+        
+        ${styleElementStr}
+        
+        <!-- Install behavior -->
+        <script>(()=>{
+          const thisScript = document.currentScript
+          
+          requestIdleCallback(async () => {
+            const lib = await import('/lib/lib.mjs')
+            
+            const pagelet = thisScript.parentElement
+            
+            const oldDisplay          = pagelet.querySelector(':scope > .old-content-display')
+            const newDisplay          = pagelet.querySelector(':scope > .new-content-display')
+            const textarea            = pagelet.querySelector('textarea')
+            const refreshButton       = pagelet.querySelector(':scope > .bottom-bar > .refresh-button')
+            const submitButton        = pagelet.querySelector(':scope > .bottom-bar > .submit-button')
+            const doneButton          = pagelet.querySelector(':scope > .bottom-bar > .done-button')
+            const operationSelector   = pagelet.querySelector(':scope > .bottom-bar > .operation-area > .operation-selector')
+            const operationInput      = pagelet.querySelector(':scope > .bottom-bar > .operation-area > input')
+            const operationButton     = pagelet.querySelector(':scope > .bottom-bar > .operation-area > button')
+            const updatePreviewButton = pagelet.querySelector(':scope > .bottom-bar > button.update-preview')
+            
+            const regularPreviewUpdate = () => { lib.renderContentTo(newDisplay, textarea.value, contentType) }
+            
+            const textExpand = lib.makeTextExpander({
+              ...lib.stdTextExpansions,
+              ["!DIR"]: {to: ()=>"${ctx.path.dirname(clientFile)}/", endPosition: -1}
+            })
+            
+            let rawData
+            let contentType = 'text/plain'
+            
+            const getRawData = async () => {
+              let response = await fetch('${ clientFile }')
+              if(response.status === 200) {
+                rawData = await response.text()
+                contentType = response.headers.get('content-type')
+                lib.renderContentTo(oldDisplay, rawData, contentType)
+              } else {
+                let message = ['server returned code ', response.status,  ', ', response.statusText, '; while trying to get file ${clientFile}'].join('')
+                pagelet.dispatchEvent(lib.bubblingEventWith('notification', { message: message, options: {error: true} }))
+                return void console.error(message)
+              }
+            }
+            await getRawData()
+            lib.renderContentTo(newDisplay, rawData, contentType)
+            textarea.value = rawData
+            
+            refreshButton.addEventListener('click', () => {
+              getRawData()
+            })
+            
+            submitButton.addEventListener('click', async () => {
+              if(pagelet.classList.contains('update-disallowed'))
+                return void lib.notificationFrom(submitButton, 'User does not have update privileges (check control.json)')
+              // else
+              let response = await fetch('/bin/file.s.js/update?file=${ clientFile }', {method:"PUT", body: textarea.value})
+              if(response.status === 200 ) {
+                rawData = textarea.value
+                lib.renderContentTo(oldDisplay, rawData, contentType)
+                pagelet.classList.remove('pending-changes')
+                submitButton.dispatchEvent(lib.bubblingEventWith('notification', { message: 'Synced'}))
+              } else {
+                let message = ['server returned code ', response.status,  ', "', response.statusText, '"; while trying to update file ${clientFile}'].join('')
+                submitButton.dispatchEvent(lib.bubblingEventWith('notification', { message: message, options: {error: true} }))
+                console.error(message)
+              }
+            })
+            
+            doneButton.addEventListener('click', async () => {
+              if(rawData !== textarea.value && !doneButton.hasAttribute('data-clicked')) {
+                doneButton.dispatchEvent(lib.bubblingEventWith('notification', {message: 'Not saved. Are you sure you\\\'re done?'}))
+                doneButton.dataset.clicked = 'true'
+                setTimeout(() => {
+                  if(doneButton.isConnected)
+                    doneButton.removeAttribute('data-clicked')
+                }, 1000)
+              } else { // file is saved or double clicked, swap out pagelet
+                const destyle = lib.styleInProgress(pagelet)
+                try {
+                  let replacementPagelet = await lib.getRemotePagelet('/pagelets/represent-file.jhp?file=${ clientFile }')
+                  pagelet.replaceWith(replacementPagelet)
+                } catch(err) {
+                  destyle()
+                  lib.notificationFrom(pagelet, 'Error: ' + err.message, {error: true})
+                }
+              }
+            })
+            
+            textarea.addEventListener('input', () => {
+              let oldCaretPos = textarea.selectionStart
+              let valueLength = textarea.value.length
+              let repOffset   = 0;
+              [textarea.value, repOffset] = textExpand.withOffset(textarea.value)
+              if(textarea.value === rawData) // hasn't changed
+                pagelet.classList.remove('pending-changes')
+              else // has changed
+                pagelet.classList.add('pending-changes')
+              let newValueLength = textarea.value.length
+              textarea.selectionStart = oldCaretPos + repOffset
+              textarea.selectionEnd   = oldCaretPos + repOffset
+            })
+            
+            let operationButtonClickHandler = async () => {}
+            operationButton.addEventListener('click', (...args) => {
+              operationButtonClickHandler(...args)
+            })
+            
+            operationSelector.addEventListener('input', async inputEvent => {
+              const lib = await import('/lib/lib.mjs')
+              switch(operationSelector.value) {
+                case '':
+                  operationInput.hidden  = true
+                  operationButton.hidden = true
+                  return
+                case 'move':
+                  operationInput.hidden  = false
+                  operationButton.hidden = false
+                  operationInput.value        = "${args.file}"
+                  operationInput.placeholder  = 'New path'
+                  operationButton.textContent = 'Move'
+                  operationButtonClickHandler = async () => {
+                    if(pagelet.classList.contains('move-disallowed'))
+                      return void lib.notificationFrom(submitButton, 'User does not have file moveing privileges (check control.json)')
+                    // else
+                    let newFilePath = operationInput.value
+                    const destyle = lib.styleInProgress(pagelet)
+                    let response = await fetch('/bin/file.s.js/move?from=${args.file}&to=' + newFilePath)
+                    if(response.ok) {
+                      pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=' + newFilePath))
+                    } else {
+                      destyle()
+                      lib.notificationFrom(operationButton, ['Server returned: ', response.status, ', ', response.statusMessage].join(''), {error: true})
+                    }
+                  }
+                  return
+                case 'rename':
+                  operationInput.hidden  = false
+                  operationButton.hidden = false
+                  operationInput.value        = "${ctx.path.basename(args.file)}"
+                  operationInput.placeholder  = 'New name'
+                  operationButton.textContent = 'Rename'
+                  operationButtonClickHandler = async () => {
+                    if(pagelet.classList.contains('rename-disallowed'))
+                      return void lib.notificationFrom(submitButton, 'User does not have file renaming privileges (check control.json)')
+                    // else
+                    let newFileName = operationInput.value
+                    const destyle = lib.styleInProgress(pagelet)
+                    let response = await fetch('/bin/file.s.js/rename?file=${args.file}&name=' + newFileName)
+                    if(response.ok) {
+                      pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=${ctx.path.dirname(args.file)}/' + newFileName))
+                    } else {
+                      destyle()
+                      lib.notificationFrom(operationButton, ['Server returned: ', response.status, ', ', response.statusMessage].join(''), {error: true})
+                    }
+                  }
+                  return
+                case 'trash':
+                  if(pagelet.classList.contains('trash-disallowed'))
+                    return void lib.notificationFrom(submitButton, 'User does not have file trashing privileges (check control.json)')
+                  // else
+                  operationInput.hidden  = true
+                  operationButton.hidden = false
+                  operationButton.textContent = 'Trash'
+                  operationButtonClickHandler = async () => {
+                  const destyle = lib.styleInProgress(pagelet)
+                    let response = await fetch('/bin/file.s.js/trash?file=${args.file}')
+                    if(response.ok) {
+                      pagelet.replaceWith(await lib.getRemotePagelet('/pagelets/file-editor.jhp?file=${args.file}'))
+                    } else {
+                      destyle()
+                      lib.notificationFrom(operationButton, ['Server returned: ', response.status, ', ', response.statusMessage].join(''), {error: true})
+                    }
+                  }
+                  return
+              }
+            })
+            
+            let updateEventHandler
+            updatePreviewButton.addEventListener('click', clickEvent => {
+              if(clickEvent.altKey) {
+                let mode = updatePreviewButton.dataset.mode ?? 'none'
+                switch(mode) {
+                  case 'none': // change to 'input'
+                    updatePreviewButton.dataset.mode = 'input'
+                    updateEventHandler = regularPreviewUpdate
+                    textarea.addEventListener('input', updateEventHandler)
+                    return
+                  case 'input': // change to 'delayed'
+                    updatePreviewButton.dataset.mode = 'delayed'
+                    let updateTimeoutId
+                    textarea.removeEventListener('input', updateEventHandler)
+                    updateEventHandler = () => {
+                      if(updateTimeoutId)
+                        clearTimeout(updateTimeoutId)
+                      updateTimeoutId = setTimeout(regularPreviewUpdate, 500)
+                    }
+                    textarea.addEventListener('input', updateEventHandler)
+                    return
+                  case 'delayed': // change to 'change'
+                    updatePreviewButton.dataset.mode = 'change'
+                    textarea.removeEventListener('input', updateEventHandler)
+                    updateEventHandler = regularPreviewUpdate
+                    textarea.addEventListener('change', updateEventHandler)
+                    return
+                  case 'change': // change to 'none'
+                    updatePreviewButton.dataset.mode = 'none'
+                    textarea.removeEventListener('change', updateEventHandler)
+                    return
+                }
+              } else {
+                lib.renderContentTo(newDisplay, textarea.value, contentType)
+              }
+            })
+          })
+        })()</script>
+        
+        <title>Editing ${ctx.path.basename(clientFile)} - ${clientFile}</title>
+        <div>Editing ${ctx.path.basename(clientFile)} - ${clientFile}</div>
+        
+        <div class="old-content-display boxed tiny-corner-bevel darker-background light-color" style="padding: 4px" title="Current contents"></div>
+        <div class="new-content-display boxed tiny-corner-bevel darker-background" style="padding: 4px"></div>
+        <textarea class="fullwidth vertical-resizable" style="height: 8em"></textarea>
+        <div class="bottom-bar">
+          <button class="submit-button text-only bluetext clickable">Submit changes</button>
+          <button class="refresh-button text-only bluetext clickable">Refresh</button>
+          <button class="done-button text-only bluetext clickable">Done</button>
+          <span class="operation-area boxed lightly-padded"> 
+            <select class="operation-selector no-background no-border" style="appearance: none" value="">
+              <option value="" class="light-color">Operation</option>
+              <option value="move">Move</option>
+              <option value="rename">Rename</option>
+              <option value="trash">Trash</option>
+            </select>
+            <input hidden type="text" class="no-border" placeholder=""/>
+            <button hidden class="linklike"></button>
+          </span>
+          <button class="update-preview linklike horizontal-margins" data-mode="none">u</button>
+        </div>
+        <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>
+      </div>
+      `
+    }
+    return true
+  } else { // unauthorized to edit
+    // todo
+    html`<div>Unauthorized to edit ${clientFile}</div>`
+    return true
+  }
+}
+// else, file doesn't exist
+
+return ctx.serveJHP(`./pagelets/non-existent-file.jhp`, request, response, args)

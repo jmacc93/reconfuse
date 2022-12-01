@@ -1,0 +1,51 @@
+
+
+.controller-frame {
+  border: 1px solid var(--controller-frame-border-color, gray);
+  box-shadow: 0px 0px 4px darkgray;
+  padding: 3px;
+  margin: 2px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  overflow: auto;
+  height: fit-content;
+  overflow: visible;
+}
+
+.controller-frame > .infobar  {
+  background: var(--infobar-background, rgba(72, 151, 254, 0.481));
+  border-bottom: 1px solid var(--infobar-border-color, rgba(128, 128, 128, 0.09));
+  margin-bottom: 4px
+}
+
+.controller-frame button {
+  padding: 1px;
+  border: none;
+  cursor: pointer;
+  color: rgb(28, 147, 251);
+}
+.controller-frame > .infobar .filename {
+  color: var(--light-text-color, rgb(140, 140, 140))
+}
+
+.controller-frame           > .infobar > button.expander::after { content: "Expanded";  }
+.controller-frame.collapsed > .infobar > button.expander::after { content: "Collapsed"; }
+
+.controller-frame.collapsed > *:not(.infobar) { display: none; }
+
+.controller-frame.collapsed { height: unset !important }
+
+.controller-frame#controller-frame-drop-target {
+  outline: 1px solid orange
+}
+.controller-frame.dragged-controller-frame {
+  opacity: 75%
+}
+
+.controller-frame > .infobar > .drag-handle {
+  user-select: none;
+}
+
+.controller-frame + .controller-frame {
+  border-top: 4px solid var(--controller-frame-border-color, rgba(0, 0, 0, 10%));
+}

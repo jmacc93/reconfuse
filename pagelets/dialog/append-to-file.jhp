@@ -1,0 +1,29 @@
+if(!args.file) {
+  html`<div class="error"><code>/pagelets/dialog/append-to-file.jhp</code> missing file argument</div>`
+  return true
+}
+// else
+
+let serverFile = ctx.addPathDot(ctx.path.relative('./', ctx.addPathDot(ctx.sanitizeHTMLString(args.file))))
+let clientFile = serverFile.slice(1)
+
+let exists = ctx.fs.existsSync(serverFile)
+
+if(!exists)
+  return ctx.serveJHP('/pagelets/non-existent-file.jhp', request, response, {...args, doneUrl:`/pagelets/dialog/append-to-file.jhp?file=${args.file}`})
+// else
+
+html`
+<div class="pagelet" data-file="${args.file}">
+  <title>Append to ${ctx.path.basename(args.file)} - ${args.file}</title>
+  `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
+  <textarea class="vertical-resizable width100p" style="height: 16em"></textarea>
+  <button is="call-resource-button" srcfn="/pagelets/dialog/append-to-file.mjs: taggedAppend" class="linklike">Append</button>
+  <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
+    <option value="" appearance="color: gray">S</option>
+    <option value="/pagelets/dialog/append-to-file.mjs: append">Append without tag</option>
+    <option value="/lib/elem-functions.mjs: removeElement" which="this parent .pagelet">Cancel</option>
+  </select>
+  <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>
+</div>
+`

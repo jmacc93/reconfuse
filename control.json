@@ -1,0 +1,9 @@
+[{
+  "file":   {"tree": {"*admin": "super-white", "*banned": "black"}},
+  "dir": {"tree": {"*admin": "super-white"}},
+  "access": {"tree": {"*admin": "super-white", "*all": "white"}},
+  "file(ofr-control.json)": {"tree": {"*admin": "super-white", "*mods": "super-white", "*supermods": "super-white"}}
+},
+{
+  "file(ofr-control.json)": {"tree": {"*all": "super-black"}}
+}]

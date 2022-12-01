@@ -1,0 +1,5 @@
+[{
+  "file": {"tree": {"*all": "super-black"}}
+},{
+  "file": {"tree": {"*admin": "white"}}
+}]

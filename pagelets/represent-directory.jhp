@@ -1,0 +1,84 @@
+  
+if(!args.directory) {
+  html`<div class="error">No directory argument given (use /pagelets/represent-directory?directory=...)</div>`
+  return true
+}
+// else
+
+let serverDir = ctx.escapeAllQuotes(ctx.addPathDot(args.directory))
+let clientDir = serverDir.slice(1) // trim off the dot .
+
+if(!ctx.fs.existsSync(serverDir)) {
+  html`<div class="error">Given directory ${clientDir} doesn't exist</div>`
+  return true
+}
+// else
+
+let dirStat = ctx.fs.statSync(serverDir)
+if(!dirStat.isDirectory()) {
+  html`<div class="error">Given directory ${clientDir} isn't a directory</div>`
+  return true
+}
+// else
+
+let thisUrl = `/pagelets/represent-directory.jhp?directory=${clientDir}`
+let upUrl = `/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientDir)}`
+
+html`
+<div class="pagelet directory-representation" data-url="/pagelets/represent-directory.jhp?directory=${args.directory}" data-file=${clientDir} data-dir=${clientDir}>
+  `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, args); html`
+  <link href="/pagelets/represent-directory.css" rel="stylesheet">
+  <title>Directory ${ctx.path.basename(clientDir)} - ${clientDir}</title>
+  <div class="header">
+    Files inside directory <code>${clientDir}</code>
+    <a href="${thisUrl}" title="reload" target="replace-noframe this parent .pagelet">R</a>
+    <a href="/pagelets/file-editor.jhp?file=${clientDir}" title="edit" target="replace-noframe this parent .pagelet">E</a>
+    <a href="${upUrl}" title="go to parent directory" target="replace-noframe this parent .pagelet">Up</a>
+    <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
+      <option value="" style="color: grey">S</option>
+      <option value="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy dir</option>
+    </select>
+  </div>
+  <call-resource srcfn="/pagelets/represent-directory.mjs: addOpenButtonFunctionality"></call-resource>
+  <span class="open-file">
+    <input type="text" placeholder="file path" data-subtitute="DIR:${clientDir}"/>
+    <button class="open linklike horizontal-margins">Open</button>
+    <button class="as-file linklike horizontal-margins">As file</button>
+  </span>
+  <div>`
+    
+    for(const fileBasename of ctx.fs.readdirSync(serverDir)) {
+      let file = ctx.path.join(serverDir, fileBasename)
+      if(fileBasename[0] === '.') // no dot files listed
+        continue
+      // else
+      let fileStat = ctx.fs.statSync(file)
+      if(fileStat.isDirectory()) {
+        html`
+        <div>
+          <span class="dir symbol" data-file=${file}></span>
+          <a href="/pagelets/represent-directory.jhp?directory=${file}" title="Directory ${file}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
+          <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
+            <option value="" style="color: gray">S</option>
+          </select>
+        </div>
+        `
+      } else {
+        html`
+        <div data-file=${file}>
+          <span class="file symbol"></span>
+          <a href="/pagelets/represent-file.jhp?file=${file}" title="File: ${ctx.path.join(file)}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
+          <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
+            <option value="" style="color: gray">S</option>
+            <option value="/pagelets/represent-directory.mjs: openSimpleEditDialog">Open simple edit dialog</option>
+            <option value="/pagelets/represent-directory.mjs: openSimpleAppendDialog">Open simple append dialog</option>
+            ${file.endsWith('.txt') ? '<option value="/pagelets/represent-directory.mjs: openAsList">Open as list</option>' : ''}
+          </select>
+        </div>`
+      }
+    }
+    
+    html`
+  </div>
+</div>
+`

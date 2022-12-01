@@ -1,0 +1,29 @@
+
+function objToHtmlString(obj, seenArg = undefined, printDetail = true) {
+  let seen = seenArg ?? new WeakSet()
+  let segs = []
+  if(typeof obj === 'object') {
+    if(obj !== null && obj !== undefined)
+      seen.add(obj)
+    if(printDetail) segs.push(`<details style="margin-left:1em"><summary>${ obj?.constructor?.name ?? 'undefined'}</summary>`)
+    for(const key in obj) {
+      let value = obj[key]
+      if(typeof value === 'object' && seen.has(value))
+        continue
+      // else
+      segs.push(objToHtmlString(key, seen), ': ', objToHtmlString(obj[key], seen), '<br>')
+    }
+    if(printDetail) segs.push('</details>')
+  } else {
+    segs.push(String(obj).replaceAll('<','&lt;').replaceAll('>','&gt;'))
+  }
+  return segs.join('')
+}
+
+html`
+<details class="pagelet" data-url="./pagelets/args.jhp">
+  <summary>Arguments</summary>`
+  objToHtmlString(args, undefined, false)
+  html`
+</details>
+`

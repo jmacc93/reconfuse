@@ -1,0 +1,29 @@
+<div class="controller-frame" data-expanded="true">
+  <!-- This isn't actually a pagelet, but its in the pagelet folder anyway -->
+  <script src="/lib/callib/callib0.mjs" type="module"></script>
+  <link rel="stylesheet" href="/pagelets/controller-frame.css"></link>
+  <link href="/lib/general.css" rel="stylesheet"></link>
+  
+  <call-resource srcfn="/pagelets/controller-frame.mjs: installTitleMirrorFunctionality"></call-resource>
+  <call-resource srcfn="/pagelets/controller-frame.mjs: installDragHandleFunctionality"></call-resource>
+  
+  <div class="infobar">
+    <button is="call-resource-button" srcfn="/lib/elem-functions.mjs: removeElement" class="linklike" which="this parent .controller-frame">X</button>
+    <span class="child-title-mirror"></span>
+    <button is="call-resource-button" class="expander linklike" srcfn="/lib/elem-functions.mjs: toggleClassname" which="this parent .controller-frame" classname="collapsed"></button> <!-- Content set in css file -->
+    <span class="drag-handle" draggable="true">///</span>
+    <select is="call-selection" class="linklike" style="appearance:none; width: 1em">
+      <option value="" style="color: gray">S</option>
+      <option value="/pagelets/controller-frame.mjs: newFrameAfter">New frame</option>
+      <option value="/pagelets/controller-frame.mjs: toggleResizable">Toggle resizable</option>
+    </select>
+  </div>
+  
+  <div class="child-container">
+    <slot name="child-mixin-target">
+      <!-- Elements are put here on mixin -->
+    </slot>
+  </div>
+  
+  <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .controller-frame"></call-resource>
+</div>

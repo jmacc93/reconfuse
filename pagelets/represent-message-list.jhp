@@ -1,0 +1,59 @@
+
+if(!args.channel)
+  args.channel = 'std'
+
+if(!args.directory) {
+  html`<div class="pagelet error">No directory argument given</div>`
+  return true
+}
+
+args.directory = ctx.addPathDot(ctx.path.relative('./', ctx.addPathDot(args.directory)))
+
+if(args.directory.startsWith('..')) {
+  html`<div class="pagelet error">Cannot use ${args.directory} because it references a directory outside of the server's directory tree</div>`
+  return true
+}
+// else
+
+if(!args.directory.endsWith('/'))
+  args.directory += '/'
+
+if(!ctx.fs.existsSync(args.directory))
+  return ctx.serveJHP('./pagelets/non-existent-file.jhp', request, response, {...args, doneUrl:`/pagelets/represent-message-list.jhp?directory=${args.directory}&channel=${args.channel}`})
+
+let dirStat = ctx.fs.statSync(args.directory)
+if(!dirStat.isDirectory()) {
+  html`<div class="pagelet error">Given directory ${args.directory} isn't a directory</div>`
+  return true
+}
+// else
+
+html`
+<div class="pagelet" data-channel=${args.channel ?? 'nochannel'} data-directory=${args.directory ?? 'nodir'}>
+  `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, args); html`
+  <script type="module" src="/lib/callib/callib0.mjs"></script>
+  <script type="module" src="/lib/mixin.mjs"></script>
+  
+  <call-resource srcfn="/pagelets/represent-message-list.mjs: installFunctionality"></call-resource>
+  
+  <title>${args.channel} message list in ${args.directory}</title>
+  
+  <div class="message-list vertical-resizable height32">
+    <!--
+    <div class="message" data-mtime="...">...</div>
+    -->
+  </div>
+  
+  <div class="submission-area boxed">
+    <div>
+      <button class="submit linklike clickable">Submit</button> as
+      <input class="filename-input" type="text" placeholder="filename" value=".md" pattern="[^\.]*.\S+"/>  <span class="filename-input-error-msg"></span>
+      <button class="refresh linklike">Refresh</button>
+    </div>
+    <div class="submission-preview"></div>
+    <textarea class="submission-input fullwidth vertical-resizable" placeholder="Submission input"></textarea>
+  </div>
+  
+  <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>
+</div>
+`

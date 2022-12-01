@@ -1,0 +1,114 @@
+const todoElem = (str) => /*html*/`<span style="color:yellow; border: 1px solid yellow">to do: ${str}</span>`
+
+html`
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    <title>Reconfuse</title>
+    
+    <script type="module" src="/lib/lib.mjs"></script>
+    <script type="module" src="/lib/mixin.mjs"></script>
+    <script type="module" src="/lib/callib/callib0.mjs"></script>
+    <link rel="stylesheet" href="/lib/callib/callib0.css"/>
+    
+    `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
+  </head>
+  
+  
+  <!-- Body looks like: -->
+  <!-- 
+    Reconfuse [About] [Search] [User]
+    --------------------------------------
+    [
+    
+      plmx target area
+    
+    ]
+    Notifications
+  -->
+  <body class="centered">
+    <div class="pagelet root-pagelet separated-children">
+      
+      <style>
+        .header > * + * {
+          margin-left: 0.25em
+        }
+      </style>
+      
+      <script>(()=>{
+        const scriptElem = document.currentScript
+        
+        requestIdleCallback(async () => {
+          const lib = await import('/lib/lib.mjs')
+          
+          const pagelet   = scriptElem.parentElement
+          const goButton  = pagelet.querySelector(':scope > .goarea > button')
+          const goField   = pagelet.querySelector(':scope > .goarea > input')
+          
+          goField.addEventListener('keydown', downEvent => {
+            if(downEvent.ctrlKey && downEvent.key === 'Enter') {
+              goButton.click()
+              goField.value = ''
+            }
+          })
+          goField.addEventListener('change', () => {
+            if(!goField.value.startsWith('/'))
+              goField.value = '/' + goField.value
+          })
+          goButton.addEventListener('click', async () => {
+            if(goField.value.length === 0)
+              return void lib.notificationFrom(goField, 'Field is empty', {error: true})
+            // else
+            let response = await fetch(goField.value)
+            if(!response.ok) 
+              return void lib.notificationFrom(goButton, ['Server returned: ', response.status, ', ', response.statusText].join(''))
+            // else
+            let pageletBody = await response.text()
+            let pagelet = lib.makePageletFromSource(pageletBody)
+            let frame = await lib.controllerFrameAround(pagelet)
+            goButton.parentElement.after(frame)
+            return void lib.notificationFrom(goButton, "Opened")
+          })
+        })
+      })()</script>
+      
+      <div class="goarea boxed padded" style="margin-bottom: 0; border-bottom: none">
+        <input is="substituting-input" type="text" placeholder="open pagelet" style="width: 80%"/>
+        <button class="linklike">Go</button>
+      </div>
+      
+      <div class="header darker-background boxed padded" style="margin-top: 0; border-top: none">
+        
+        <span>Reconfuse</span>
+        <a href="/pagelets/represent-file.jhp?file=/intro.md">Intro</a>
+        <a href="/pagelets/settings.html">Settings</a>
+        <a href="/pagelets/user.jhp">User</a>
+        <a href="/pagelets/represent-directory.jhp?directory=/">Root</a>
+        `
+        let username = args.cookies?.username
+        if(username)
+          html`<a href="/pagelets/represent-directory.jhp?directory=/users/${username}/">${username}</a>`
+        html`
+        
+      </div>
+      
+      `
+      if(args.mixin) {
+        let splitMixinArg = args.mixin.split(/\s*,\s*/g).map(x =>x.replaceAll(/\\([\&\=\?])/g, (_str,cap)=>cap))
+        for(const url of splitMixinArg)
+          html`<html-mixin src="${url}" framed></html-mixin>`
+      } else {
+        html`
+        <html-mixin src="/pagelets/represent-file.jhp?file=/intro.md" framed></html-mixin>
+        <html-mixin src="/pagelets/selfpad.jhp?name=main" framed></html-mixin>
+        `
+      }
+      html`
+      
+    </div>
+    <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent body"></call-resource>
+    <div class="overscroll" style="height: 16em"></div>
+  </body>
+</html>
+`

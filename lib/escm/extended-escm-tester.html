@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Escape markup tester</title>
+  
+  <link rel="stylesheet" href="/lib/escm/basic-escm.css">
+  <script src="/lib/mixin.mjs" type="module"></script>
+  
+  <!-- <script type="text/javascript" src="/lib/escm/lib.js"></script> -->
+  <script type="module">(async ()=>{
+    window.globalThis.escm = await import('/lib/escm/escm.mjs')
+    window.globalThis.basicEscset = await import('/lib/escm/basic-escm.mjs').then(mod=> mod.basicEscset)
+    window.globalThis.extendedEscset = await import('/lib/escm/extended-escm.mjs').then(mod=> mod.extendedEscset)
+    window.globalThis.escset = {...basicEscset, ...extendedEscset}
+    
+    function elementThen(tag, fn = undefined) {
+      let ret = document.createElement(tag)
+      fn?.(ret)
+      return ret
+    }
+    function plaintextElement(tag, text) {
+      let ret = document.createElement(tag)
+      ret.innerText = text
+      return ret
+    }
+    function randomIntegerOn(start, end) {
+        if (end < start)
+            return randomIntegerOn(start, end);
+        else if (end === start)
+            return start;
+        else
+            return Math.floor(Math.random() * (end + 1 - start)) + start;
+    }
+    function singleRandomChoice(choices) {
+        return choices[randomIntegerOn(0, choices.length - 1)];
+    }
+    function randomChoice(choices, n) {
+        let ret = [];
+        for (let i = 0; i < n; i++)
+            ret.push(singleRandomChoice(choices));
+        return ret;
+    }
+    
+    console.log("bodyLoadScript")
+    const body = document.body
+    
+    body.appendChild(escm.parsePreprocessEval('\\header1(mixin:)\n', escset))
+    body.appendChild(escm.parsePreprocessEval('\\mixin(/testers/generic-html.html)\n', escset))
+    body.appendChild(escm.parsePreprocessEval('\\header1(frame:)\n', escset))
+    body.appendChild(escm.parsePreprocessEval('\\frame(abc)\n', escset))
+    body.appendChild(escm.parsePreprocessEval('\\header1(ticon:)\n', escset))
+    body.appendChild(escm.parsePreprocessEval('\\ticon(arrow-left)\n', escset))
+    
+  })()</script>
+</head>
+<body id='body'>
+</body>
+</html>

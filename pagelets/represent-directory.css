@@ -1,0 +1,8 @@
+
+.pagelet.directory-representation span.symbol::after {
+  color: gray;
+  margin-right: 0.25em;
+  font-family: monospace;
+}
+.pagelet.directory-representation span.symbol.dir::after  { content: "D"; }
+.pagelet.directory-representation span.symbol.file::after { content: "F"; }

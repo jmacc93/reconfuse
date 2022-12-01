@@ -1,0 +1,25 @@
+html`
+<div class="pagelet selfpad" data-name="selfpad-${args.name ?? 'misc'}" ${args.contentType ? `data-contenttype="${args.contentType}"` : ''}>
+  `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
+  
+  <title>Selfpad ${ args.name ?? 'misc'}</title>
+  
+  <call-resource srcfn="/pagelets/selfpad.mjs: installFunctionality"></call-resource>
+  
+  <div class="content-display padded"></div>
+  <textarea 
+    class="input fullwidth vertical-resizable" 
+    data-subtitute="name: ${args.name ?? 'misc'}"
+    style="height: 8em" 
+    placeholder="Write here. It gets stored in local storage on your computer"
+  >
+  </textarea>
+  <div>
+    <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
+      <option value="" style="color: gray">S</option>
+      <option value="/pagelets/selfpad.mjs: updateButton">Update</option>
+    </select>
+  </div>
+  
+</div>
+`

@@ -1,0 +1,10 @@
+
+.pagelet.list-representation {
+  border: 1px solid gray;
+  display: inline-block;
+  width: fit-content
+}
+
+.pagelet.list-representation > .count {
+  color: lightgreen
+}

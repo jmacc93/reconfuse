@@ -1,0 +1,3 @@
+
+return ctx.serveJHP('./pagelets/represent-directory.jhp', request, response, {...args, directory: args.originalPath})
+

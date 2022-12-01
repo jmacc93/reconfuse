@@ -1,0 +1,54 @@
+html`
+<div class="pagelet usercontrols" data-loggedin="false">
+  `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
+  
+  <script type="module" src="/lib/callib/callib0.mjs"></script>
+  
+  <title>User controls</title>
+  
+  <style>
+    .usercontrols[data-loggedin="false"] .logged-in-as { display: none }
+    .usercontrols[data-loggedin="true" ] .logged-out   { display: none }
+    
+    .usercontrols[data-loggedin="true"]  *:is(input.username, input.password, .rememberme) { opacity: 50% }
+    .usercontrols[data-loggedin="true"]  button.login    { opacity: 50% }
+    .usercontrols[data-loggedin="true"]  button.register { opacity: 50% }
+    .usercontrols[data-loggedin="true"]  span.rememberme { opacity: 50% }
+    
+    .usercontrols[data-loggedin="false"] *:is(button.logout) { opacity: 50% }
+    
+    .usercontrols .validation-msg:empty { display: none }
+    
+    .usercontrols .msg:empty { display: none}
+    
+    .usercontrols input:invalid { outline: 1px solid red }
+  </style>
+  
+  <call-resource srcfn="/pagelets/user.mjs: installFunctionality"></call-resource>
+  
+  <div class="logged-in-as"> Logged in as <span class="username"></span> (as <span class="displayname"></span>) </div>
+  <div class="logged-out"> Logged out </div>
+  
+  <div>
+    <input class="displayname" type="displayname" placeholder="displayname" maxlength="32"/>
+    <button class="save-displayname linklike">Save</button> <br>
+    <input class="username" type="username" placeholder="username" minlength="1" maxlength="16" pattern="[a-zA-Z_\\-0-9]+"/><br>
+    <input class="password" type="password" placeholder="password" minlength="4"/>
+  </div>
+  
+  <div>
+    <div class="validation-msg msg displayname"></div>
+    <div class="validation-msg msg username"></div>
+    <div class="validation-msg msg password"></div>
+  </div>
+  
+  <div>
+    <button class="logout linklike">Log out</button>
+    <button class="login linklike">Log in</button>
+    <button class="register linklike">Register</button>
+    <span class="rememberme">Remember? <input type="checkbox"></span>
+  </div>
+  
+  <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>
+</div>
+`

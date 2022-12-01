@@ -1,0 +1,17 @@
+
+
+*[data-contenttype="text/markdown"] > *:first-child {
+  margin-top: 0
+}
+*[data-contenttype="text/markdown"] > *:last-child {
+  margin-bottom: 0
+}
+
+.just-added {
+  animation: fade-in .2s ease; 
+}
+
+@keyframes fade-in {
+  0%   {opacity: 0%}
+  100% {opacity: 100%}
+}

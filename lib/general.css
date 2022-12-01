@@ -1,0 +1,235 @@
+
+body {
+  margin-left:    2em;
+  margin-right:   2em;
+  margin-bottom: 16em;
+}
+
+pre > code {
+  border: 1px solid gray;
+  display: block;
+  overflow: auto;
+}
+
+.centered {
+  margin: auto;
+  width: 90%;
+}
+
+.boxed {
+  border: 1px solid rgb(129, 129, 129);
+  margin: 1px;
+}
+
+.dash-boxed {
+  border: 1px solid rgb(129, 129, 129);
+  margin: 1px;
+}
+
+.lightly-dash-boxed {
+  border: 1px dashed rgba(0, 0, 0, 0.05)
+}
+
+.tiny-corner-bevel {
+  border-radius: 2px;
+}
+.corner-bevel {
+  border-radius: 4px;
+}
+.big-corner-bevel {
+  border-radius: 8px;
+}
+
+.fullwidth {
+  width: 100%;
+  box-sizing: border-box;
+}
+.halfwidth {
+  width: 50%;
+}
+.quarterwidth {
+  width: 25%;
+}
+
+.flex-columns {
+  display: flex
+}
+
+.height8 { height: 8em }
+.height16 { height: 16em }
+.height32 { height: 32em }
+
+.width100p { box-sizing: border-box; width: 100% }
+.width50p  { box-sizing: border-box; width: 50% }
+.width75p  { box-sizing: border-box; width: 75% }
+.width25p  { box-sizing: border-box; width: 25% }
+
+.width100vw { width: 100vw }
+.width50vw  { width: 50vw }
+.width75vw  { width: 75vw }
+.width25vw  { width: 25vw }
+
+.vertical-resizable {
+  resize: vertical;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.darker-background {
+  background: rgba(0, 0, 0, 0.05)
+}
+
+.darker-background-alternating > *:nth-child(even) {
+  background: rgba(0, 0, 0, 0.05)
+}
+
+code {
+  background: rgba(145, 169, 255, 0.322)
+}
+
+.light-color {
+  color: gray
+}
+
+.bluetext {
+  color: blue;
+}
+
+.green-text {
+  color: rgb(0, 189, 0);
+}
+
+.bold {
+  font-weight: bold;
+}
+
+body > * + div {
+  margin-top: 1em
+}
+
+.active-glow {
+  color: white;
+  text-shadow: 0px 0px 3px blue
+}
+
+.underlined {
+  text-decoration: underline;
+}
+
+.mono-text {
+  font-family: monospace;
+}
+
+.text-only {
+  border: none;
+  background: unset;
+}
+
+.linklike {
+  border: none;
+  background: unset;
+  color: blue;
+  cursor: pointer;
+}
+
+.no-border {
+  border: none
+}
+
+.no-background {
+  background: unset
+}
+
+
+.clickable {
+  cursor: pointer;
+}
+
+.lightly-padded {
+  padding: 0.125em
+}
+.padded {
+  padding: 0.25em
+}
+.very-padded {
+  padding: 1em
+}
+.super-padded {
+  padding: 2em
+}
+.mega-padded {
+  padding: 4em
+}
+
+.horizontal-margins {
+  margin-left:  0.5em;
+  margin-right: 0.5em;
+}
+
+.unselectable {
+  user-select: none;
+}
+
+
+.vertically-padded {
+  padding-top: 0.128em;
+  padding-bottom: 0.128em;
+}
+.very-vertically-padded {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+.super-vertically-padded {
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+.mega-vertically-padded {
+  padding-top: 2em;
+  padding-bottom: 2em;
+}
+
+.separated-children > * + * {
+  margin-top: 1em
+}
+
+/* ---------------------------- */
+
+.attention-flashing            { animation: af-outline-pulse    .5s ease; }
+.attention-flashing-color      { animation: af-color-pulse      .5s ease; }
+.attention-flashing-outline    { animation: af-outline-pulse    .5s ease; }
+.attention-flashing-background { animation: af-background-pulse .5s ease; }
+
+@keyframes af-color-pulse {
+  0%   {color:  #86ff86}
+  100% {color:    unset  }
+}
+@keyframes af-outline-pulse {
+  0%   {outline: 4px solid  #86ff86}
+  100% {outline: 0px dashed #80ff80}
+}
+@keyframes af-background-pulse {
+  0%   {background: #98ff98  }
+  40%  {background: #76ff7633}
+  100% {background:   unset    }
+}
+
+/* ---------------------------- */
+
+.in-progress-dim { opacity: 50% }
+.in-progress-outline { outline: 1px solid gray }
+.in-progress-outline-empty {
+  outline: 1px solid gray;
+  width: 2em;
+  height: 2em;
+  
+}
+
+/* ----------- Reconfuse Specific: ----------------- */
+
+html-mixin {
+  opacity: 20%;
+  outline: 1px solid gray;
+  display: inline-block;
+  min-width: 2em;
+  min-height: 2em;
+}

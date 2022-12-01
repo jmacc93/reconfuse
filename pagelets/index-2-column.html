@@ -1,0 +1,88 @@
+<div>
+  <script type="module" src="/pagelets/pagelet-header.mjs"></script>
+  <script type="module" src="/lib/mixin.mjs"></script>
+  <script type="module" src="/lib/callib/callib0.mjs"></script>
+  <link rel="stylesheet" href="/lib/callib/callib0.css"/>
+  <link rel="stylesheet" href="/lib/general.css"></link>
+  <link rel="stylesheet" href="/pagelets/pagelet-header.css"></link>
+  <script type="module" src="/lib/lib.mjs"></script>
+  <title>Reconfuse</title>
+  
+  <div class="goarea boxed padded">
+    <input is="substituting-input" type="text" placeholder="open pagelet" style="width: 80%"/>
+    <button class="linklike">Go</button>
+  </div>
+  
+  <div class="header darker-background boxed padded">
+        
+    <style>
+      .header > * + * {
+        margin-left: 0.25em
+      }
+    </style>
+        
+    <script>(()=>{
+      const scriptElem = document.currentScript
+      
+      requestIdleCallback(async () => {
+        const lib = await import('/lib/lib.mjs')
+        
+        const pagelet   = scriptElem.parentElement
+        const goButton  = pagelet.querySelector(':scope > .goarea > button')
+        const goField   = pagelet.querySelector(':scope > .goarea > input')
+        
+        goField.addEventListener('keydown', downEvent => {
+          if(downEvent.ctrlKey && downEvent.key === 'Enter') {
+            goButton.click()
+            goField.value = ''
+          }
+        })
+        goField.addEventListener('change', () => {
+          if(!goField.value.startsWith('/'))
+            goField.value = '/' + goField.value
+        })
+        goButton.addEventListener('click', async () => {
+          if(goField.value.length === 0)
+            return void lib.notificationFrom(goField, 'Field is empty', {error: true})
+          // else
+          let response = await fetch(goField.value)
+          if(!response.ok) 
+            return void lib.notificationFrom(goButton, ['Server returned: ', response.status, ', ', response.statusText].join(''))
+          // else
+          let pageletBody = await response.text()
+          let pagelet = lib.makePageletFromSource(pageletBody)
+          let frame = await lib.controllerFrameAround(pagelet)
+          goButton.parentElement.after(frame)
+          return void lib.notificationFrom(goButton, "Opened")
+        })
+      })
+    })()</script>
+    
+    <span>Reconfuse</span>
+    <a href="/pagelets/represent-file.jhp?file=/intro.md">Intro</a>
+    <a href="/pagelets/represent-file.jhp?file=/search.md">Search</a>
+    <a href="/pagelets/user.jhp">User</a>
+    <a href="/pagelets/represent-directory.jhp?directory=/">Root</a>
+    
+  </div>
+        
+  <div class="flex-columns width100p">
+  
+    <!-- 1st column -->
+    <div class="width100p">
+      <div class="pagelet root-pagelet separated-children">
+        <html-mixin src="/pagelets/represent-file.jhp?file=/intro.md" framed></html-mixin>
+      </div>
+      <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent body"></call-resource>
+      <div class="overscroll" style="height: 16em"></div>
+    </div>
+    
+    <!-- 2nd column -->
+    <div class="width50p">
+      <html-mixin src="/pagelets/selfpad.jhp?name=main" framed></html-mixin>
+      <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent body"></call-resource>
+      <div class="overscroll" style="height: 16em"></div>
+    </div>
+    
+  </div>
+</div>

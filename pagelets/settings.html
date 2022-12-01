@@ -1,0 +1,14 @@
+<div class="pagelet settings">
+  <title>Settings</title>
+  -:[/pagelets/pagelet-header.html]:-
+  
+  <div>Test setting checkbox 
+    <input type="checkbox" data-setting="test-check">
+    <call-resource srcfn="/pagelets/settings.mjs: localStorageCheckboxChange"></call-resource>
+  </div>
+  
+  <div>
+    <button is="call-resource-button" srcfn="/pagelets/settings.mjs: saveSelfpadData" class="linklike">Save selfpad data</button>, 
+    <button is="call-resource-button" srcfn="/pagelets/settings.mjs: loadSelfpadData" class="linklike">Load selfpad data</button>
+  </div>
+</div>

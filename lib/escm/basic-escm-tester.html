@@ -1,0 +1,405 @@
+<div class="pagelet">
+  <title>Escape markup tester</title>
+  <link rel="stylesheet" href="/lib/escm/basic-escm.css">
+  <!-- <script type="text/javascript" src="/lib/escm/lib.js"></script> -->
+    
+  <script>(()=>{const scriptElem = document.currentScript; ((async ()=>{
+    const lib = await import('/lib/escm/lib.mjs')
+    window.globalThis.escm = await import('/lib/escm/escm.mjs')
+    window.globalThis.basicEscset = await import('/lib/escm/basic-escm.mjs').then(mod=> mod.basicEscset)
+    
+    escm.configure({
+      escHead: /\\(?<head>\w+)/,
+      openDelimiter: /\(/,
+      closeDelimiter: /\)/,
+      linearizeInsideStart: inside => `\\${inside.head}(`,
+      linearizeInsideEnd: inside => `)`,
+      autoRender: true,
+      defaultEscset: basicEscset
+    })
+    
+    function elementThen(tag, fn = undefined) {
+      let ret = document.createElement(tag)
+      fn?.(ret)
+      return ret
+    }
+    function plaintextElement(tag, text) {
+      let ret = document.createElement(tag)
+      ret.innerText = text
+      return ret
+    }
+    function randomIntegerOn(start, end) {
+        if (end < start)
+            return randomIntegerOn(start, end);
+        else if (end === start)
+            return start;
+        else
+            return Math.floor(Math.random() * (end + 1 - start)) + start;
+    }
+    function singleRandomChoice(choices) {
+        return choices[randomIntegerOn(0, choices.length - 1)];
+    }
+    function randomChoice(choices, n) {
+        let ret = [];
+        for (let i = 0; i < n; i++)
+            ret.push(singleRandomChoice(choices));
+        return ret;
+    }
+    
+    console.log("bodyLoadScript")
+    const body = scriptElem.closest('.pagelet')
+    
+    const renderTestP = plaintextElement('p', '\\header1(basicEscset \\rainbow(tester page))\n')
+    body.appendChild(renderTestP)
+    setTimeout(() => {
+      escm.renderElement(renderTestP, basicEscset)
+    }, 1000*2)
+    const autorenderTest = elementThen('p',  p => {
+      p.innerText = 'Autorender \\bold(test)'
+      p.classList.add('tc-autorender')
+    })
+    body.appendChild(autorenderTest)
+    
+    body.appendChild(escm.parsePreprocessEval('\\header1(Test box:)', basicEscset))
+    body.appendChild(elementThen('div', tbc => {
+      tbc.style = 'margin-left: 1em; border: 1px solid lightblue'
+      let testbox = escm.parsePreprocessEval(`...`, basicEscset)
+      let parseTreeExpandable = basicEscset.expandableElement('...', 1)
+      tbc.appendChild(parseTreeExpandable)
+      tbc.appendChild(elementThen('br'))
+      let htmlExpandable = basicEscset.expandableElement('...', 1)
+      tbc.appendChild(htmlExpandable)
+      tbc.appendChild(elementThen('br'))
+      let linearizedElement = plaintextElement('span', '...')
+      tbc.appendChild(linearizedElement)
+      tbc.appendChild(elementThen('br'))
+      tbc.appendChild(testbox)
+      tbc.appendChild(elementThen('textarea', textarea => {
+        textarea.style = 'width: 100%; box-sizing: border-box'
+        textarea.addEventListener('input', inputevent => {
+          const parseTree = escm.parse(textarea.value, basicEscset)
+          escm.preprocess(parseTree, basicEscset)
+          const newTestbox = escm.evaluate(parseTree, basicEscset)
+          testbox.replaceWith(newTestbox)
+          testbox = newTestbox
+          const newParseTreeExpandable = basicEscset.expandableElement(plaintextElement('pre', JSON.stringify(parseTree, null, 2)))
+          if(parseTreeExpandable.classList.contains('expanded'))
+            newParseTreeExpandable.classList.add('expanded')
+          parseTreeExpandable.replaceWith(newParseTreeExpandable)
+          parseTreeExpandable = newParseTreeExpandable
+          const newHtmlExpandable = basicEscset.expandableElement(newTestbox.innerHTML)
+          if(htmlExpandable.classList.contains('expanded'))
+            newHtmlExpandable.classList.add('expanded')
+          htmlExpandable.replaceWith(newHtmlExpandable)
+          htmlExpandable = newHtmlExpandable
+          const newLinearizedElement = plaintextElement('span', escm.linearize(parseTree, basicEscset))
+          linearizedElement.replaceWith(newLinearizedElement)
+          linearizedElement = newLinearizedElement
+        })
+      }))
+    }))
+    
+    body.appendChild(elementThen('h1', e=>e.innerText=`Parse tree:`))
+    body.appendChild(elementThen('p', e=>e.innerText=`The quick \\bold(brown) fox`))
+    body.appendChild(plaintextElement('pre', JSON.stringify(escm.parse('The quick \\bold(brown) fox', basicEscset), null, 2)))
+    
+    body.appendChild(elementThen('h2', e=>e.innerText=`\\nocom Parse tree:`))
+    body.appendChild(plaintextElement('pre', JSON.stringify(escm.parse('\\bold(\\nocom(\\bold(...)))', basicEscset), null, 2)))
+    
+    // w/ newlines text
+    body.appendChild(elementThen('h1', e=>e.innerText=`Escm w/ newlines:`))
+    body.appendChild(escm.parsePreprocessEval('A\n\\bold(B)\n\\bold(C)\nD', basicEscset))
+    
+    // particular command tests
+    body.appendChild(elementThen('h1', e=>e.innerText=`Particular command tests:`))
+    body.appendChild(escm.parsePreprocessEval('\\icode(\\pre(...)):\n\\pre(1\n 2\n  3  -        -\n 4\n 5)', basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval('\\icode(\\chaotic(\\chaotic(\\chaotic(...)))): \\chaotic(\\chaotic(\\chaotic(The quick brown fox jumps over the lazy dog)))', basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\chaotic^5()): ${`\\chaotic(`.repeat(5)}The quick brown fox jumps over the lazy dog${`)`.repeat(5)}`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\separator()): \\separator()`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\blockquote()): \\blockquote(A\nB\nC)`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\colored(color | color)): \\colored(red | red) \\colored(blue | blue) \\colored(green | green)\n`, basicEscset))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\colored breaking:): Single arg: color: \\colored(red), content: \\colored(\\pulse(asdf))`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\link()): \\link(wikipedia.org|\\bold(element here))`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\link()): \\link(wikipedia.org)`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\tooltip()): \\tooltip(\\bold(asdf)|\\rainbow(zxcv))`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\math()): \\math(x^2+1)`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\displaymath()): \\displaymath(\\int_0^\\infty f(x)\\, dx = 1)`, basicEscset))
+    body.appendChild(elementThen('br'))
+    let kittysrc = 'https://i.imgur.com/45kFYNZ.gif'
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\img()): \\img(${kittysrc})`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\charimg()): \\charimg(${kittysrc})`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\list()): \\list(\\item(\\bold(A))\n\\item(\\rainbow(B)) \\item(\\list(\\item(\\wavy(CCCC)) asdf \\item(\\math(\\sqrt{x^2-1})))))`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\code()): \\code(js|\nfunction echo(x) {\n  console.log(x)\n  return x\n})`, basicEscset))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\code()): \\code(js|\nfunction echo(x) {\n  console.log("x|y")\n  return x\n})`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\code() no language): \\code(function echo(x) {\n  console.log("x|y")\n  return x\n})`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(Lots of \\expoverlays) ${'\\expoverlay(0123456789 0123456789)'.repeat(40)}`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(Lots of \\tooltips) ${'\\tooltip(xyz|0123456789 0123456789)'.repeat(40)}`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(Nested tabs) \\tabs(\\item(a|\\tabs(\\item(A|B) \\item(X|Y))) \\item(x|y))`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(Nested expoverlays) ${'\\expoverlay('.repeat(10)}hi${')'.repeat(10)}`, basicEscset))
+    body.appendChild(elementThen('br'))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(Nested expoverlays 2) ${'\\expoverlay(Some text'.repeat(10)}hi${'more text)'.repeat(10)}`, basicEscset))
+    
+    const loremIpsum = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem dolor sed viverra ipsum nunc aliquet bibendum. Morbi tristique senectus et netus et malesuada fames ac turpis. Urna id volutpat lacus laoreet non curabitur gravida. Ultrices in iaculis nunc sed augue. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Mi quis hendrerit dolor magna eget. Orci ac auctor augue mauris augue neque gravida in. Bibendum arcu vitae elementum curabitur vitae nunc. Adipiscing enim eu turpis egestas pretium.
+
+Vel facilisis volutpat est velit egestas dui id ornare arcu. Fusce ut placerat orci nulla pellentesque dignissim enim sit. Vestibulum sed arcu non odio euismod. Ut pharetra sit amet aliquam id diam maecenas. Et leo duis ut diam quam. Integer enim neque volutpat ac tincidunt. In arcu cursus euismod quis viverra nibh cras. Volutpat consequat mauris nunc congue nisi vitae suscipit tellus. Porta nibh venenatis cras sed felis eget velit. Tincidunt arcu non sodales neque sodales ut etiam. Volutpat blandit aliquam etiam erat velit scelerisque. Curabitur vitae nunc sed velit dignissim. Nibh tortor id aliquet lectus proin nibh.
+
+Nisl nisi scelerisque eu ultrices vitae auctor eu. Diam maecenas sed enim ut. Maecenas accumsan lacus vel facilisis volutpat est velit egestas dui. Vel elit scelerisque mauris pellentesque pulvinar pellentesque habitant morbi. Turpis massa sed elementum tempus egestas sed sed risus pretium. Ac tortor vitae purus faucibus ornare suspendisse. Suscipit tellus mauris a diam maecenas sed enim ut sem. Nibh cras pulvinar mattis nunc sed. Leo integer malesuada nunc vel risus commodo viverra maecenas accumsan. In tellus integer feugiat scelerisque. Porta nibh venenatis cras sed felis eget. Tristique senectus et netus et malesuada fames ac. At augue eget arcu dictum varius duis.
+
+Donec ultrices tincidunt arcu non sodales. Elit eget gravida cum sociis natoque penatibus et magnis dis. Quam pellentesque nec nam aliquam. Id eu nisl nunc mi ipsum. Consectetur lorem donec massa sapien faucibus et molestie ac. Curabitur gravida arcu ac tortor dignissim convallis aenean et. Nunc consequat interdum varius sit amet mattis vulputate enim. Gravida in fermentum et sollicitudin ac orci phasellus. Sit amet est placerat in egestas erat. Lorem ipsum dolor sit amet. Sit amet est placerat in egestas erat imperdiet sed. Bibendum arcu vitae elementum curabitur vitae nunc. Nibh nisl condimentum id venenatis a condimentum vitae sapien pellentesque. Elementum sagittis vitae et leo duis ut diam quam. Elementum facilisis leo vel fringilla est. Natoque penatibus et magnis dis parturient montes nascetur ridiculus. Tortor condimentum lacinia quis vel eros donec ac odio.
+
+Gravida quis blandit turpis cursus in hac habitasse. Amet nulla facilisi morbi tempus iaculis urna id. Id porta nibh venenatis cras sed felis. Ut ornare lectus sit amet est. Semper auctor neque vitae tempus quam pellentesque nec. Pellentesque habitant morbi tristique senectus. In tellus integer feugiat scelerisque varius morbi enim nunc faucibus. Auctor neque vitae tempus quam pellentesque nec nam aliquam. Cursus metus aliquam eleifend mi. Integer vitae justo eget magna. Pellentesque massa placerat duis ultricies lacus sed turpis tincidunt. Sapien eget mi proin sed libero enim sed faucibus turpis.`
+    
+    const oneParamCommands = [
+      'nocom',
+      'comment',
+      'expandable',
+      'collapsible',
+      'indent',
+      'bold',
+      'italic',
+      'small',
+      'tiny',
+      'big',
+      'huge',
+      'pre',
+      'icode',
+      'sarcasm',
+      'wavy',
+      'chaotic',
+      'scramble',
+      'lowvis',
+      'strikeout',
+      'underline',
+      'error',
+      'pulse',
+      'mirror',
+      'reverse',
+      'blurry',
+      'strobe',
+      'spoiler',
+      'highlight',
+      'rainbow',
+      'radioactive',
+      'powerful',
+      'bubble',
+      'centered',
+      'quote',
+      'blockquote',
+      'hypothesis',
+      'header1',
+      'header2',
+      'header3',
+      'header4',
+      'expoverlay',
+      'scrollbox',
+      ['tooltip[first arg]', arg=>`\\tooltip(${arg}|Tooltip message)`],
+      ['tooltip[second arg]', arg=>`\\tooltip(Tooltip body|${arg})`],
+      ['colored[second arg]', arg=>`\\colored(green|${arg})`],
+      ['img', arg=>`\\img(${kittysrc})`],
+      ['charimg', arg=>`\\charimg(${kittysrc})`],
+      ['list +1 item', arg=>`\\list(\\item(First item) \\item(${arg}))`],
+    ]
+    const opcmap = {}
+    for(let i = 0; i < oneParamCommands.length; i++) {
+      const opc = oneParamCommands[i]
+      if(typeof opc === 'string'){
+        oneParamCommands[i] = [opc, arg=>`\\${opc}(${arg})`]
+      }
+      opcmap[oneParamCommands[i][0]] = i
+    }
+    
+    // One param commands
+    body.appendChild(elementThen('h1', e=>e.innerText=`One-parameter commands`))
+    for(const opc of oneParamCommands) {
+      let parseTree = escm.parse(opc[1](`\\nocom(${opc[1]('...')})`), basicEscset)
+      escm.preprocess(parseTree, basicEscset)
+      body.appendChild(escm.evaluate(parseTree, basicEscset))
+      body.appendChild(elementThen('br'))
+    }
+    
+    // One param commands in scrollbox
+    body.appendChild(elementThen('h1', e=>e.innerText=`Scroll-boxed one-parameter commands`))
+    let str = '\\scrollbox('
+    for(const opc of oneParamCommands)
+      str += opc[1](`\\nocom(${opc[1]('...')})`) + '\n'
+    body.appendChild(escm.parsePreprocessEval(str + ')', basicEscset))
+    
+    // One param commands in scrollbox long ml
+    let mlstring = `  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem dolor sed viverra ipsum nunc aliquet bibendum. Morbi tristique senectus et netus et malesuada fames ac turpis. Urna id volutpat lacus laoreet non curabitur gravida. Ultrices in iaculis nunc sed augue. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Mi quis hendrerit dolor magna eget. Orci ac auctor augue mauris augue neque gravida in. Bibendum arcu vitae elementum curabitur vitae nunc. Adipiscing enim eu turpis egestas pretium.
+
+Vel facilisis volutpat est velit egestas dui id ornare arcu. Fusce ut placerat orci nulla pellentesque dignissim enim sit. Vestibulum sed arcu non odio euismod. Ut pharetra sit amet aliquam id diam maecenas. Et leo duis ut diam quam. Integer enim neque volutpat ac tincidunt. In arcu cursus euismod quis viverra nibh cras. Volutpat consequat mauris nunc congue nisi vitae suscipit tellus. Porta nibh venenatis cras sed felis eget velit. Tincidunt arcu non sodales neque sodales ut etiam. Volutpat blandit aliquam etiam erat velit scelerisque. Curabitur vitae nunc sed velit dignissim. Nibh tortor id aliquet lectus proin nibh.
+
+Nisl nisi scelerisque eu ultrices vitae auctor eu`
+    body.appendChild(elementThen('h1', e=>e.innerText=`Scroll-boxed one-parameter commands on long multiline string`))
+    str = '\\scrollbox('
+    for(const opc of oneParamCommands)
+      str += opc[1](mlstring) + '\n'
+    body.appendChild(escm.parsePreprocessEval(str + ')', basicEscset))
+    
+    // One param commands linearied
+    body.appendChild(elementThen('h1', e=>e.innerText=`One-parameter commands re-linearized`))
+    for(const opc of oneParamCommands) {
+      let parseTree = escm.parse(opc[1](`...`), basicEscset)
+      escm.preprocess(parseTree, basicEscset)
+      body.appendChild(plaintextElement('span', escm.linearize(parseTree)))
+      body.appendChild(elementThen('br'))
+    }
+    
+    // Containers
+    body.appendChild(elementThen('h1', e=>e.innerText=`Containers`))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\scrollbox(...)):\\scrollbox(${loremIpsum})`, basicEscset))
+    body.appendChild(escm.parsePreprocessEval(`\\icode(\\tabs(...)):\\tabs(\\item(tab 2|\\bold(Sample text)) \\item(lorem ipsum|${loremIpsum}) \\item(\\bold(tab 3) | \\expoverlay(More stuff)\nMultiline) \\item(scrollbox|\\scrollbox(\\charimg(${kittysrc})\\charimg(${kittysrc})${loremIpsum})))`, basicEscset))
+    
+    // Mix test
+    body.appendChild(elementThen('h1', e=>e.innerText=`One-parameter mix test`))
+    function mixTestRoll() {
+      body.querySelector('#mixtest').firstChild.replaceWith(
+        escm.parsePreprocessEval(
+          randomChoice(oneParamCommands, 16)
+            .map(opc => opc[1](opc[0])).join(' ')
+        , basicEscset)
+      )
+    }
+    body.appendChild(elementThen('input', rollbutton => {
+      rollbutton.setAttribute('type', 'button')
+      rollbutton.value = 'Reroll mix test'
+      rollbutton.addEventListener('click', clickevent => mixTestRoll())
+    }))
+    body.appendChild(elementThen('div', mixdiv => {
+      mixdiv.id = 'mixtest'
+      mixdiv.appendChild(elementThen('span'))
+    }))
+    
+    // Mix relinearization test
+    body.appendChild(elementThen('h1', e=>e.innerText=`One-parameter mix re-linearization test`))
+    function mixTestRoll2() {
+      let parseTree = escm.parse(
+        randomChoice(oneParamCommands, 16)
+          .map(opc => opc[1](opc[0])).join(' ')
+      , basicEscset)
+      escm.preprocess(parseTree, basicEscset)
+      body.querySelector('#linear-mixtest').firstChild.replaceWith(escm.linearize(parseTree))
+    }
+    body.appendChild(elementThen('input', rollbutton => {
+      rollbutton.setAttribute('type', 'button')
+      rollbutton.value = 'Reroll mix test'
+      rollbutton.addEventListener('click', clickevent => mixTestRoll2())
+    }))
+    body.appendChild(elementThen('div', mixdiv => {
+      mixdiv.id = 'linear-mixtest'
+      mixdiv.appendChild(elementThen('span'))
+    }))
+    
+    // Super mix test
+    body.appendChild(elementThen('h1', e=>e.innerText=`One-parameter super-mix test`))
+    function randomMixComboString(maxCount = 3, depth = 3) {
+      const count = randomIntegerOn(0, maxCount)
+      if(count === 0 || depth <= 0) {
+        return 'Sample text'
+      } else {
+        return randomChoice(oneParamCommands, count)
+          .map(opc => opc[1](randomMixComboString(maxCount, depth-1)))
+          .join(' ')
+      }
+    }
+    function mixTestRoll3() {
+      body.querySelector('#mixtest3').firstChild.replaceWith(
+        escm.parsePreprocessEval(randomMixComboString(8, 4), basicEscset)
+      )
+    }
+    body.appendChild(elementThen('input', rollbutton => {
+      rollbutton.setAttribute('type', 'button')
+      rollbutton.value = 'Reroll mix test'
+      rollbutton.addEventListener('click', clickevent => mixTestRoll3())
+    }))
+    body.appendChild(elementThen('div', mixdiv => {
+      mixdiv.id = 'mixtest3'
+      mixdiv.appendChild(elementThen('span'))
+    }))
+    
+    
+    // Combinations
+    body.appendChild(elementThen('h1', e=>e.innerText=`One-parameter combinations`))
+    let combosdiv = elementThen('div')
+    let combosmode = 1
+    let first = oneParamCommands[opcmap.bold]
+    function updatecombos() {
+      combosdiv.innerHTML = ''
+      if(combosmode == 1) {
+        for(const opc2 of oneParamCommands) {
+          combosdiv.appendChild(escm.parsePreprocessEval(`\\icode(\\${first[0]}(${opc2[0]}(...))): ${first[1](opc2[1]('Sample text'))}`, basicEscset))
+          combosdiv.appendChild(elementThen('br'))
+        }
+      } else {
+        for(const opc2 of oneParamCommands) {
+          combosdiv.appendChild(escm.parsePreprocessEval(`\\icode(\\${opc2[0]}(\\${first[0]}(...))): ${opc2[1](first[1]('Sample text'))}`, basicEscset))
+          combosdiv.appendChild(elementThen('br'))
+        }
+      }
+    }
+    function transposecombos() {
+      if(combosmode == 1)
+        combosmode = 2
+      else 
+        combosmode = 1
+      updatecombos()
+    }
+    updatecombos()
+    body.appendChild(elementThen('select', selectmenu => {
+      for(const opc of oneParamCommands) {
+        selectmenu.appendChild(elementThen('option', option => {
+          option.innerText = opc[0]
+          option.setAttribute('value', opc[0])
+          if(opc[0] === first[0])
+            option.setAttribute('selected', true)
+        }))
+      }
+      selectmenu.addEventListener('input', inputevent => {
+        first = oneParamCommands[opcmap[selectmenu.value]]
+        updatecombos()
+      })
+    }))
+    body.appendChild(elementThen('input', switchbutton => {
+      switchbutton.setAttribute('type', 'button')
+      switchbutton.setAttribute('value', 'Transpose combos')
+      switchbutton.addEventListener('click', clickevent => {
+        transposecombos()
+      })
+    }))
+    body.appendChild(combosdiv)
+    
+    // Null and undefined test
+    body.appendChild(elementThen('h1', e=>e.innerText=`Null and undefined test`))
+    for(const opc of oneParamCommands)
+      body.appendChild(escm.parsePreprocessEval(`${opc[0]}: ${opc[1](`\\comment()`)}\n`, basicEscset))
+    
+    
+    // Multiline string test
+
+    body.appendChild(elementThen('h1', e=>e.innerText=`One-parameter commands multi-line`))
+    for(const opc of oneParamCommands) {
+      body.appendChild(escm.parsePreprocessEval(`\\colored(green|${opc[0]}:)\n`, basicEscset))
+      body.appendChild(escm.parsePreprocessEval(`${opc[1](mlstring)}`, basicEscset))
+      body.appendChild(escm.parsePreprocessEval(`\\separator()\n\n`, basicEscset))
+    }
+    
+  }))()})()</script>
+</div>

@@ -1,0 +1,173 @@
+
+if(args.file === undefined) { // no file argument given
+  if(args.directory !== undefined)
+    return ctx.serveJHP('./pagelets/represent-directory.jhp', request, response, args)
+  // else
+  html`<div class="pagelet file-representation" data-url="/pagelets/represent-file.jhp?file=undefined">`
+    await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response)
+    html`<title>Bad file representation</title>`
+    html`<div>No <code>file</code> argument given (use <code>/pagelets/represent-file.jhp?file=<span style="red">...</span></code> to specify the file to represent)</div>`
+  html`</div>`
+  return true
+}
+// else
+
+let serverFile = ctx.sanitizeHTMLString(ctx.addPathDot(args.file))
+let clientFile = ctx.sanitizeHTMLString(serverFile.slice(1))
+
+let exists = ctx.fs.existsSync(serverFile)
+
+let ext = ctx.path.extname(clientFile)
+if(ext === '.html' || ext === '.jhp') { // html files represent themselves
+  let interpolateObj = {}
+  for(const key in args)
+    interpolateObj[`arg-${key}`] = args[key]
+  if(exists)
+    return ctx.serveFile(serverFile, response, interpolateObj)
+  else
+    return ctx.serveJHP('./lib/404.jhp', request, response, {requestPath: serverFile})
+}
+// else
+
+let fileMTime
+if(exists) {
+  let fileStat = ctx.fs.statSync(serverFile)
+  fileMTime = fileStat.mtimeMs
+  if(fileStat.isDirectory()) {
+    let newArgs = args
+    newArgs.directory = args.file
+    delete newArgs.file
+    return ctx.serveJHP('./pagelets/represent-directory.jhp', request, response, newArgs)
+  }
+  // else
+
+  let etag = request.headers['if-none-match'] ?? ''
+  let thisStat = ctx.fs.statSync('./pagelets/represent-file.jhp')
+  let thisEtag = `${thisStat.mtimeMs}${ctx.sha256(JSON.stringify(args))}${fileMTime}`
+  response.setHeader('ETag', thisEtag)
+  if(etag === thisEtag) {
+    response.statusCode = 304
+    return true
+  }
+  // else
+}
+
+let extContent  = ctx.extContentMap[ctx.path.extname(serverFile)]
+let [contentType, isBinary] = extContent ?? [undefined, undefined]
+if(contentType === undefined)
+  [contentType, isBinary] = ctx.extContentMap.default
+  
+principleContentType = ctx.splitAtFirst(contentType, ';')?.[0] ?? contentType
+
+if(isBinary) {
+  if(exists) {
+    html`
+    <div class="pagelet file-representation" data-file="${clientFile}" data-url="/pagelets/represent-file.jhp?file=${clientFile}">
+      `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
+      <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
+      
+      <script src="/lib/callib/callib0.mjs" type="module"></script>
+      <script src="/lib/mixin.mjs" type="module"></script>
+      
+      <link href="/pagelets/represent-file.css" rel="stylesheet">
+      `
+      if(principleContentType.startsWith('image/')) // is an image, use <img> element
+        html`<img class="current-content" src="${clientFile}?random=${fileMTime}" style="padding: 4px" cache="no-cache" title="Current content"/>`
+      else
+        html`<div>File</div>`
+      html`
+      
+      <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
+        <option value="" style="color:gray">S</option>
+        ${!exists ? /*html*/`<option value="/pagelets/represent-file.mjs: uploadIt">Upload</option>` : ''}
+        <option value="/pagelets/represent-file.mjs: reload">Reload</option>
+        <option value="/pagelets/represent-file.mjs: openEditor">Editor</option>
+        <option value="/pagelets/represent-file.mjs: openDirectory">Directory</option>
+        <option value="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
+        <option value="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+      </select>
+    </div>
+    `
+    return true
+  } else { // binary file, doesn't exist
+    html`
+    <div class="pagelet file-representation" data-file="${clientFile}" data-url="/pagelets/represent-file.jhp?file=${clientFile}">
+      `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
+      <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
+      <script src="/lib/callib/callib0.mjs" type="module"></script>
+      <script src="/lib/mixin.mjs" type="module"></script>
+      <link href="/pagelets/represent-file.css" rel="stylesheet">
+      
+      `
+      if(principleContentType.startsWith('image/')) // is an image, use <img> element
+        html`<div style="color: red">Image 404</div>`
+      else
+        html`<div style="color: red">File 404</div>`
+      html`
+      
+      <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
+        <option value="" style="color:gray">S</option>
+        <option value="/pagelets/represent-file.mjs: uploadIt">Upload</option>
+        <option value="/pagelets/represent-file.mjs: reload">Reload</option>
+        <option value="/pagelets/represent-file.mjs: openEditor">Editor</option>
+        <option value="/pagelets/represent-file.mjs: openDirectory">Directory</option>
+        <option value="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
+        <option value="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+      </select>
+    </div>
+    `
+    return true
+  }
+} else { // textual file
+  if(exists) {
+    html`
+    <div class="pagelet file-representation" data-file="${clientFile}" data-url="/pagelets/represent-file.jhp?file=${clientFile}">
+      `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
+      <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
+      
+      <script src="/lib/callib/callib0.mjs" type="module"></script>
+      <script src="/lib/mixin.mjs" type="module"></script>
+      <link href="/pagelets/represent-file.css" rel="stylesheet">
+      
+      <call-resource srcfn="/pagelets/represent-file.mjs: initializeContentDisplay"></call-resource>
+      <span class="content-display"></span>
+      
+      <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
+        <option value="" style="color:gray">S</option>
+        <option value="/pagelets/represent-file.mjs: reload">Reload</option>
+        <option value="/pagelets/represent-file.mjs: openSimpleEditDialog">Edit dialog</option>
+        <option value="/pagelets/represent-file.mjs: openSimpleAppendDialog">Append dialog</option>
+        <option value="/pagelets/represent-file.mjs: openEditor">Editor</option>
+        <option value="/pagelets/represent-file.mjs: openDirectory">Directory</option>
+        <option value="/pagelets/represent-file.mjs: enframe">Enframe</option>
+        <option value="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+      </select>
+    </div>
+    `
+    return true
+  } else { // textual file, doesn't exist
+    html`
+    <div class="pagelet file-representation" data-file="${clientFile}" data-url="/pagelets/represent-file.jhp?file=${clientFile}">
+      `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
+      <title>Non existent file ${ctx.path.basename(clientFile)} - ${clientFile}</title>
+      <script src="/lib/callib/callib0.mjs" type="module"></script>
+      <script src="/lib/mixin.mjs" type="module"></script>
+      <link href="/pagelets/represent-file.css" rel="stylesheet">
+      
+      <span style="color:red" title="${clientFile} doesn't exist">404</span>
+      
+      <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
+        <option value="" style="color:gray">S</option>
+        <option value="/pagelets/represent-file.mjs: reload">Reload</option>
+        <option value="/pagelets/represent-file.mjs: makeIt">Make it</option>
+        <option value="/pagelets/represent-file.mjs: openEditor">Open editor</option>
+        <option value="/pagelets/represent-file.mjs: openDirectory">Open directory</option>
+        <option value="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
+        <option value="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+      </select>
+    </div>
+    `
+    return true
+  }
+}
+
