@@ -43,3 +43,7 @@ Download the code by either:
 Now, open a terminal or `cd` into the new directory and in the terminal run: `node fragment-server.js`. You should see 'Fragment server started on port 5502' or similar (note: you can change the port in `server-config.json`)
 
 Now just navigate to `localhost:5502/` in a webbrowser on the same computer and you should see *reconfuse*'s `/index.jhp` page
+
+You'll likely also want to create a new admin user by:
+  1. Creating a user through the UI
+  2. Adding that user's username into `/groups/admin/members.txt` (create the file if necessary)
