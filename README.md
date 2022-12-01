@@ -1,4 +1,6 @@
 
+# Reconfuse ![](./favicon.ico)
+
 This contains the major components for project reconfuse
 * Fragment server -- a server which:
   + Calls arbitrary initialization scripts
@@ -17,6 +19,14 @@ This contains the major components for project reconfuse
   + Scripts in `/lib/`
 
 Project reconfuse is intended to provide a platform for free expression of ideas
+
+# Project status:
+
+Reconfuse is in-development and pretty much very unstable. Expect bugs and an irritating UI
+
+HOWEVER, it *is* currently usable and functional as a hybrid file browser / web forum / web blog / whatever
+
+The current main developer Joe / jmacc93 works on it every day despite not commiting to this repo every day, so don't consider gaps between commits as meaning slow development (well, development may be slow, but only because Joe's progress per effort has decreased)
 
 # How to run:
 
