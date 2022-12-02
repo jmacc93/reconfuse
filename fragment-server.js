@@ -36,7 +36,7 @@ function insertPlaceholderValues(str, obj, valueRegex = _insertPlaceholderValues
   let gFileRegex  = new RegExp(fileRegex, 'g')
   if(obj) {
     return str.replaceAll(gValueRegex, (str, cap) => { // Insert given obj[key] values for each -[key]-
-      return sanitizeHTMLString(obj[cap] ?? obj.default ?? '')
+      return sanitizeHTMLString(obj[cap] ?? (obj.default ?? ''))
     }).replaceAll(gFileRegex, (str, cap) => { // Insert file filepath contents for each -:[filepath]:-
       let file = addPathDot(path.relative('./', addPathDot(cap)))
       return insertPlaceholderValues(fs.readFileSync(file).toString(), obj, valueRegex, fileRegex)
