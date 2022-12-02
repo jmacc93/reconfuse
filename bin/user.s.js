@@ -6,6 +6,9 @@ const nullStringHash = sha256('')
 const authtokenExpirationTime = 1000*3600*24*7 // 7 days
 const rememberMeTimeHeader    =`Max-Age=${authtokenExpirationTime}` // remember for 7 days
 
+if(!ctx.fs.existsSync('./users'))
+  ctx.fs.mkdirSync('./users')
+
 const initialUserControlFileContent = (username)=> /*json*/ `[{
   "file": {"tree": {"*all": "black"}}
 }, {

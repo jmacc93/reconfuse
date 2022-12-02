@@ -32,3 +32,9 @@ rootObj.nextAnonIpId = function() {
   return anonIpId
 }
 
+// Make some directories
+
+if(!ctx.fs.existsSync('./logs'))
+  ctx.fs.mkdirSync('./logs')
+
+

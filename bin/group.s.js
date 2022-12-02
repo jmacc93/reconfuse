@@ -11,6 +11,10 @@ function setCodeAndMessage(response, code, msg) {
   return true
 }
 
+
+if(!ctx.fs.existsSync('./groups'))
+  ctx.fs.mkdirSync('./groups')
+
 let currentTime = 0
 let beginTime = 0
 let invocations = 0
