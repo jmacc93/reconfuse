@@ -1,8 +1,0 @@
-[{
-  "file": {
-    "tree": {"*all": "black"}, 
-    "subdir": {"*all": "white"}
-  }
-}, {
-  "newDir": {"this": {"*all": "white"}}
-}]
