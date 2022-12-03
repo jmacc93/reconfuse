@@ -481,6 +481,8 @@ if(config.protocol) {
     }
     server = https.createServer(options)
   }
+} else {
+  server = http.createServer()
 }
 _G.server = server
 
