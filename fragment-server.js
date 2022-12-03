@@ -462,7 +462,26 @@ if(fs.existsSync('./server-config.json')) {
 
 //#region server and response
 
-const server = http.createServer()
+let server
+if(config.protocol) {
+  if(config.protocol === 'http') {
+    server = http.createServer()
+  } else {
+    const https = await import('https')
+    _G.https = https
+    let httpsKeyFile = config['https-key'] ?? '.private/key.pem'
+    if(!fs.existsSync(httpsKeyFile))
+      throw Error(`No https key file at ${httpsKeyFile}. You can give a different file using "https-key" in server-config.json`)
+    let httpsCertFile = config['https-cert'] ?? '.private/cert.pem'
+    if(!fs.existsSync(httpsCertFile))
+      throw Error(`No https cert file at ${httpsCertFile}. You can give a different file using "https-cert" in server-config.json`)
+    let options = {
+      key: fs.readFileSync(httpsKeyFile),
+      cert: fs.readFileSync(httpsCertFile)
+    }
+    server = https.createServer(options)
+  }
+}
 _G.server = server
 
 function _endResponseCheckServed(didRespond, response) {
