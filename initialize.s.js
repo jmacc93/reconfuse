@@ -37,4 +37,5 @@ rootObj.nextAnonIpId = function() {
 if(!ctx.fs.existsSync('./logs'))
   ctx.fs.mkdirSync('./logs')
 
-
+if(!ctx.fs.existsSync('./state/'))
+  ctx.fs.mkdirSync('./state')
