@@ -1,6 +1,10 @@
 users/
 groups/
+<<<<<<< HEAD
 logs/
 instances/
 /intro.md
 /last-jfp-source.js
+=======
+logs/
+>>>>>>> main
