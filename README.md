@@ -1,6 +1,8 @@
 
 # Reconfuse ![](./favicon.ico)
 
+Visit [reconfuse.org](reconfuse.org) to see the site in action (note: currently not using http!)
+
 This contains the major components for project reconfuse
 * Fragment server -- a server which:
   + Calls arbitrary initialization scripts
