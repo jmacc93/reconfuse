@@ -1,5 +1,6 @@
 
-const sha256 = await import(ctx.path.resolve('./lib/sha256.mjs')).then(x => x.exp)
+// const sha256 = await import(ctx.path.resolve('./lib/sha256.mjs')).then(x => x.exp)
+const sha256 = ctx.sha256
 
 const nullStringHash = sha256('')
 
@@ -180,5 +181,47 @@ exports.respondToRequest.register = async function(request, response, getBody, a
   
   response.statusCode = 200
   response.statusMessage = `Success, please log in`
+  return true
+}
+
+exports.respondToRequest.changePassword = async function(request, response, getBody, args) {
+  // is username given?
+  const username = args.cookies.username
+  if(!username)
+    return setCodeAndMessage(response, 400, 'Please log in')
+  // else
+  
+  // is user actually who they say they are?
+  if(!handleUserAuthcheck(response, args))
+    return true
+  // else
+  
+  // is oldPassword given?
+  if(!args.oldPassword)
+    return setCodeAndMessage(response, 400, 'No oldPassword argument given')
+  // else
+  
+  // is oldPassword correct?
+  const storedSalt = ctx.fs.readFileSync(`./users/${username}/.salt.txt`).toString()
+  const storedPassword = ctx.fs.readFileSync(`./users/${username}/.password.txt`).toString()
+  if(sha256(args.oldPassword + storedSalt) !== storedPassword)
+    return setCodeAndMessage(response, 400, `Incorrect oldPassword`)
+  // else
+  
+  if(!args.newPassword)
+    return setCodeAndMessage(response, 400, 'No newPassword argument given')
+  // else
+  
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(20) // wait 20 ms
+  
+  let salt = lib.randomTokenString(16)
+  
+  ctx.fsp.writeFile(`./users/${username}/.salt.txt`, salt)
+  ctx.fsp.writeFile(`./users/${username}/.password.txt`, sha256(args.newPassword + salt))
+  ctx.fsp.writeFile(`./users/${username}/.last-interaction-time.txt`, String(Date.now()))
+  
+  response.statusCode = 200
+  response.statusMessage = `Success`
   return true
 }
