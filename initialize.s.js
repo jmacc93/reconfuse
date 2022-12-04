@@ -12,7 +12,7 @@ ctx.scriptStorage['./'] = rootObj
 
 ctx.sha256 = await import(ctx.path.resolve('./lib/sha256.mjs')).then(mod=>mod.exp)
 
-let anonIpId  = ctx.fs.existsSync('./state/anonipid.txt') ? parseInt(ctx.fs.readFile('./state/anonipid.txt')) : 0
+let anonIpId  = ctx.fs.existsSync('./state/anonipid.txt') ? parseInt(ctx.fs.readFileSync('./state/anonipid.txt')) : 0
 let anonIpMap = {}
 
 rootObj.registerAnonIp = function(ipArg) { // (ipArg: http.IncomingMessage | ip string) => unique integer
