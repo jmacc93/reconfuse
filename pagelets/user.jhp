@@ -43,6 +43,16 @@ html`
     <span class="rememberme logged-in-fade">Remember? <input type="checkbox"></span>
   </div>
   
+  <div class="logged-out-hide">
+    
+    <div class="change-password">
+      <input class="old" type="password" placeholder="Old password">
+      <input class="new" type="password" placeholder="New password">
+      <button is="call-resource-button" class="linklike" srcfn="/pagelets/user.mjs: setPasswordButtonClicked">Change password</button>
+    </div>
+    
+  </div>
+  
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>
 </div>
 `
