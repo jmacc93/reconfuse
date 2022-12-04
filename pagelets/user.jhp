@@ -7,46 +7,40 @@ html`
   <title>User controls</title>
   
   <style>
-    .usercontrols[data-loggedin="false"] .logged-in-as { display: none }
-    .usercontrols[data-loggedin="true" ] .logged-out   { display: none }
     
-    .usercontrols[data-loggedin="true"]  *:is(input.username, input.password, .rememberme) { opacity: 50% }
-    .usercontrols[data-loggedin="true"]  button.login    { opacity: 50% }
-    .usercontrols[data-loggedin="true"]  button.register { opacity: 50% }
-    .usercontrols[data-loggedin="true"]  span.rememberme { opacity: 50% }
+    .usercontrols[data-loggedin="false"] .logged-out-hide {display: none}
+    .usercontrols[data-loggedin="false"] .logged-out-fade {opacity: 50%}
     
-    .usercontrols[data-loggedin="false"] *:is(button.logout) { opacity: 50% }
-    
-    .usercontrols .validation-msg:empty { display: none }
-    
-    .usercontrols .msg:empty { display: none}
+    .usercontrols[data-loggedin="true"] .logged-in-hide {display: none}
+    .usercontrols[data-loggedin="true"] .logged-in-fade {opacity: 50%}
     
     .usercontrols input:invalid { outline: 1px solid red }
   </style>
   
-  <call-resource srcfn="/pagelets/user.mjs: installFunctionality"></call-resource>
+  <call-resource srcfn="/pagelets/user.mjs: setInitialState"></call-resource>
+  <call-resource srcfn="/pagelets/user.mjs: installCheckOnInputFunctionality"></call-resource>
   
-  <div class="logged-in-as"> Logged in as <span class="username"></span> (as <span class="displayname"></span>) </div>
-  <div class="logged-out"> Logged out </div>
+  <div class="logged-in-as logged-out-hide"> Logged in as <span class="username"></span> (as <span class="displayname"></span>) </div>
+  <div class="logged-out logged-in-hide"> Logged out </div>
   
   <div>
     <input class="displayname" type="displayname" placeholder="displayname" maxlength="32"/>
-    <button class="save-displayname linklike">Save</button> <br>
-    <input class="username" type="username" placeholder="username" minlength="1" maxlength="16" pattern="[a-zA-Z_\\-0-9]+"/><br>
-    <input class="password" type="password" placeholder="password" minlength="4"/>
+    <button is="call-resource-button" srcfn="/pagelets/user.mjs: saveDisplaynameClicked" class="save-displayname linklike">Save</button> <br>
+    <input class="username logged-in-fade" type="username" placeholder="username" minlength="1" maxlength="16" pattern="[a-zA-Z_\\-0-9]+"/><br>
+    <input class="password logged-in-fade" type="password" placeholder="password" minlength="4"/>
   </div>
   
   <div>
-    <div class="validation-msg msg displayname"></div>
-    <div class="validation-msg msg username"></div>
-    <div class="validation-msg msg password"></div>
+    <div class="msg displayname"></div>
+    <div class="msg username"></div>
+    <div class="msg password"></div>
   </div>
   
   <div>
-    <button class="logout linklike">Log out</button>
-    <button class="login linklike">Log in</button>
-    <button class="register linklike">Register</button>
-    <span class="rememberme">Remember? <input type="checkbox"></span>
+    <button is="call-resource-button" srcfn="/pagelets/user.mjs: logoutButtonClicked" class="logout linklike logged-out-fade">Log out</button>
+    <button is="call-resource-button" srcfn="/pagelets/user.mjs: loginButtonClicked" class="login linklike">Log in</button>
+    <button is="call-resource-button" srcfn="/pagelets/user.mjs: registerButtonClicked" class="register linklike">Register</button>
+    <span class="rememberme logged-in-fade">Remember? <input type="checkbox"></span>
   </div>
   
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>

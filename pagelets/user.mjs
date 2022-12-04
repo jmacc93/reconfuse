@@ -1,34 +1,11 @@
 
-export async function installFunctionality(callElem) {
-  const lib    = await import('/lib/lib.mjs')
-  const sha256 = await import('/lib/sha256.mjs').then(x => x.exp)
-  
-  const pagelet                 = callElem.closest('.pagelet')
-  
-  const usernameInput           = pagelet.querySelector('input.username')
-  const usernameValidMsg        = pagelet.querySelector('.validation-msg.username')
-  let   usernameOk              = false
-  let   usernameHadInput        = false
-  
-  let   loggedInAsUsernameElem  = pagelet.querySelector('.logged-in-as > .username')
-  let   loggedInAsDispnameElem  = pagelet.querySelector('.logged-in-as > .displayname')
-  
-  const displaynameInput        = pagelet.querySelector('input.displayname')
-  const displaynameValidMsg     = pagelet.querySelector('.validation-msg.displayname')
-  let   displaynameOk           = false
-  
-  const saveDisplaynameButton   = pagelet.querySelector('button.save-displayname')
-  
-  const passwordInput           = pagelet.querySelector('input.password')
-  const passwordValidMsg        = pagelet.querySelector('.validation-msg.password')
-  let   passwordOk              = false
-  let   passwordHadInput        = false
-  
-  const logoutButton            = pagelet.querySelector('button.logout')
-  const loginButton             = pagelet.querySelector('button.login')
-  const registerButton          = pagelet.querySelector('button.register')
-  
-  const rememberMeBox           = pagelet.querySelector('.rememberme input')
+export async function setInitialState(callElem) {
+  const pagelet = callElem.closest('.pagelet')
+  const displaynameInput = pagelet.querySelector(':scope > * > input.displayname')
+  const usernameInput = pagelet.querySelector(':scope > * > input.username')
+  const rememberMeBox = pagelet.querySelector(':scope > * > .rememberme > input')
+  const loggedInAsUsernameElem = pagelet.querySelector(':scope > .logged-in-as .username')
+  const loggedInAsDispnameElem = pagelet.querySelector(':scope > .logged-in-as .displayname')
   
   let username = window.localStorage.getItem('username')
   usernameInput.value = username ?? ''
@@ -44,100 +21,103 @@ export async function installFunctionality(callElem) {
   
   loggedInAsUsernameElem.textContent = username
   loggedInAsDispnameElem.textContent = displayname
+}
+
+export async function logoutButtonClicked(callElemButton) {
+  const pagelet = callElemButton.closest('.pagelet')
+  const loggedInAsUsernameElem = pagelet.querySelector(':scope > .logged-in-as .username')
+  const loggedInAsDispnameElem = pagelet.querySelector(':scope > .logged-in-as .displayname')
   
-  logoutButton.addEventListener('click', () => {
-    document.cookie = 'authtoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict'
-    document.cookie = 'loggedin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict'
-    window.localStorage.removeItem('username')
-    window.localStorage.removeItem('rememberme')
-    loggedInAsUsernameElem.textContent = ''
-    loggedInAsDispnameElem.textContent = ''
-    pagelet.setAttribute('data-loggedin', 'false')
-  })
-  loginButton.addEventListener('click', async () => {
-    let uriSegs = [
-      '/bin/user.s.js/login?username=', encodeURIComponent(usernameInput.value),
-      '&password=', encodeURIComponent(sha256(passwordInput.value))
-    ]
-    if((displayname ?? '') !== '')
-      uriSegs.push('&displayname=', encodeURIComponent(displaynameInput.value))
-    if(rememberMeBox.checked)
-      uriSegs.push('&rememberme')
-    let response = await fetch(uriSegs.join(''))
-    lib.notificationFrom(loginButton, [
-      response.ok ? 'Success: ' : 'Failure: ',
-      response.statusText, ' (', String(response.status), ')'
-    ].join(''))
-    lib.attentionFlashElement(loginButton)
-    if(response.ok) {
-      window.localStorage.setItem('username',    String(usernameInput.value   ))
-      window.localStorage.setItem('displayname', String(displaynameInput.value))
-      window.localStorage.setItem('rememberme',  String(rememberMeBox.checked ))
-      pagelet.setAttribute('data-loggedin', 'true')
-      loggedInAsUsernameElem.textContent = usernameInput.value
-      loggedInAsDispnameElem.textContent = displaynameInput.value
-    }
-  })
+  document.cookie = 'authtoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict'
+  document.cookie = 'loggedin=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict'
+  window.localStorage.removeItem('username')
+  window.localStorage.removeItem('rememberme')
+  loggedInAsUsernameElem.textContent = ''
+  loggedInAsDispnameElem.textContent = ''
+  pagelet.setAttribute('data-loggedin', 'false')
+}
+
+export async function loginButtonClicked(callElemButton) {
+  const lib    = await import('/lib/lib.mjs')
+  const sha256 = await import('/lib/sha256.mjs').then(x => x.exp)
+  const pagelet = callElemButton.closest('.pagelet')
+  const displaynameInput = pagelet.querySelector(':scope > * > input.displayname')
+  const usernameInput = pagelet.querySelector(':scope > * > input.username')
+  const passwordInput = pagelet.querySelector(':scope > * > input.password')
+  const rememberMeBox = pagelet.querySelector(':scope > * > .rememberme > input')
+  const loggedInAsUsernameElem = pagelet.querySelector(':scope > .logged-in-as .username')
+  const loggedInAsDispnameElem = pagelet.querySelector(':scope > .logged-in-as .displayname')
+  const loginButton = pagelet.querySelector(':scope > * > .login')
   
+  if(pagelet.dataset.loggedin === 'true')
+    return void lib.notificationFrom(callElemButton, 'Already logged in')
+  // else
   
-  registerButton.addEventListener('click', async () => {
-    let uriSegs = [
-      '/bin/user.s.js/register?username=', encodeURIComponent(usernameInput.value),
-      '&password=', encodeURIComponent(sha256(passwordInput.value))
-    ]
-    if((displayname ?? '') !== '')
-      uriSegs.push('&displayname=', encodeURIComponent(displaynameInput.value))
-    let response = await fetch(uriSegs.join(''))
-    lib.notificationFrom(registerButton, [
-      response.ok ? 'Success: ' : 'Failure: ',
-      response.statusText, ' (', String(response.status), ')'
-    ].join(''))
-    lib.attentionFlashElement(registerButton)
-  })
-  
-  saveDisplaynameButton.addEventListener('click', () => {
-    localStorage.setItem('displayname', displaynameInput.value)
-    lib.attentionFlashElement(saveDisplaynameButton)
-    lib.notificationFrom(saveDisplaynameButton, 'Displayname saved')
+  let uriSegs = [
+    '/bin/user.s.js/login?username=', encodeURIComponent(usernameInput.value),
+    '&password=', encodeURIComponent(sha256(passwordInput.value))
+  ]
+  if((displaynameInput.value ?? '') !== '')
+    uriSegs.push('&displayname=', encodeURIComponent(displaynameInput.value))
+  if(rememberMeBox.checked)
+    uriSegs.push('&rememberme')
+  let response = await fetch(uriSegs.join(''))
+  lib.notificationFrom(loginButton, [
+    response.ok ? 'Success: ' : 'Failure: ',
+    response.statusText, ' (', String(response.status), ')'
+  ].join(''))
+  lib.attentionFlashElement(loginButton)
+  if(response.ok) {
+    window.localStorage.setItem('username',    String(usernameInput.value   ))
+    window.localStorage.setItem('displayname', String(displaynameInput.value))
+    window.localStorage.setItem('rememberme',  String(rememberMeBox.checked ))
+    pagelet.setAttribute('data-loggedin', 'true')
+    loggedInAsUsernameElem.textContent = usernameInput.value
     loggedInAsDispnameElem.textContent = displaynameInput.value
-  })
+    passwordInput.value = ''
+  }
+}
+
+export async function installCheckOnInputFunctionality(callElem) {
+  const pagelet = callElem.closest('.pagelet')
+  const displaynameInput = pagelet.querySelector(':scope > * > input.displayname')
+  const usernameInput = pagelet.querySelector(':scope > * > input.username')
+  const passwordInput = pagelet.querySelector(':scope > * > input.password')
+  const displaynameValidMsg = pagelet.querySelector(':scope > * > .msg.displayname')
+  const usernameValidMsg = pagelet.querySelector(':scope > * > .msg.username')
+  const passwordValidMsg = pagelet.querySelector(':scope > * > .msg.password')
+  
+  let usernameHadInput = false
+  let passwordHadInput = false
   
   const checkOnInput = () => {
     // check username
     if(usernameInput.value.length === 0) {
       if(usernameHadInput) {
-        usernameOk = false;
         usernameValidMsg.innerText = 'Username is empty'
       }
     } else if(!/^[a-zA-Z_\-0-9]*$/.test(usernameInput.value)) {
-      usernameOk = false
       let chars = usernameInput.value.split('').filter(c=> !/[a-zA-Z_\-0-9]+/.test(c))
       usernameValidMsg.innerText = 'Username contains invalid characters: ' + chars.join('')
     } else if(usernameInput.value.length > 16) {
-      usernameOk = false
       usernameValidMsg.innerText = 'Username too long'
     } else {
-      usernameOk = true
       usernameValidMsg.innerHTML = ''
     }
     
     // check displayname
     if(displaynameInput.value.length > 32) {
-      displaynameOk = false
       displaynameValidMsg.innerText = 'Displayname too long'
     } else {
-      displaynameOk = true
       displaynameValidMsg.innerHTML = ''
     }
     
     // check password
     if(passwordInput.value.length < 4) {
       if(passwordHadInput) {
-        passwordOk = false;
         passwordValidMsg.innerText = 'Password is too short (must be length > 3; highly recommend a random password using all available characters with length > 8)'
       }
     } else {
-      passwordOk = true
       passwordValidMsg.innerHTML = ''
     }
     
@@ -148,6 +128,38 @@ export async function installFunctionality(callElem) {
   displaynameInput.addEventListener('input', () => { checkOnInput() })
   usernameInput.addEventListener(   'input', () => { usernameHadInput = true; checkOnInput() })
   passwordInput.addEventListener(   'input', () => { passwordHadInput = true; checkOnInput() })
+}
+
+export async function registerButtonClicked(callElemButton) {
+  const lib    = await import('/lib/lib.mjs')
+  const sha256 = await import('/lib/sha256.mjs').then(x => x.exp)
+  const pagelet = callElemButton.closest('.pagelet')
+  const displaynameInput = pagelet.querySelector(':scope > * > input.displayname')
+  const usernameInput = pagelet.querySelector(':scope > * > input.username')
+  const passwordInput = pagelet.querySelector(':scope > * > input.password')
   
+  let uriSegs = [
+    '/bin/user.s.js/register?username=', encodeURIComponent(usernameInput.value),
+    '&password=', encodeURIComponent(sha256(passwordInput.value))
+  ]
+  if((displaynameInput.value ?? '') !== '')
+    uriSegs.push('&displayname=', encodeURIComponent(displaynameInput.value))
+  let response = await fetch(uriSegs.join(''))
+  lib.notificationFrom(callElemButton, [
+    response.ok ? 'Success: ' : 'Failure: ',
+    response.statusText, ' (', String(response.status), ')'
+  ].join(''))
+  lib.attentionFlashElement(callElemButton)
+}
+
+export async function saveDisplaynameClicked(callElemButton) {
+  const lib    = await import('/lib/lib.mjs')
+  const pagelet = callElemButton.closest('.pagelet')
+  const displaynameInput = pagelet.querySelector(':scope > * > input.displayname')
+  const loggedInAsDispnameElem = pagelet.querySelector(':scope > .logged-in-as .displayname')
   
+  localStorage.setItem('displayname', displaynameInput.value)
+  lib.attentionFlashElement(callElemButton)
+  lib.notificationFrom(callElemButton, 'Displayname saved')
+  loggedInAsDispnameElem.textContent = displaynameInput.value
 }
