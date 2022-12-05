@@ -61,6 +61,7 @@ export async function installDragHandleFunctionality(callElem) {
 
 export async function toggleResizable(callElem) {
   const lib = await import('/lib/lib.mjs')
+  const settings = await import('/lib/settings.mjs')
   const frame = callElem.closest('.controller-frame')
   const childContainer = frame.querySelector(':scope > .child-container')
   childContainer.classList.toggle('vertical-resizable')
@@ -68,7 +69,7 @@ export async function toggleResizable(callElem) {
     childContainer.style.height = 'fit-content'
   } else {
     let height = parseInt(window.getComputedStyle(childContainer).height.slice(0, -2))
-    let maxInitialHeight = lib.getSetting('controller-frame-resize-max-initial-height') ?? 16*16
+    let maxInitialHeight = settings.getSetting('controller-frame-resize-max-initial-height') ?? 16*16
     if(height > maxInitialHeight)
       childContainer.style.height = `${maxInitialHeight}px`
   }
