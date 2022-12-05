@@ -46,6 +46,16 @@
   user-select: none;
 }
 
+.controller-frame.resizable > .child-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+  resize: vertical;
+}
+
+.controller-frame:not(.resizable) > .child-container {
+  height: fit-content !important
+}
+
 .controller-frame + .controller-frame {
   border-top: 4px solid var(--controller-frame-border-color, rgba(0, 0, 0, 10%));
 }
