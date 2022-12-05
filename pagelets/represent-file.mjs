@@ -114,7 +114,7 @@ export async function enframe(optionCallElem) {
 
 export async function copyUrl(optionCallElem) {
   const pagelet = optionCallElem.closest('.pagelet')
-  navigator.clipboard.write(pagelet.dataset.file)
+  navigator.clipboard.writeText(pagelet.dataset.file)
 }
 
 export async function initializeContentDisplay(callElem) {
