@@ -20,7 +20,10 @@ html`
   <call-resource srcfn="/pagelets/user.mjs: setInitialState"></call-resource>
   <call-resource srcfn="/pagelets/user.mjs: installCheckOnInputFunctionality"></call-resource>
   
-  <div class="logged-in-as logged-out-hide"> Logged in as <span class="username"></span> (as <span class="displayname"></span>) </div>
+  <div class="logged-in-as logged-out-hide">
+    Logged in as <span class="username"></span> 
+    <span>(as <span class="displayname"></span>)</span> 
+  </div>
   <div class="logged-out logged-in-hide"> Logged out </div>
   
   <div>

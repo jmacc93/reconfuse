@@ -69,11 +69,17 @@ export async function loginButtonClicked(callElemButton) {
   lib.attentionFlashElement(loginButton)
   if(response.ok) {
     window.localStorage.setItem('username',    String(usernameInput.value   ))
-    window.localStorage.setItem('displayname', String(displaynameInput.value))
     window.localStorage.setItem('rememberme',  String(rememberMeBox.checked ))
+    if(displaynameInput.value) {
+      window.localStorage.setItem('displayname', String(displaynameInput.value))
+      loggedInAsDispnameElem.textContent = displaynameInput.value
+      loggedInAsDispnameElem.parentElement.hidden = false
+    } else {
+      localStorage.removeItem('displayname')
+      loggedInAsDispnameElem.parentElement.hidden = true
+    }
     pagelet.setAttribute('data-loggedin', 'true')
     loggedInAsUsernameElem.textContent = usernameInput.value
-    loggedInAsDispnameElem.textContent = displaynameInput.value
     passwordInput.value = ''
   }
 }
@@ -158,10 +164,16 @@ export async function saveDisplaynameClicked(callElemButton) {
   const displaynameInput = pagelet.querySelector(':scope > * > input.displayname')
   const loggedInAsDispnameElem = pagelet.querySelector(':scope > .logged-in-as .displayname')
   
-  localStorage.setItem('displayname', displaynameInput.value)
-  lib.attentionFlashElement(callElemButton)
-  lib.notificationFrom(callElemButton, 'Displayname saved')
-  loggedInAsDispnameElem.textContent = displaynameInput.value
+  if(displaynameInput.value) {
+    localStorage.setItem('displayname', displaynameInput.value)
+    lib.attentionFlashElement(callElemButton)
+    lib.notificationFrom(callElemButton, 'Displayname saved')
+    loggedInAsDispnameElem.textContent = displaynameInput.value
+    loggedInAsDispnameElem.parentElement.hidden = false
+  } else {
+    localStorage.removeItem('displayname')
+    loggedInAsDispnameElem.parentElement.hidden = true
+  }
 }
 
 export async function setPasswordButtonClicked(callElemButton) {
