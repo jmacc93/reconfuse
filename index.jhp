@@ -30,7 +30,7 @@ html`
   <body class="centered">
     <div class="pagelet root-pagelet separated-children">
       
-      <style>
+      <!-- <style>
         .header > * + * {
           margin-left: 0.25em
         }
@@ -50,7 +50,7 @@ html`
         <a href="/pagelets/user.jhp">User</a>
         <a href="/pagelets/represent-directory.jhp?directory=/">Root</a>
         `
-        let username = args.cookies?.username
+        let username = (args.cookies?.loggedin ? args.cookies?.username : undefined)
         if(username)
           html`<a href="/pagelets/represent-directory.jhp?directory=/users/${username}/">${username}</a>`
         html`

@@ -96,7 +96,7 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   // else
   
   const groupLib = await ctx.runScript('./bin/group.s.js')
-  let username = args.username ??args.cookies.username
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
   
   if(fileIsOffLimits(args.file))
     return setCodeAndMessage(response, 400, `Cannot edit this file`)
@@ -163,7 +163,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   // else
   
   const groupLib = await ctx.runScript('./bin/group.s.js')
-  let username = args.username ??args.cookies.username
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
   
   if(fileIsOffLimits(args.file))
     return setCodeAndMessage(response, 400, `Cannot edit this file`)
@@ -256,7 +256,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
   
   // Register anonymous user if anonymous
   let anonId
-  let username = args.username ?? args.cookies?.username
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
   if(username === undefined)
     anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
   
@@ -353,7 +353,7 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   // is user allowed to do this here?
   const groupLib = await ctx.runScript('./bin/group.s.js')
   let parentDirectory = ctx.path.dirname(args.file)
-  let username = args.username ?? args.cookies?.username
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
   let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['newFile', 'file', `file(${filename})`, `newFile(${filename})`])
   if(isAllowed !== undefined && !isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make files here`)
@@ -423,7 +423,7 @@ exports.respondToRequest["trash"] =  async function(request, response, getBody, 
   
   // is user allowed to do this here?
   let parentDirectory = ctx.path.dirname(args.file)
-  let username = args.username ?? args.cookies?.username
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
   let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['trashFile', 'file', `file(${filename})`, `trashFile(${filename})`])
   if(isAllowed !== undefined && !isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot trash files here`)
@@ -512,7 +512,7 @@ exports.respondToRequest['move'] = async function(request, response, getBody, ar
   const groupLib = await ctx.runScript('./bin/group.s.js')
   let fromParentDirectory = ctx.path.dirname(args.from)
   let toParentDirectory   = ctx.path.dirname(args.to)
-  let username = args.username ?? args.cookies?.username
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
   let isFromAllowed = groupLib.userControlInclusionStatus(username, fromParentDirectory, ['moveFile', 'file', `file(${frombasename})`, `moveFile(${frombasename})`])
   let isToAllowed   = groupLib.userControlInclusionStatus(username, toParentDirectory,   ['newFile', 'file', `file(${tobasename})`, `newFile(${tobasename})`])
   if(isFromAllowed !== undefined && !isFromAllowed)
@@ -563,7 +563,7 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
   // else
   
   let groupLib = await ctx.runScript('./bin/group.s.js')
-  let username = args.username ?? args.cookies?.username
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
   if(fileIsOffLimits(args.file))
     return setCodeAndMessage(response, 400, `Cannot rename this file`)
   // else
@@ -624,7 +624,7 @@ exports.respondToRequest["copy"] =  async function(request, response, getBody, a
   // else
   
   let groupLib = await ctx.runScript('./bin/group.s.js')
-  let username = args.username ?? args.cookies?.username
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
   
   if(fileIsOffLimits(args.to))
     return setCodeAndMessage(response, 400, `Cannot copy file to this location with this file extension`)
