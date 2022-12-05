@@ -5,6 +5,28 @@ const fsp  = ctx.fsp
 const path = ctx.path
 
 /**
+Takes a non existent directory missingDir, looks up it's path to find its first existent directory parent
+*/
+function getFirstExistingDirectory(missingDir) {
+  const absPath = path.resolve(missingDir)
+  const relPath = path.relative('./', absPath)
+  const splitPath = relPath.split('/')
+  if(splitPath.length === 0)
+    return './'
+  // else
+  let curPath = './'
+  let lastPath = './'
+  for(const dir of splitPath) {
+    lastPath = curPath
+    curPath = path.join(curPath, dir)
+    if(!fs.existsSync(curPath))
+      return lastPath
+  }
+  // else
+  return missingDir
+}
+
+/**
 This enables the pattern:
 if(...)
   return setCodeAndMessage(response, ..., '...')
@@ -206,15 +228,15 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     return setCodeAndMessage(response, 400, `No file argument given`)
   // else
   
-  // Is file outside working directory tree?
   let isDir = args.file.endsWith('/')
   args.file = path.relative('./', ctx.addPathDot(args.file))
-  if(isDir)
-    args.file += '/'
+  
+  // Is file outside working directory tree?
   if(args.file.startsWith('..'))
     return setCodeAndMessage(response, 400, 'File argument cant start at directories higher than working directory')
   // else
   
+  // Is file allowed?
   let groupLib = await ctx.runScript('./bin/group.s.js')
   if(fileIsOffLimits(args.file))
     return setCodeAndMessage(response, 400, `Cannot make this file`)
@@ -222,9 +244,9 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
   
   args.file = ctx.addPathDot(args.file)
   let filename = ctx.path.basename(args.file)
-
+  
   if(ctx.fs.existsSync(args.file))
-    return setCodeAndMessage(response, 400, `Instance ${args.file} already exists`)
+    return setCodeAndMessage(response, 400, `File ${args.file} already exists`)
   // else
   
   // is user actually who they say they are?
@@ -242,13 +264,14 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
   // is file a directory?
   let parentDirectory = ctx.path.dirname(args.file)
   if(isDir) {
-  
+    
     // is user allowed to create directories?
-    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['newDir', 'dir'])
+    const firstExisting = getFirstExistingDirectory(parentDirectory)
+    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, firstExisting, ['newDir', 'dir'])
     if(!isNewdirAllowed)
       return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that directory`)
     // else
-      
+    
     // make the directory
     fs.mkdirSync(args.file, {recursive: true})
     ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
@@ -266,7 +289,8 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     
     // does parent directory exist?
     if(!fs.existsSync(parentDirectory)) {
-      let isNewdirAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['newDir', 'dir'])
+      const firstExisting = getFirstExistingDirectory(parentDirectory)
+      let isNewdirAllowed = groupLib.userControlInclusionStatus(username, firstExisting, ['newDir', 'dir'])
       if(!isNewdirAllowed)
         return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that file's parent directory`)
       // else
@@ -341,14 +365,26 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   if(username === undefined)
     anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
   
-  fsp.writeFile(args.file, body)
+  // does parent directory exist?
+  if(!fs.existsSync(parentDirectory)) {
+    const firstExisting = getFirstExistingDirectory(parentDirectory)
+    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, firstExisting, ['newDir', 'dir'])
+    if(!isNewdirAllowed)
+      return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that file's parent directory (${parentDirectory})`)
+    // else
+    fs.mkdirSync(parentDirectory, {recursive: true})
+    ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
+      Date.now(), ' ', username ?? `anonymous(${anonId})`, ' made the directory ', parentDirectory, ' to create the file', ctx.path.basename(args.file),'\n'
+    ].join(''))
+  }
+  
+  await fsp.writeFile(args.file, body)
   fsp.appendFile(ctx.path.join(ctx.path.dirname(args.file), 'changelog.autogen.txt'), [
     Date.now(), ' ', username ?? `anonymous(${anonId})`, ' uploaded ', ctx.path.basename(args.file), ' with ', body.length, ' initial chars\n'
   ].join(''))
   
   return setCodeAndMessage(response, 200, 'Upload successful')
 }
-
 
 /**
 Move a file to its parent directory's 'trash' directory

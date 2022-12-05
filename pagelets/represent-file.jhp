@@ -100,9 +100,9 @@ if(isBinary) {
       
       `
       if(principleContentType.startsWith('image/')) // is an image, use <img> element
-        html`<div style="color: red">Image 404</div>`
+        html`<span style="color: red">Image 404</span>`
       else
-        html`<div style="color: red">File 404</div>`
+        html`<span style="color: red">File 404</span>`
       html`
       
       <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
