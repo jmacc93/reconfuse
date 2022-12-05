@@ -208,27 +208,31 @@ decorateTextFieldChildren(document.body)
 async function decorateTextField(textarea) {
   const lib = await import('/lib/lib.mjs')
   let pagelet = textarea.closest('.pagelet')
-  let attrSubList = textarea.dataset.subtitute?.split(/\s*\;\s*/g).map(x=> x.split(/\s*\:\s*/g)) ?? [] // "a:b; x:y" -> [["a","b"],["x","y"]]
-  const textExpansionSpec = {...lib.stdTextExpansions}
-  for(const attrSub of attrSubList)
-    if(attrSub.length === 2)
-      textExpansionSpec['!' + attrSub[0].toUpperCase()] = {to: ()=>attrSub[1], endPosition: -1}
-  if(pagelet) {
-    if(pagelet.dataset.file)
-      textExpansionSpec['!FILE'] = {to: ()=>pagelet.dataset.file, endPosition: -1}
-    if(pagelet.dataset.dir)
-      textExpansionSpec['!DIR'] = {to: ()=>pagelet.dataset.dir, endPosition: -1}
-    if(pagelet.dataset.url)
-      textExpansionSpec['!URL'] = {to: ()=>pagelet.dataset.url, endPosition: -1}
+  // Text substitutions
+  if(!textarea.hasAttribute('no-substitutions')) {
+    let attrSubList = textarea.dataset.subtitute?.split(/\s*\;\s*/g).map(x=> x.split(/\s*\:\s*/g)) ?? [] // "a:b; x:y" -> [["a","b"],["x","y"]]
+    const textExpansionSpec = {...lib.stdTextExpansions}
+    for(const attrSub of attrSubList)
+      if(attrSub.length === 2)
+        textExpansionSpec['!' + attrSub[0].toUpperCase()] = {to: ()=>attrSub[1], endPosition: -1}
+    if(pagelet) {
+      if(pagelet.dataset.file)
+        textExpansionSpec['!FILE'] = {to: ()=>pagelet.dataset.file, endPosition: -1}
+      if(pagelet.dataset.dir)
+        textExpansionSpec['!DIR'] = {to: ()=>pagelet.dataset.dir, endPosition: -1}
+      if(pagelet.dataset.url)
+        textExpansionSpec['!URL'] = {to: ()=>pagelet.dataset.url, endPosition: -1}
+    }
+    const textExpand = lib.makeTextExpander(textExpansionSpec)
+    textarea.addEventListener('input',  () => {
+      let oldCaretPos = textarea.selectionStart
+      let repOffset   = 0;
+      [textarea.value, repOffset] = textExpand.withOffset(textarea.value)
+      textarea.selectionStart = oldCaretPos + repOffset
+      textarea.selectionEnd   = oldCaretPos + repOffset
+    })
   }
-  const textExpand = lib.makeTextExpander(textExpansionSpec)
-  textarea.addEventListener('input',  () => {
-    let oldCaretPos = textarea.selectionStart
-    let repOffset   = 0;
-    [textarea.value, repOffset] = textExpand.withOffset(textarea.value)
-    textarea.selectionStart = oldCaretPos + repOffset
-    textarea.selectionEnd   = oldCaretPos + repOffset
-  })
+  // Grow / shrink on scroll
   textarea.addEventListener('wheel', wheelEvent => {
     if(wheelEvent.shiftKey) {
       let height = parseInt(window.getComputedStyle(textarea).height.slice(0, -2))
