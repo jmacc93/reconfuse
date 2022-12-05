@@ -4,7 +4,7 @@
 export async function newFrameAfter(optionCallElem) {
   const lib = await import('/lib/lib.mjs')
   const frame = optionCallElem.closest('.controller-frame')
-  frame.insertAdjacentElement('afterend', await lib.controllerFrameAround(await lib.getRemotePagelet('/pagelets/open-dialog.html')))
+  frame.insertAdjacentElement('beforebegin', await lib.controllerFrameAround(await lib.getRemotePagelet('/pagelets/open-dialog.html')))
 }
 
 export async function installTitleMirrorFunctionality(callElem) {
