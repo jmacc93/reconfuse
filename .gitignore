@@ -2,5 +2,6 @@ users/
 groups/
 logs/
 instances/
+state/
 /intro.md
 /last-jfp-source.js
