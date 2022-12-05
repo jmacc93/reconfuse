@@ -2,13 +2,35 @@
   <title>Settings</title>
   -:[/pagelets/pagelet-header.html]:-
   
-  <div>Test setting checkbox 
-    <input type="checkbox" data-setting="test-check">
+  <template class="textarea">
+    <div class="boxed">
+      <div>
+        <textarea class="width100p" no-substitutions></textarea>
+        <call-resource srcfn="/pagelets/settings.mjs: localStorageSiblingTextareaChange"></call-resource>
+      </div>
+    </div>
+  </template>
+  
+  <template class="integer">
+    <div class="boxed">
+      <div>
+        <input type="text" no-substitutions>
+        <call-resource srcfn="/pagelets/settings.mjs: localStorageIntegerTextChange"></call-resource>
+      </div>
+    </div>
+  </template>
+  
+  <div data-setting="test-check">Test setting checkbox 
+    <input type="checkbox">
     <call-resource srcfn="/pagelets/settings.mjs: localStorageCheckboxChange"></call-resource>
   </div>
+  
+  <call-resource srcfn="/pagelets/settings.mjs: loadLibSettingsElements"></call-resource>
   
   <div>
     <button is="call-resource-button" srcfn="/pagelets/settings.mjs: saveSelfpadData" class="linklike">Save selfpad data</button>, 
     <button is="call-resource-button" srcfn="/pagelets/settings.mjs: loadSelfpadData" class="linklike">Load selfpad data</button>
   </div>
+  
+  <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>
 </div>
