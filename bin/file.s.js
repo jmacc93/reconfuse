@@ -198,10 +198,11 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
     anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
   
   // Update the file
+  let displayname = args.displayname ?? args.cookies?.displayname
   let [_contentType, isBinary] = ctx.extContentMap[ctx.path.extname(args.file)] ?? ctx.extContentMap.default
   let payload = args.body ?? (isBinary ? await getBody() : (await getBody()).toString()) // use args.body if given, else use request body
   if(args.tagged ?? false) // tagged append
-    await fsp.appendFile(args.file, `\n${username ?? `anonymous(${anonId})`} ${(new Date()).toUTCString()}\n${payload}`)
+    await fsp.appendFile(args.file, `\n${username ?? `anonymous(${anonId})`} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n${payload}`)
   else // regular append
     await fsp.appendFile(args.file, payload)
   console.log(`  update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
