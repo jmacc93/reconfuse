@@ -74,9 +74,11 @@ export async function loginButtonClicked(callElemButton) {
       window.localStorage.setItem('displayname', String(displaynameInput.value))
       loggedInAsDispnameElem.textContent = displaynameInput.value
       loggedInAsDispnameElem.parentElement.hidden = false
+      document.cookie = `displayname=${displaynameInput.value}`
     } else {
       localStorage.removeItem('displayname')
       loggedInAsDispnameElem.parentElement.hidden = true
+      document.cookie = `displayname=;max-age=0`
     }
     pagelet.setAttribute('data-loggedin', 'true')
     loggedInAsUsernameElem.textContent = usernameInput.value
@@ -170,9 +172,11 @@ export async function saveDisplaynameClicked(callElemButton) {
     lib.notificationFrom(callElemButton, 'Displayname saved')
     loggedInAsDispnameElem.textContent = displaynameInput.value
     loggedInAsDispnameElem.parentElement.hidden = false
+    document.cookie = `displayname=${displaynameInput.value}`
   } else {
     localStorage.removeItem('displayname')
     loggedInAsDispnameElem.parentElement.hidden = true
+    document.cookie = `displayname=;max-age=0`
   }
 }
 
