@@ -205,12 +205,13 @@ const textareaObserver = new MutationObserver((records) => {
 textareaObserver.observe(document.body, {childList: true, subtree: true})
 decorateTextFieldChildren(document.body)
 
-async function decorateTextField(textarea) {
+async function decorateTextField(textfield) {
   const lib = await import('/lib/lib.mjs')
-  let pagelet = textarea.closest('.pagelet')
+  let pagelet = textfield.closest('.pagelet')
+  
   // Text substitutions
-  if(!textarea.hasAttribute('no-substitutions')) {
-    let attrSubList = textarea.dataset.subtitute?.split(/\s*\;\s*/g).map(x=> x.split(/\s*\:\s*/g)) ?? [] // "a:b; x:y" -> [["a","b"],["x","y"]]
+  if(!textfield.hasAttribute('no-substitutions')) {
+    let attrSubList = textfield.dataset.subtitute?.split(/\s*\;\s*/g).map(x=> x.split(/\s*\:\s*/g)) ?? [] // "a:b; x:y" -> [["a","b"],["x","y"]]
     const textExpansionSpec = {...lib.stdTextExpansions}
     for(const attrSub of attrSubList)
       if(attrSub.length === 2)
@@ -224,23 +225,56 @@ async function decorateTextField(textarea) {
         textExpansionSpec['!URL'] = {to: ()=>pagelet.dataset.url, endPosition: -1}
     }
     const textExpand = lib.makeTextExpander(textExpansionSpec)
-    textarea.addEventListener('input',  () => {
-      let oldCaretPos = textarea.selectionStart
+    textfield.addEventListener('input',  () => {
+      let oldCaretPos = textfield.selectionStart
       let repOffset   = 0;
-      [textarea.value, repOffset] = textExpand.withOffset(textarea.value)
-      textarea.selectionStart = oldCaretPos + repOffset
-      textarea.selectionEnd   = oldCaretPos + repOffset
+      [textfield.value, repOffset] = textExpand.withOffset(textfield.value)
+      textfield.selectionStart = oldCaretPos + repOffset
+      textfield.selectionEnd   = oldCaretPos + repOffset
     })
   }
+  
   // Grow / shrink on scroll
-  textarea.addEventListener('wheel', wheelEvent => {
+  textfield.addEventListener('wheel', wheelEvent => {
     if(wheelEvent.shiftKey) {
-      let height = parseInt(window.getComputedStyle(textarea).height.slice(0, -2))
+      let height = parseInt(window.getComputedStyle(textfield).height.slice(0, -2))
       height = Math.max(height + Math.ceil(wheelEvent.deltaY / 4), 92)
-      textarea.style.height = `${height}px`
+      textfield.style.height = `${height}px`
     }
   })
-  textarea.classList.add('decorated-textfield')
+  
+  // ctrl-enter, enter, alt-enter, etc functionality
+  const ctrlEnterSrcfn  = textfield.getAttribute('ctrl-enter-srcfn')
+  const altEnterSrcfn   = textfield.getAttribute('alt-enter-srcfn')
+  const shiftEnterSrcfn = textfield.getAttribute('shift-enter-srcfn')
+  const enterSrcfn      = textfield.getAttribute('enter-srcfn')
+  if(ctrlEnterSrcfn || altEnterSrcfn || shiftEnterSrcfn || enterSrcfn) {
+    const lib = await import('/lib/lib.mjs')
+    let [ctrlEnterSrc, ctrlEnterFn]   = lib.splitAtFirst(ctrlEnterSrcfn  , /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
+    let [altEnterSrc, altEnterFn]     = lib.splitAtFirst(altEnterSrcfn   , /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
+    let [shiftEnterSrc, shiftEnterFn] = lib.splitAtFirst(shiftEnterSrcfn , /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
+    let [enterSrc, enterFn]           = lib.splitAtFirst(enterSrcfn      , /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
+    textfield.addEventListener('keydown', async downEvent => {
+      if(downEvent.key === 'Enter') {
+        if(ctrlEnterSrc  && downEvent.ctrlKey)  callFunctionInModule(ctrlEnterSrc  , ctrlEnterFn  , textfield)
+        if(altEnterSrc   && downEvent.altKey)   callFunctionInModule(altEnterSrc   , altEnterFn   , textfield)
+        if(shiftEnterSrc && downEvent.shiftKey) callFunctionInModule(shiftEnterSrc , shiftEnterFn , textfield)
+        if(enterSrc)                            callFunctionInModule(enterSrc      , enterFn      , textfield)
+      }
+    })
+  }
+}
+
+async function callFunctionInModule(modName, fnName, ...args) {
+  let mod = await import(modName)
+  if(!mod)
+    throw Error(`No such module ${modName}`)
+  // else
+  let fn = mod[fnName]
+  if(!fn)
+    throw Error(`No function ${fnName} in module ${modName}`)
+  // else
+  fn(...args)
 }
 
 //#endregion
