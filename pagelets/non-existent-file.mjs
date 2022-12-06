@@ -4,8 +4,10 @@ export async function makeDir(callElem) {
   const lib = await import('/lib/lib.mjs')
   const pagelet = callElem.closest('.pagelet[data-file]')
   const clientFile = pagelet.dataset.file
-  const doneUrl    = (pagelet.dataset.doneurl === 'undefined') ? undefined : pagelet.dataset.doneurl
-  const response = await fetch(`/bin/make-directory.s.js?directory=${clientFile}`)
+  if(!clientFile.endsWith('/'))
+    clientFile += '/'
+  const doneUrl  = (pagelet.dataset.doneurl === 'undefined') ? undefined : pagelet.dataset.doneurl
+  const response = await fetch(`/bin/file.s.js/make?file=${clientFile}`)
   if(!response.ok)
     return void callElem.dispatchEvent(lib.bubblingEventWith('notification', {message: response.statusText, options: {error: true}}))
   // else
