@@ -21,7 +21,6 @@ async function renderTextareaContent(textarea, contentDisplay, pagelet) {
 }
 
 export async function installFunctionality(callElem) {
-  const lib = await import('/lib/lib.mjs')
   
   const pagelet        = callElem.parentElement
   const contentDisplay = pagelet.querySelector('.content-display')
@@ -29,11 +28,6 @@ export async function installFunctionality(callElem) {
   
   const padName = pagelet.dataset.name
   
-  // const textExpand = lib.makeTextExpander({
-  //   ...lib.stdTextExpansions,
-  //   ["!PAD"]: {to: ()=>`${pagelet.dataset.name}`, endPosition: -1}
-  // })
-        
   let fromStorage = localStorage.getItem(padName)
   if(fromStorage !== null) {
     textarea.value = fromStorage
@@ -41,13 +35,6 @@ export async function installFunctionality(callElem) {
       renderTextareaContent(textarea, contentDisplay, pagelet)
   }
   
-  // textarea.addEventListener('input', inputEvent => {
-  //   let oldCaretPos = textarea.selectionStart
-  //   let repOffset   = 0;
-  //   [textarea.value, repOffset] = textExpand.withOffset(textarea.value)
-  //   textarea.selectionStart = oldCaretPos + repOffset
-  //   textarea.selectionEnd   = oldCaretPos + repOffset
-  // })
   textarea.addEventListener('keydown', keyEvent => {
     if(keyEvent.ctrlKey && keyEvent.key === 'Enter')
       renderTextareaContent(textarea, contentDisplay, pagelet)
