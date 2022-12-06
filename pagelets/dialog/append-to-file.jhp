@@ -17,7 +17,7 @@ html`
 <div class="pagelet" data-file="${args.file}">
   <title>Append to ${ctx.path.basename(args.file)} - ${args.file}</title>
   `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
-  <textarea class="vertical-resizable width100p" style="height: 16em"></textarea>
+  <textarea class="vertical-resizable width100p" style="height: 16em" ctrl-enter-srcfn="/pagelets/dialog/append-to-file.mjs: taggedAppend"></textarea>
   <button is="call-resource-button" srcfn="/pagelets/dialog/append-to-file.mjs: taggedAppend" class="linklike">Append</button>
   <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
     <option value="" appearance="color: gray">S</option>
