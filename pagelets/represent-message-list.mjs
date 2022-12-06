@@ -57,12 +57,6 @@ export async function installFunctionality(callElem) {
     if(downEvent.ctrlKey && downEvent.key === 'Enter')
       return void submitButton.click()
   })
-  inputArea.addEventListener('input', async () => {
-    const lib = await import('/lib/lib.mjs')
-    let splitFilename = filenameArea.value.split('.')
-    let filenameExtension = splitFilename.length > 0 ? '.' + splitFilename[splitFilename.length-1] : '.txt'
-    lib.renderContentTo(preview, inputArea.value, filenameExtension)
-  })
   
   submitButton.addEventListener('click', async () => {
     const lib = await import('/lib/lib.mjs')
@@ -86,4 +80,17 @@ export async function installFunctionality(callElem) {
       lib.notificationFrom(submitButton, ['Could not create: ', String(response.status), ", ", response.statusText].join(''), {transient:true})
     }
   })
+}
+
+export async function updatePreview(callElemButton) {
+  const lib = await import('/lib/lib.mjs')
+  
+  const pagelet       = callElemButton.closest('.pagelet')
+  const filenameArea  = pagelet.querySelector(':scope > .submission-area > div > .filename-input')
+  const preview       = pagelet.querySelector(':scope > .submission-area > .submission-preview')
+  const inputArea     = pagelet.querySelector(':scope > .submission-area > .submission-input')
+  
+  let splitFilename = filenameArea.value.split('.')
+  let filenameExtension = splitFilename.length > 0 ? '.' + splitFilename[splitFilename.length-1] : '.txt'
+  lib.renderContentTo(preview, inputArea.value, filenameExtension)
 }
