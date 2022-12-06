@@ -12,8 +12,7 @@ html`
     data-subtitute="name: ${args.name ?? 'misc'}"
     style="height: 8em" 
     placeholder="Write here. It gets stored in local storage on your computer"
-  >
-  </textarea>
+  ></textarea>
   <div>
     <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
       <option value="" style="color: gray">S</option>
