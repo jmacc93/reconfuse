@@ -265,6 +265,25 @@ async function decorateTextField(textfield) {
       }
     })
   }
+  
+  // input functionality
+  const inputSrcfn  = textfield.getAttribute('input-srcfn')
+  if(inputSrcfn) {
+    const lib = await import('/lib/lib.mjs')
+    let [inputSrc, inputFn] = lib.splitAtFirst(inputSrcfn, /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
+    textfield.addEventListener('input', inputEvent => {
+      callFunctionInModule(inputSrc, inputFn, textfield, inputEvent)
+    })
+  }
+  // change functionality
+  const changeSrcFn  = textfield.getAttribute('input-srcfn')
+  if(changeSrcFn) {
+    const lib = await import('/lib/lib.mjs')
+    let [changeSrc, changeFn] = lib.splitAtFirst(changeSrcFn, /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
+    textfield.addEventListener('change', changeEvent => {
+      callFunctionInModule(changeSrc, changeFn, textfield, changeEvent)
+    })
+  }
 }
 
 async function callFunctionInModule(modName, fnName, ...args) {
