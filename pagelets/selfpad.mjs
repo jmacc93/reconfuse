@@ -10,7 +10,7 @@ async function renderTextareaContent(textarea, contentDisplay, pagelet) {
     localStorage.removeItem(name)
   } else if(contentType) { // content type given
     lib.renderContentTo(contentDisplay, trimmedValue, pagelet.dataset.contenttype)
-  } else if(name.indexOf('.')) { // name has an extension
+  } else if(name.indexOf('.') !== -1) { // name has an extension
     let [_, contentType] = lib.splitAtFirst(name, /\./)
     contentType = '.' + contentType // ".escm" instead of "escm"
     lib.renderContentTo(contentDisplay, trimmedValue, contentType)
