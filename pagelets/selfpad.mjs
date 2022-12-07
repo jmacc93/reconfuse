@@ -3,21 +3,25 @@
 
 async function renderTextareaContent(textarea, contentDisplay, pagelet) {
   const lib = await import('/lib/lib.mjs')
+  const contentType = pagelet.dataset.contenttype
+  const name        = pagelet.dataset.name
   let trimmedValue = textarea.value.trim()
   if(trimmedValue === '') {
-    localStorage.removeItem(pagelet.dataset.name)
-  } else {
-    if(pagelet.dataset.contenttype) { // content type given
-      lib.renderContentTo(contentDisplay, trimmedValue, pagelet.dataset.contenttype)
-    } else { // try getting content type from first line
-      let contentType = 'text/markdown'
-      let [firstLine, _] = lib.splitAtFirst(textarea.value, /\n/)
-      if(firstLine?.startsWith('type:'))
-        contentType = firstLine.slice(5).trim() // remove 'type:' and whitespace
-      lib.renderContentTo(contentDisplay, trimmedValue, contentType)
-    }
-    localStorage.setItem(pagelet.dataset.name, trimmedValue)
+    localStorage.removeItem(name)
+  } else if(contentType) { // content type given
+    lib.renderContentTo(contentDisplay, trimmedValue, pagelet.dataset.contenttype)
+  } else if(name.indexOf('.')) { // name has an extension
+    let [_, contentType] = lib.splitAtFirst(name, /\./)
+    contentType = '.' + contentType // ".escm" instead of "escm"
+    lib.renderContentTo(contentDisplay, trimmedValue, contentType)
+  } else { // try getting content type from first line
+    let contentType = 'text/markdown'
+    let [firstLine, _] = lib.splitAtFirst(textarea.value, /\n/)
+    if(firstLine?.startsWith('type:'))
+      contentType = firstLine.slice(5).trim() // remove 'type:' and whitespace
+    lib.renderContentTo(contentDisplay, trimmedValue, contentType)
   }
+  localStorage.setItem(name, trimmedValue)
 }
 
 export async function installFunctionality(callElem) {
