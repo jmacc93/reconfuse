@@ -115,6 +115,8 @@ export async function enframe(optionCallElem) {
 export async function copyUrl(optionCallElem) {
   const pagelet = optionCallElem.closest('.pagelet')
   navigator.clipboard.writeText(pagelet.dataset.file)
+  const lib = await import('/lib/lib.mjs')
+  lib.notificationFrom(optionCallElem, `Copied`, {transient: true})
 }
 
 export async function initializeContentDisplay(callElem) {
