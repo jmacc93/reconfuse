@@ -44,37 +44,14 @@ export async function reload(optionCallElem) {
 
 export async function openSimpleEditDialog(optionCallElem) {
   const lib = await import('/lib/lib.mjs')
-  // const dialog  = await import('/pagelets/dialog/dialog.mjs')
   const pagelet = optionCallElem.closest('.pagelet')
   lib.openPageletAt(optionCallElem, `/pagelets/dialog/edit-file.html?file=${pagelet.dataset.file}`, 'after this parent select')
-  // const initialValue = await fetch(`/bin/file.s.js/raw?file=${pagelet.dataset.file}`).then(response=> response.text())
-  // const editor = await dialog.simpleEditDialog(initialValue, async (value) => {
-  //   let response = await fetch(`/bin/file.s.js/update?file=${pagelet.dataset.file}`, {method: "PUT", body: value})
-  //   if(response.ok) {
-  //     await reload(optionCallElem)
-  //     return true
-  //   } else {
-  //     lib.notificationFrom(editor, `Error: ${response.status}, ${response.statusText}`, {error:true})
-  //   }
-  // })
-  // pagelet.insertAdjacentElement('afterend', editor)
 }
 
 export async function openSimpleAppendDialog(optionCallElem) {
   const lib = await import('/lib/lib.mjs')
-  // const dialog  = await import('/pagelets/dialog/dialog.mjs')
   const pagelet = optionCallElem.closest('.pagelet')
   lib.openPageletAt(optionCallElem, `/pagelets/dialog/append-to-file.jhp?file=${pagelet.dataset.file}`, 'after this parent select')
-  // const editor = await dialog.simpleEditDialog('', async (value) => {
-  //   let response = await fetch(`/bin/file.s.js/append?file=${pagelet.dataset.file}`, {method: "PUT", body: value})
-  //   if(response.ok) {
-  //     await reload(optionCallElem)
-  //     return true
-  //   } else {
-  //     lib.notificationFrom(editor, `Error: ${response.status}, ${response.statusText}`, {error:true})
-  //   }
-  // })
-  // pagelet.insertAdjacentElement('afterend', editor)
 }
 
 export async function openEditor(optionCallElem) {
