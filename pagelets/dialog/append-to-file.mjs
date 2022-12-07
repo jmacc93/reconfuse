@@ -7,6 +7,7 @@ export async function taggedAppend(callElem) {
   if(response.ok) {
     lib.notificationFrom(callElem, 'Appended', {transient: true})
     textarea.value = ''
+    pagelet.classList.remove('unsaved')
     return void 0
   } else {
     return void lib.notificationFrom(callElem, `Error: ${response.status}, ${response.statusText}`, {error: true})
@@ -21,6 +22,7 @@ export async function append(callElemButton) {
   if(response.ok) {
     lib.notificationFrom(callElemButton, 'Appended', {transient: true})
     textarea.value = ''
+    pagelet.classList.remove('unsaved')
     return void 0
   } else {
     return void lib.notificationFrom(callElemButton, `Error: ${response.status}, ${response.statusText}`, {error: true})
