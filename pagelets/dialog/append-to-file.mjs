@@ -26,3 +26,12 @@ export async function append(callElemButton) {
     return void lib.notificationFrom(callElemButton, `Error: ${response.status}, ${response.statusText}`, {error: true})
   }
 }
+
+export async function setUnsaved(callElem) {
+  const pagelet  = callElem.closest('.pagelet')
+  const textarea = pagelet.querySelector(':scope > textarea')
+  if(textarea.value.length > 0)
+    pagelet.classList.add('unsaved')
+  else
+    pagelet.classList.remove('unsaved')
+}
