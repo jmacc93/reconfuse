@@ -36,7 +36,7 @@ if(...)
   return setCodeAndMessage(response, ..., '...')
 */
 function setCodeAndMessage(response, code, msg) {
-  console.log('  file.s.js ', msg)
+  console.log(response.uid, 'file.s.js ', msg)
   response.statusCode = code
   response.statusMessage = msg
   return true
@@ -86,8 +86,7 @@ Argument body gets used first if given
 */
 // args: {file, body}
 exports.respondToRequest["update"] = async function(request, response, getBody, args) {
-  console.log(``)
-  console.log(`file.s.js/update requested to update file ${args.file}`)
+  console.log(`[${request.uid}]`, `file.s.js/update requested to update file ${args.file}`)
 
   if(!args.file) 
     return setCodeAndMessage(response, 400, `No file argument given (use ?file=...)`)
@@ -135,7 +134,7 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   let [_contentType, isBinary] = ctx.extContentMap[ctx.path.extname(args.file)] ?? ctx.extContentMap.default
   let payload = args.body ?? (isBinary ? await getBody() : (await getBody()).toString()) // use args.body if given, else use request body
   await fsp.writeFile(args.file, payload)
-  console.log(`  update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
+  console.log(`[${request.uid}]`, `update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
     utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' updated ', ctx.path.basename(args.file), ' with ', payload.length, ' chars\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
@@ -153,8 +152,7 @@ If argument tagged is given then username and time are also appended along with 
 */
 // args: {file, body, tagged}
 exports.respondToRequest["append"] = async function(request, response, getBody, args) {
-  console.log(``)
-  console.log(`file.s.js/append requested to update file ${args.file}`)
+  console.log(`[${request.uid}]`, `file.s.js/append requested to update file ${args.file}`)
 
   if(!args.file) 
     return setCodeAndMessage(response, 400, `No file argument given (use ?file=...)`)
@@ -209,7 +207,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
     await fsp.appendFile(args.file, `\n${username ?? `anonymous(${anonId})`} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n${payload}`)
   else // regular append
     await fsp.appendFile(args.file, payload)
-  console.log(`  update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
+  console.log(`[${request.uid}]`, `update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
     utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' appended ', payload.length, ' chars to ', ctx.path.basename(args.file), '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
@@ -225,8 +223,7 @@ Initial content given by arguments or by http request body
 */
 // args: {file, body}
 exports.respondToRequest["make"] =  async function(request, response, getBody, args) {
-  console.log(``)
-  console.log(`file.s.js/make requested to make a new file ${args.file}`)
+  console.log(`[${request.uid}]`, `file.s.js/make requested to make a new file ${args.file}`)
 
   if(args.file === undefined)
     return setCodeAndMessage(response, 400, `No file argument given`)
@@ -308,7 +305,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     let [_contentType, isBinary] = ctx.extContentMap[ctx.path.extname(args.file)] ?? ctx.extContentMap.default
     let content = args.body ?? (isBinary ? (await getBody()) : (await getBody()).toString()) // use args.body first if given, else use request body
     await fsp.writeFile(args.file, content)
-    console.log(`  file.s.js/make successfully made file ${args.file}`)
+    console.log(`[${request.uid}]`, `file.s.js/make successfully made file ${args.file}`)
     ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
       utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' made ', ctx.path.basename(args.file), ' with ', content.length, ' initial chars\n'
     ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js make: ${err.message}`))
@@ -395,8 +392,7 @@ Move a file to its parent directory's 'trash' directory
 */
 // args: {file}
 exports.respondToRequest["trash"] =  async function(request, response, getBody, args) {
-  console.log(``)
-  console.log(`file.s.js/trash requested to trash a file ${args.file}`)
+  console.log(`[${request.uid}]`, `file.s.js/trash requested to trash a file ${args.file}`)
 
   if(args.file === undefined)
     return setCodeAndMessage(response, 400, `No file argument given`)
@@ -459,7 +455,7 @@ exports.respondToRequest["trash"] =  async function(request, response, getBody, 
   // Remove the file
   await fsp.rename(args.file, trashPath)
   
-  console.log(`  file.s.js/trash successfully trashed file ${args.file}`)
+  console.log(`[${request.uid}]`, `file.s.js/trash successfully trashed file ${args.file}`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
     utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' trashed ', args.file, ' to ', trashPath, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js trash: ${err.message}`))
@@ -546,8 +542,7 @@ Changes the file argument file's name the name argument
 */
 // args: {file, name}
 exports.respondToRequest["rename"] =  async function(request, response, getBody, args) {
-  console.log(``)
-  console.log(`file.s.js/rename requested to rename a file ${args.file}`)
+  console.log(`[${request.uid}]`, `file.s.js/rename requested to rename a file ${args.file}`)
 
   if(args.file === undefined)
     return setCodeAndMessage(response, 400, `No file argument given`)
@@ -601,7 +596,7 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
   
   // Rename the file
   await ctx.fsp.rename(args.file, `${parentDirectory}/${args.name}`)
-  console.log(`  file.s.js/rename successfully renamed file ${args.file}`)
+  console.log(`[${request.uid}]`, `file.s.js/rename successfully renamed file ${args.file}`)
   ctx.fsp.appendFile(ctx.path.join(ctx.path.dirname(args.file), 'changelog.autogen.txt'), [
     utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' renamed ', ctx.path.basename(args.file), ' to ', args.name, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(ctx.path.dirname(args.file), 'changelog.autogen.txt')} in file.s.js rename: ${err.message}`))
@@ -672,7 +667,7 @@ exports.respondToRequest["copy"] =  async function(request, response, getBody, a
   
   // Make the file
   await ctx.fsp.copyFile(args.from, args.to)
-  console.log(`  file.s.js/copy successfully copied file ${args.from} to ${args.to}`)
+  console.log(`[${request.uid}]`, `file.s.js/copy successfully copied file ${args.from} to ${args.to}`)
   ctx.fsp.appendFile(ctx.path.join(toParentDirectory, 'changelog.autogen.txt'), [
     utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' copied ', args.from, ' to ', args.to, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
@@ -690,8 +685,7 @@ Pattern can be a RegExp if called form another script or a properly escaped rege
 */
 // args: {directory, pattern, afterTime}
 exports.respondToRequest['list'] = async function(request, response, getBody, args) {
-  console.log(``)
-  console.log(`file.s.js/list requested to list files in ${args.directory ?? ''}`)
+  // console.log(`[${request.uid}]`, `file.s.js/list requested to list files in ${args.directory ?? ''}`)
   
   if(!args.directory)
     return setCodeAndMessage(response, 400, `No directory argument given`)
@@ -751,8 +745,7 @@ Gets exactly the contents of the given file without any parsing or anything
 */
 // args: {file}
 exports.respondToRequest['raw'] = async function(request, response, getBody, args) {
-  console.log(``)
-  console.log(`file.s.js/raw requested to serve a ${args.file} raw`)
+  // console.log(`[${request.uid}]`, `file.s.js/raw requested to serve a ${args.file} raw`)
   
   if(!args.file)
     return setCodeAndMessage(response, 400, `No file argument given`)
