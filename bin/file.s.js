@@ -4,6 +4,10 @@ const fs   = ctx.fs
 const fsp  = ctx.fsp
 const path = ctx.path
 
+function utcDateStr() {
+  return new Date().toUTCString()
+}
+
 /**
 Takes a non existent directory missingDir, looks up it's path to find its first existent directory parent
 */
@@ -133,7 +137,7 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   await fsp.writeFile(args.file, payload)
   console.log(`  update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    Date.now(), ' ', username ?? `anonymous(${anonId})`, ' updated ', ctx.path.basename(args.file), ' with ', payload.length, ' chars\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' updated ', ctx.path.basename(args.file), ' with ', payload.length, ' chars\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
   
   response.statusCode = 200
@@ -207,7 +211,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
     await fsp.appendFile(args.file, payload)
   console.log(`  update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    Date.now(), ' ', username ?? `anonymous(${anonId})`, ' appended ', payload.length, ' chars to ', ctx.path.basename(args.file), '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' appended ', payload.length, ' chars to ', ctx.path.basename(args.file), '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
   
   response.statusCode = 200
@@ -275,7 +279,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     // make the directory
     fs.mkdirSync(args.file, {recursive: true})
     ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-      Date.now(), ' ', username ?? `anonymous(${anonId})`, ' made the directory ', ctx.path.basename(args.file), '\n'
+      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' made the directory ', ctx.path.basename(args.file), '\n'
     ].join(''))
     return true
     
@@ -296,7 +300,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
       // else
       fs.mkdirSync(parentDirectory, {recursive: true})
       ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-        Date.now(), ' ', username ?? `anonymous(${anonId})`, ' made the directory ', parentDirectory, ' to create the file', ctx.path.basename(args.file),'\n'
+        utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' made the directory ', parentDirectory, ' to create the file', ctx.path.basename(args.file),'\n'
       ].join(''))
     }
     
@@ -306,7 +310,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     await fsp.writeFile(args.file, content)
     console.log(`  file.s.js/make successfully made file ${args.file}`)
     ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-      Date.now(), ' ', username ?? `anonymous(${anonId})`, ' made ', ctx.path.basename(args.file), ' with ', content.length, ' initial chars\n'
+      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' made ', ctx.path.basename(args.file), ' with ', content.length, ' initial chars\n'
     ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js make: ${err.message}`))
     
     response.statusCode = 200
@@ -374,13 +378,13 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
     // else
     fs.mkdirSync(parentDirectory, {recursive: true})
     ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-      Date.now(), ' ', username ?? `anonymous(${anonId})`, ' made the directory ', parentDirectory, ' to create the file', ctx.path.basename(args.file),'\n'
+      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' made the directory ', parentDirectory, ' to create the file', ctx.path.basename(args.file),'\n'
     ].join(''))
   }
   
   await fsp.writeFile(args.file, body)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    Date.now(), ' ', username ?? `anonymous(${anonId})`, ' uploaded ', ctx.path.basename(args.file), ' with ', body.length, ' initial chars\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' uploaded ', ctx.path.basename(args.file), ' with ', body.length, ' initial chars\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js upload: ${err.message}`))
   
   return setCodeAndMessage(response, 200, 'Upload successful')
@@ -457,7 +461,7 @@ exports.respondToRequest["trash"] =  async function(request, response, getBody, 
   
   console.log(`  file.s.js/trash successfully trashed file ${args.file}`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    Date.now(), ' ', username ?? `anonymous(${anonId})`, ' trashed ', args.file, ' to ', trashPath, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' trashed ', args.file, ' to ', trashPath, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js trash: ${err.message}`))
   
   return setCodeAndMessage(response, 200, `Trashed file ${args.file}`)
@@ -530,7 +534,7 @@ exports.respondToRequest['move'] = async function(request, response, getBody, ar
   // Move the file (rename is equivalent to move in node api)
   await fsp.rename(args.from, args.to)
   fsp.appendFile(ctx.path.join(ctx.path.dirname(args.to), 'changelog.autogen.txt'), [
-    Date.now(), ' ', username ?? `anonymous(${anonId})`, ' moved ', args.from, ' to ', args.to, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' moved ', args.from, ' to ', args.to, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(ctx.path.dirname(args.to), 'changelog.autogen.txt')} in file.s.js move: ${err.message}`))
   
   return setCodeAndMessage(response, 200, `Moved ${args.from} to ${args.to}`)
@@ -599,7 +603,7 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
   await ctx.fsp.rename(args.file, `${parentDirectory}/${args.name}`)
   console.log(`  file.s.js/rename successfully renamed file ${args.file}`)
   ctx.fsp.appendFile(ctx.path.join(ctx.path.dirname(args.file), 'changelog.autogen.txt'), [
-    Date.now(), ' ', username ?? `anonymous(${anonId})`, ' renamed ', ctx.path.basename(args.file), ' to ', args.name, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' renamed ', ctx.path.basename(args.file), ' to ', args.name, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(ctx.path.dirname(args.file), 'changelog.autogen.txt')} in file.s.js rename: ${err.message}`))
   
   response.statusCode = 200
@@ -670,7 +674,7 @@ exports.respondToRequest["copy"] =  async function(request, response, getBody, a
   await ctx.fsp.copyFile(args.from, args.to)
   console.log(`  file.s.js/copy successfully copied file ${args.from} to ${args.to}`)
   ctx.fsp.appendFile(ctx.path.join(toParentDirectory, 'changelog.autogen.txt'), [
-    Date.now(), ' ', username ?? `anonymous(${anonId})`, ' copied ', args.from, ' to ', args.to, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' copied ', args.from, ' to ', args.to, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
   
   response.statusCode = 200
