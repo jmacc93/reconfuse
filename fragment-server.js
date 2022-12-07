@@ -496,8 +496,11 @@ function _endResponseCheckServed(didRespond, response) {
   response.end()
 }
 
+let nextRequestId = 0
 server.on('request', async (request, response) => {
   
+  request.uid  = nextRequestId++
+  response.uid = request.uid
   const getBody = async () => new Promise((res) => {
     let readBuffers = []
     request.setEncoding('binary')
