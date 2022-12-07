@@ -235,13 +235,15 @@ async function decorateTextField(textfield) {
   }
   
   // Grow / shrink on scroll
-  textfield.addEventListener('wheel', wheelEvent => {
-    if(wheelEvent.shiftKey) {
-      let height = parseInt(window.getComputedStyle(textfield).height.slice(0, -2))
-      height = Math.max(height + Math.ceil(wheelEvent.deltaY / 4), 92)
-      textfield.style.height = `${height}px`
-    }
-  })
+  if(textfield instanceof HTMLTextAreaElement) {
+    textfield.addEventListener('wheel', wheelEvent => {
+      if(wheelEvent.shiftKey) {
+        let height = parseInt(window.getComputedStyle(textfield).height.slice(0, -2))
+        height = Math.max(height + Math.ceil(wheelEvent.deltaY / 4), 92)
+        textfield.style.height = `${height}px`
+      }
+    })
+  }
   
   // ctrl-enter, enter, alt-enter, etc functionality
   const ctrlEnterSrcfn  = textfield.getAttribute('ctrl-enter-srcfn')
