@@ -1,17 +1,16 @@
 <div class="pagelet" data-file="-[arg-file]-">
   -:[/pagelets/pagelet-header.html]:-
   <title>Editing -[arg-file]- </title>
+  <style>.pagelet.unsaved { outline: 1px solid red } </style>
   
   <textarea class="width100p" placeholder="Text written here updates -[arg-file]-'s content"></textarea>
   <call-resource srcfn="/pagelets/dialog/edit-file.mjs: installCtrlEnterFunctionality"></call-resource>
   <call-resource srcfn="/pagelets/dialog/edit-file.mjs: setInitialValue"></call-resource>
+  <call-resource srcfn="/pagelets/dialog/edit-file.mjs: setUnsavedClassOnEdit"></call-resource>
+  <span class="initial-value" hidden></span>
   <div>
     <button is="call-resource-button" class="linklike" srcfn="/pagelets/dialog/edit-file.mjs: submit">Submit</button>,
     <button is="call-resource-button" class="linklike" srcfn="/pagelets/dialog/edit-file.mjs: showPreview">Preview</button>
-    <!-- <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-      <option value="" style="color: gray">S</option>
-      <option value="/lib/elem-functions.mjs: removeElement" which="this parent .pagelet">Cancel</option>
-    </select> -->
   </div>
   <span class="preview-display"></span>
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>

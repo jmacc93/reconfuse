@@ -21,6 +21,9 @@ export async function submit(callElem) {
   if(!response.ok)
     return void lib.notificationFrom(callElem, `Error: ${response.status}, ${response.statusText}`, {error: true})
   // else
+  pagelet.classList.remove('unsaved')
+  const initialElem = pagelet.querySelector(':scope > .initial-value')
+  initialElem.textContent = textarea.value
   lib.notificationFrom(callElem, `Success`, {transient: true})
 }
 
@@ -33,13 +36,28 @@ export async function installCtrlEnterFunctionality(callElem) {
   })
 }
 
+export async function setUnsavedClassOnEdit(callElem) {
+  const pagelet = callElem.closest('.pagelet')
+  const textarea = pagelet.querySelector(':scope > textarea')
+  const initialElem = pagelet.querySelector(':scope > .initial-value')
+  textarea.addEventListener('input', () => {
+    if(textarea.value === initialElem.textContent)
+      pagelet.classList.remove('unsaved')
+    else
+      pagelet.classList.add('unsaved')
+  })
+}
+
 export async function setInitialValue(callElem) {
   const pagelet = callElem.closest('.pagelet')
   const textarea = pagelet.querySelector(':scope > textarea')
+  const initialElem = pagelet.querySelector(':scope > .initial-value')
   const file = pagelet.dataset.file
   let response = await fetch(`/bin/file.s.js/raw?file=${file}`)
   if(!response.ok)
     return void lib.notificationFrom(callElem, `Error: ${response.status}, ${response.statusText}`, {error: true})
   // else
-  textarea.value = await response.text()
+  const initialValue = await response.text()
+  initialElem.textContent = initialValue
+  textarea.value = initialValue
 }
