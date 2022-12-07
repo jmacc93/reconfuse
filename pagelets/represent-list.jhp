@@ -54,9 +54,9 @@ if(args.username) { // requested about a user, check user voted
     <span class="count">${count}</span>
     <span class="user-listd" data-inlist="${userInList}">${args.username} ${userInList ? 'is in this list' : "isn't in this list"}</span>
     <select is="call-selection" class="linklike" style="width: 1em; appearance:none">
-      <option value="" style="color:gray">S</option>
-      <option value="" style="color:gray">List ${clientFile}</option>
-      <option value="/pagelets/represent-list.mjs: refresh">Refresh</option>
+      <option style="color:gray">S</option>
+      <option srcfn="" style="color:gray">List ${clientFile}</option>
+      <option srcfn="/pagelets/represent-list.mjs: refresh">Refresh</option>
     </select>
   </div>
   `
@@ -70,9 +70,9 @@ if(args.username) { // requested about a user, check user voted
     <span class="count">${count}</span>
     <span class="user-listd" data-inlist="${userInList}">You (${args.cookies.username}) ${userInList ? 'are in this list' : "aren't in this list"}</span>
     <select is="call-selection" class="linklike" style="width: 1em; appearance:none">
-      <option value="" style="color:gray">S</option>
-      <option value="" style="color:gray">List ${clientFile}</option>
-      <option value="/pagelets/represent-list.mjs: refresh">Refresh</option>
+      <option style="color:gray">S</option>
+      <option srcfn="" style="color:gray">List ${clientFile}</option>
+      <option srcfn="/pagelets/represent-list.mjs: refresh">Refresh</option>
       ${userInList ?
         /*html*/`<option value="/pagelets/represent-list.mjs: listOut">Leave list</option>` :
         /*html*/`<option value="/pagelets/represent-list.mjs: listIn">Join list</option>`
@@ -88,9 +88,9 @@ if(args.username) { // requested about a user, check user voted
     <link href="/pagelets/represent-list.css" rel="stylesheet"/>
     <span class="count">${count}</span>
     <select is="call-selection" class="linklike" style="width: 1em; appearance:none">
-      <option value="" style="color:gray">S</option>
-      <option value="" style="color:gray">List ${clientFile}</option>
-      <option value="/pagelets/represent-list.mjs: refresh">Refresh</option>
+      <option style="color:gray">S</option>
+      <option style="color:gray">List ${clientFile}</option>
+      <option srcfn="/pagelets/represent-list.mjs: refresh">Refresh</option>
     </select>
   </div>
   `

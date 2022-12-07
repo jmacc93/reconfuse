@@ -10,8 +10,8 @@ const simpleEditDialogTemplate = makeTemplate(/*html*/`
     <textarea class="vertical-resizable width100p" style="height: 16em"></textarea>
     <button class="linklike">Done</button>
     <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-      <option value="" style="color:gray">S</option>
-      <option value="/lib/elem-functions.mjs: removeElement" which="this parent .pagelet.edit">Cancel</option>
+      <option style="color:gray">S</option>
+      <option srcfn="/lib/elem-functions.mjs: removeElement" which="this parent .pagelet.edit">Cancel</option>
     </select>
   </div>
 `)
@@ -47,8 +47,8 @@ const simpleLineDialogTemplate = makeTemplate(/*html*/`
     <input type="text"/>
     <button class="linklike">Done</button>
     <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-      <option value="" style="color:gray">S</option>
-      <option value="/lib/elem-functions.mjs: removeElement" which="this parent .pagelet.edit">Cancel</option>
+      <option style="color:gray">S</option>
+      <option srcfn="/lib/elem-functions.mjs: removeElement" which="this parent .pagelet.edit">Cancel</option>
     </select>
   </div>
 `)

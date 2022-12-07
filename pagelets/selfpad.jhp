@@ -15,8 +15,8 @@ html`
   ></textarea>
   <div>
     <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-      <option value="" style="color: gray">S</option>
-      <option value="/pagelets/selfpad.mjs: updateButton">Update</option>
+      <option style="color: gray">S</option>
+      <option srcfn="/pagelets/selfpad.mjs: updateButton">Update</option>
     </select>
   </div>
   

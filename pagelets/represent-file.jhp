@@ -78,13 +78,13 @@ if(isBinary) {
       html`
       
       <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
-        <option value="" style="color:gray">S</option>
-        ${!exists ? /*html*/`<option value="/pagelets/represent-file.mjs: uploadIt">Upload</option>` : ''}
-        <option value="/pagelets/represent-file.mjs: reload">Reload</option>
-        <option value="/pagelets/represent-file.mjs: openEditor">Editor</option>
-        <option value="/pagelets/represent-file.mjs: openDirectory">Directory</option>
-        <option value="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
-        <option value="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+        <option style="color:gray">S</option>
+        ${!exists ? /*html*/`<option srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</option>` : ''}
+        <option srcfn="/pagelets/represent-file.mjs: reload">Reload</option>
+        <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
+        <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
+        <option srcfn="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
+        <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
     `
@@ -106,13 +106,13 @@ if(isBinary) {
       html`
       
       <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
-        <option value="" style="color:gray">S</option>
-        <option value="/pagelets/represent-file.mjs: uploadIt">Upload</option>
-        <option value="/pagelets/represent-file.mjs: reload">Reload</option>
-        <option value="/pagelets/represent-file.mjs: openEditor">Editor</option>
-        <option value="/pagelets/represent-file.mjs: openDirectory">Directory</option>
-        <option value="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
-        <option value="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+        <option style="color:gray">S</option>
+        <option srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</option>
+        <option srcfn="/pagelets/represent-file.mjs: reload">Reload</option>
+        <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
+        <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
+        <option srcfn="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
+        <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
     `
@@ -133,14 +133,14 @@ if(isBinary) {
       <span class="content-display"></span>
       
       <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
-        <option value="" style="color:gray">S</option>
-        <option value="/pagelets/represent-file.mjs: reload">Reload</option>
-        <option value="/pagelets/represent-file.mjs: openSimpleEditDialog">Edit dialog</option>
-        <option value="/pagelets/represent-file.mjs: openSimpleAppendDialog">Append dialog</option>
-        <option value="/pagelets/represent-file.mjs: openEditor">Editor</option>
-        <option value="/pagelets/represent-file.mjs: openDirectory">Directory</option>
-        <option value="/pagelets/represent-file.mjs: enframe">Enframe</option>
-        <option value="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+        <option style="color:gray">S</option>
+        <option srcfn="/pagelets/represent-file.mjs: reload">Reload</option>
+        <option srcfn="/pagelets/represent-file.mjs: openSimpleEditDialog">Edit dialog</option>
+        <option srcfn="/pagelets/represent-file.mjs: openSimpleAppendDialog">Append dialog</option>
+        <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
+        <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
+        <option srcfn="/pagelets/represent-file.mjs: enframe">Enframe</option>
+        <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
     `
@@ -157,13 +157,13 @@ if(isBinary) {
       <span style="color:red" title="${clientFile} doesn't exist">404</span>
       
       <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
-        <option value="" style="color:gray">S</option>
-        <option value="/pagelets/represent-file.mjs: reload">Reload</option>
-        <option value="/pagelets/represent-file.mjs: makeIt">Make it</option>
-        <option value="/pagelets/represent-file.mjs: openEditor">Open editor</option>
-        <option value="/pagelets/represent-file.mjs: openDirectory">Open directory</option>
-        <option value="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
-        <option value="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+        <option style="color:gray">S</option>
+        <option srcfn="/pagelets/represent-file.mjs: reload">Reload</option>
+        <option srcfn="/pagelets/represent-file.mjs: makeIt">Make it</option>
+        <option srcfn="/pagelets/represent-file.mjs: openEditor">Open editor</option>
+        <option srcfn="/pagelets/represent-file.mjs: openDirectory">Open directory</option>
+        <option srcfn="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
+        <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
     `

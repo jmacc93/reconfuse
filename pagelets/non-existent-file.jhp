@@ -75,11 +75,11 @@ if(!ctx.fs.existsSync(serverFile)) { // file doesn't exist
     <div class="bottom-bar">
       File <code>${clientFile}</code> doesn't exist
       <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
-        <option value="" style="color:gray">S</option>
-        <option value="/pagelets/non-existent-file.mjs: reload">Reload</option>
-        <option value="/pagelets/non-existent-file.mjs: makeFile">Make it</option>
-        <option value="/pagelets/non-existent-file.mjs: uploadFile">Upload</option>
-        <option value="/pagelets/non-existent-file.mjs: copyFrom">Copy from</option>
+        <option style="color:gray">S</option>
+        <option srcfn="/pagelets/non-existent-file.mjs: reload">Reload</option>
+        <option srcfn="/pagelets/non-existent-file.mjs: makeFile">Make it</option>
+        <option srcfn="/pagelets/non-existent-file.mjs: uploadFile">Upload</option>
+        <option srcfn="/pagelets/non-existent-file.mjs: copyFrom">Copy from</option>
       </select >
       <a href="${args.doneUrl ?? '/pagelets/represent-file.jhp?file=${clientFile}'}" target="replace-noframe this parent .pagelet">Back</a>
     </div>

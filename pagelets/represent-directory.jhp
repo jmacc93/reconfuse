@@ -35,8 +35,8 @@ html`
     <a href="/pagelets/file-editor.jhp?file=${clientDir}" title="edit" target="replace-noframe this parent .pagelet">E</a>
     <a href="${upUrl}" title="go to parent directory" target="replace-noframe this parent .pagelet">Up</a>
     <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-      <option value="" style="color: grey">S</option>
-      <option value="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy dir</option>
+      <option style="color: grey">S</option>
+      <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy dir</option>
     </select>
   </div>
   <call-resource srcfn="/pagelets/represent-directory.mjs: addOpenButtonFunctionality"></call-resource>
@@ -69,9 +69,9 @@ html`
           <span class="file symbol"></span>
           <a href="/pagelets/represent-file.jhp?file=${file}" title="File: ${ctx.path.join(file)}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
           <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-            <option value="" style="color: gray">S</option>
-            <option value="/pagelets/represent-directory.mjs: openSimpleEditDialog">Open simple edit dialog</option>
-            <option value="/pagelets/represent-directory.mjs: openSimpleAppendDialog">Open simple append dialog</option>
+            <option style="color: gray">S</option>
+            <option srcfn="/pagelets/represent-directory.mjs: openSimpleEditDialog">Open simple edit dialog</option>
+            <option srcfn="/pagelets/represent-directory.mjs: openSimpleAppendDialog">Open simple append dialog</option>
             ${file.endsWith('.txt') ? '<option value="/pagelets/represent-directory.mjs: openAsList">Open as list</option>' : ''}
           </select>
         </div>`
