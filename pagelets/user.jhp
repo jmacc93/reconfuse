@@ -43,7 +43,13 @@ html`
     <button is="call-resource-button" srcfn="/pagelets/user.mjs: logoutButtonClicked" class="logout linklike logged-out-fade">Log out</button>
     <button is="call-resource-button" srcfn="/pagelets/user.mjs: loginButtonClicked" class="login linklike">Log in</button>
     <button is="call-resource-button" srcfn="/pagelets/user.mjs: registerButtonClicked" class="register linklike">Register</button>
-    <span class="rememberme logged-in-fade">Remember? <input type="checkbox"></span>
+    <span class="rememberme logged-in-fade">Remember? <input type="checkbox"></span>, 
+    <button
+      is="call-resource-button"
+      srcfn="/lib/elem-functions.mjs: mixinRemotePagelet"
+      class="linklike"
+      pagelet-src="/pagelets/dialog/forgot-password-challenge.html"
+      mixin-target="after this">Forgot password</button>
   </div>
   
   <div class="logged-out-hide">
@@ -54,6 +60,27 @@ html`
       <button is="call-resource-button" class="linklike" srcfn="/pagelets/user.mjs: setPasswordButtonClicked">Change password</button>
     </div>
     
+    <details class="challenge-response">
+      <summary class="linklike">Forgotten password challenge</summary>
+      <div>Create a new forgotten password challenge</div>
+      <div><input class="challenge" style="width: 48em"  type="text" placeholder="Challenge prompt"></div>
+      <div><input class="response"  style="width: 48em" type="text" placeholder="Challenge response"></div>
+      <button class="linklike" is="call-resource-button" srcfn="/pagelets/user.mjs: submitNewChallenge">Submit</button>
+      <div>
+        <div>When you've forgotten your password you may respond to a self-given challenge prompt to reset your password</div>
+        <div>The challenge can be anything</div>
+        <div>The response may be anything as well, but must be given back exactly as originally written</div>
+        <div>Suggestion: select a challenge with a response that is a single word, and the response should be in all lower case</div>
+        <div>Please note: if <em>anyone</em> can produce the correct response to your given challenge then they can access your account</div>
+        <div>Also note: pushing submit here will overwrite your current challenge (if you have one)</div>
+        <div>Some challenge-response ideas:</div>
+      </div>
+      <ol>
+        <li>The name of your first pet</li>
+        <li>A reminder of a prominent memory, and who you were with in the memory</li>
+        <li>Another password (challenge prompt is the location of the password)</li>
+      </ol>
+    </details>
   </div>
   
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>
