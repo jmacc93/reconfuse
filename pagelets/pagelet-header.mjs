@@ -88,24 +88,6 @@ const linkObserver = new MutationObserver((records) => {
 linkObserver.observe(document.body, {childList: true, subtree: true})
 addLinkFunctionalityToElementAndChildren(document.body)
 
-// // old
-// export async function getRemotePagelet(src) {
-//   // get pagelet body from remote source and make the pagelet
-//   const lib = await import('/lib/lib.mjs')
-//   let response = await fetch(src)
-//   let pageletBody = await response.text()
-//   if(pageletBody.length > 0) {
-//     return lib.makePageletFromSource(pageletBody)
-//     // let pageletElem = document.createElement('template')
-//     // pageletElem.innerHTML = pageletBody.trim()
-//     // pageletElem = pageletElem.content
-//     // lib.replicateAndReplaceScripts(pageletElem)
-//     // return pageletElem
-//   } else {
-//     return undefined
-//   }
-// }
-
 let defaultLinkTargets = {
   ctrlClick:  '_blank',
   altClick:   '_blank',
