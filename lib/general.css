@@ -64,6 +64,11 @@ pre > code {
 .width75p  { box-sizing: border-box; width: 75% }
 .width25p  { box-sizing: border-box; width: 25% }
 
+textarea.width100p { resize: vertical }
+textarea.width50p  { resize: vertical }
+textarea.width75p  { resize: vertical }
+textarea.width25p  { resize: vertical }
+
 .width100vw { width: 100vw }
 .width50vw  { width: 50vw }
 .width75vw  { width: 75vw }
