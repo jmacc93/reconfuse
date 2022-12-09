@@ -224,6 +224,10 @@ exports.respondToRequest.changePassword = async function(request, response, getB
     return setCodeAndMessage(response, 400, 'Please log in')
   // else
   
+  if(/[\/\.]/g.test(username))
+    return setCodeAndMessage(response, 400, 'Forbidden username given')
+  // else
+  
   // is user actually who they say they are?
   if(!handleUserAuthcheck(response, args))
     return true
