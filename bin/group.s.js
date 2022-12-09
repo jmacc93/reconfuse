@@ -15,17 +15,17 @@ function setCodeAndMessage(response, code, msg) {
 if(!ctx.fs.existsSync('./groups'))
   ctx.fs.mkdirSync('./groups')
 
-let currentTime = 0
-let beginTime = 0
-let invocations = 0
-function startTime() {
-  beginTime = Date.now()
-  invocations++
-}
-function stopAndPrintTime() {
-  currentTime += Date.now() - beginTime
-  console.log('current timing:', currentTime/invocations, Date.now() - beginTime)
-}
+// let currentTime = 0
+// let beginTime = 0
+// let invocations = 0
+// function startTime() {
+//   beginTime = Date.now()
+//   invocations++
+// }
+// function stopAndPrintTime() {
+//   currentTime += Date.now() - beginTime
+//   console.log('current timing:', currentTime/invocations, Date.now() - beginTime)
+// }
 
 exports.respondToRequest = async function(request, response, getBody, args) {
   return setCodeAndMessage(response, 500, `Please use a subfunction instead`)
