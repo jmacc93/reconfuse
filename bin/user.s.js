@@ -89,7 +89,7 @@ exports.respondToRequest = async function(request, response, getBody, args) {
 
 exports.respondToRequest.login = async function(request, response, getBody, args) {
   const lib = await ctx.runScript('./lib/lib.s.js')
-  await lib.asyncSleepFor(20) // wait 20 ms
+  await lib.asyncSleepFor(1000) // wait 1 second
   
   console.log(``)
   console.log(`user.s.js/login requested to log in user ${args.username}`)
