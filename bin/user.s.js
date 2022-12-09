@@ -251,7 +251,7 @@ exports.respondToRequest.changePassword = async function(request, response, getB
   }
   
   const lib = await ctx.runScript('./lib/lib.s.js')
-  await lib.asyncSleepFor(20) // wait 20 ms
+  await lib.asyncSleepFor(500) // wait 1/2 s
   
   let salt = lib.randomTokenString(16)
   
