@@ -107,9 +107,6 @@ exports.respondToRequest.login = async function(request, response, getBody, args
   const lib = await ctx.runScript('./lib/lib.s.js')
   await lib.asyncSleepFor(1000) // wait 1 second
   
-  console.log(``)
-  console.log(`user.s.js/login requested to log in user ${args.username}`)
-  
   if(!args.username) 
     return setCodeAndMessage(response, 400,  'No username argument given')
   // else
@@ -170,8 +167,7 @@ exports.respondToRequest.register = async function(request, response, getBody, a
   const lib = await ctx.runScript('./lib/lib.s.js')
   await lib.asyncSleepFor(2000) // wait 2 seconds
   
-  console.log(``)
-  console.log(`user.s.js/register requested to register user ${args.username}`)
+  console.log(`[${request.uid}] user.s.js/register requested to register user ${args.username}`)
   
   
   // check username
