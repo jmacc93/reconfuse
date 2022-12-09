@@ -7,7 +7,6 @@ html`
   <title>User controls</title>
   
   <style>
-    
     .usercontrols[data-loggedin="false"] .logged-out-hide {display: none}
     .usercontrols[data-loggedin="false"] .logged-out-fade {opacity: 50%}
     
@@ -81,6 +80,17 @@ html`
         <li>Another password (challenge prompt is the location of the password)</li>
       </ol>
     </details>
+    
+    <details>
+      <summary class="linklike">Mod-only contact information</summary>
+      <textarea class="mod-contact-info width100p" change-srcfn="/pagelets/user.mjs: updateModContactInfo"></textarea>
+      <div>
+        <div>Anything written is saved to a private dot file in your user directory</div>
+        <div>Only admins and mods may access it</div>
+        <div>Its intended purpose is for mods to be able to contact you privately, primarily for password reset purposes</div>
+      </div>
+    </details>
+    
   </div>
   
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>
