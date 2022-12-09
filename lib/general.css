@@ -197,6 +197,42 @@ body > * + div {
   margin-top: 1em
 }
 
+
+
+/* ---------------------------- */
+/*      Element dragging        */
+
+
+.unselectable {
+  user-select: none;
+}
+
+.drop-hovered {
+  outline: 1px solid orange
+}
+.drop-hovered.top-hovered::before {
+  position: absolute;
+  width: 0; height: 0;
+  content: 'Drop';
+  color: orange;
+}
+.drop-hovered.bottom-hovered::after {
+  position: absolute;
+  width: 0; height: 0;
+  content: 'Drop';
+  color: orange;
+}
+
+body.dragging-element {
+  cursor: crosshair
+}
+body.dragging-element .drop-hovered {
+  cursor: move
+}
+
+
+
+
 /* ---------------------------- */
 
 .attention-flashing            { animation: af-outline-pulse    .5s ease; }
