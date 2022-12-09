@@ -2,6 +2,10 @@
 // const sha256 = await import(ctx.path.resolve('./lib/sha256.mjs')).then(x => x.exp)
 const sha256 = ctx.sha256
 
+const path = ctx.path
+const fs   = ctx.fs
+const fsp  = ctx.fsp
+
 const nullStringHash = sha256('')
 
 const authtokenExpirationTime = 1000*3600*24*7 // 7 days
@@ -83,6 +87,18 @@ function handleUserAuthcheck(response, args) {
 }
 exports.handleUserAuthcheck = handleUserAuthcheck
 
+/**
+A one-time PET (password-equivalent token) is good for use as a password ONCE
+*/
+async function generateOneTimePet(username) {
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  const userDir = path.join('./users/', username)
+  const petFile = path.join(userDir, '.one-time-pet.json')
+  let pet = lib.randomTokenString(64)
+  fsp.writeFile(petFile, sha256(pet))
+  return pet
+}
+
 exports.respondToRequest = async function(request, response, getBody, args) {
   return setCodeAndMessage(response, 400, 'Please use a subfunction instead eg: /login, /register, etc')
 }
@@ -111,11 +127,25 @@ exports.respondToRequest.login = async function(request, response, getBody, args
     return setCodeAndMessage(response, 400,  `User ${args.username} doesn't exist`)
   // else
   
-  let salt     = ctx.fs.readFileSync(userDir + '.salt.txt').toString()
-  let password = ctx.fs.readFileSync(userDir + '.password.txt').toString()
-  if(sha256(args.password + salt) !== password)  
-    return setCodeAndMessage(response, 400,  `Incorrect password`)
-  // else
+  const salt     = ctx.fs.readFileSync(userDir + '.salt.txt').toString()
+  const password = ctx.fs.readFileSync(userDir + '.password.txt').toString()
+  const passBypassFile = path.join(userDir, '.change-pass-bypass-old')
+  if(sha256(args.password + salt) !== password) {
+    // check if given password is a one time PET
+    let oneTimePetFile = path.join(userDir, '.one-time-pet.json')
+    if(ctx.fs.existsSync(oneTimePetFile)) {
+      let pet = ctx.fs.readFileSync(oneTimePetFile).toString()
+      if(args.password !== pet)
+        return setCodeAndMessage(response, 400,  `Incorrect password`)
+      // else
+      fsp.writeFile(passBypassFile, '')
+    } else {
+      return setCodeAndMessage(response, 400,  `Incorrect password`)
+    }
+  } else { // correct password given
+    if(fs.existsSync(passBypassFile))
+      fs.rmSync(passBypassFile)
+  }
   
   ctx.fs.writeFileSync(userDir + '.last-interaction-time.txt', String(Date.now()))
   
@@ -203,21 +233,26 @@ exports.respondToRequest.changePassword = async function(request, response, getB
     return true
   // else
   
-  // is oldPassword given?
-  if(!args.oldPassword)
-    return setCodeAndMessage(response, 400, 'No oldPassword argument given')
-  // else
-  
-  // is oldPassword correct?
-  const storedSalt = ctx.fs.readFileSync(`./users/${username}/.salt.txt`).toString()
-  const storedPassword = ctx.fs.readFileSync(`./users/${username}/.password.txt`).toString()
-  if(sha256(args.oldPassword + storedSalt) !== storedPassword)
-    return setCodeAndMessage(response, 400, `Incorrect oldPassword`)
-  // else
-  
   if(!args.newPassword)
     return setCodeAndMessage(response, 400, 'No newPassword argument given')
   // else
+  
+  // is oldPassword given?
+  let userDir = path.join('./users', username)
+  if(!args.oldPassword) {
+    // is old password needed? eg: used a pet, old password not needed
+    let passBypassFile = path.join(userDir, '.change-pass-bypass-old')
+    if(!fs.existsSync(passBypassFile))
+      return setCodeAndMessage(response, 400, 'No oldPassword argument given')
+    // else
+  } else { // old password was given
+    // is oldPassword correct?
+    const storedSalt = ctx.fs.readFileSync(path.join(userDir, '.salt.txt')).toString()
+    const storedPassword = ctx.fs.readFileSync(path.join(userDir, '.password.txt')).toString()
+    if(sha256(args.oldPassword + storedSalt) !== storedPassword)
+      return setCodeAndMessage(response, 400, `Incorrect oldPassword`)
+    // else
+  }
   
   const lib = await ctx.runScript('./lib/lib.s.js')
   await lib.asyncSleepFor(20) // wait 20 ms
@@ -231,4 +266,99 @@ exports.respondToRequest.changePassword = async function(request, response, getB
   response.statusCode = 200
   response.statusMessage = `Success`
   return true
+}
+
+exports.respondToRequest.newPasswordChallenge = async function(request, response, getBody, args) {
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(500) // wait 1/2 second
+  
+  // is username given?
+  const username = args.cookies?.loggedin ? args.cookies.username : undefined
+  if(!username)
+    return setCodeAndMessage(response, 400, 'Please log in')
+  // else
+  
+  // is user actually who they say they are?
+  if(!handleUserAuthcheck(response, args))
+    return true
+  // else
+  
+  // is challenge arg given?
+  if(!args.challenge)
+    return setCodeAndMessage(response, 400, 'No challenge argument given')
+  // else
+  
+  // is response arg given?
+  if(!args.response)
+    return setCodeAndMessage(response, 400, 'No response argument given')
+  // else
+  
+  // write the file
+  const userDir = path.join('./users/', username)
+  const challengeFile = path.join(userDir, '.challenge.json')
+  fsp.writeFile(challengeFile, JSON.stringify({challenge: args.challenge, response: args.response}))
+  response.statusCode = 200
+  return true
+}
+
+exports.respondToRequest.getPasswordChallenge = async function(request, response, getBody, args) {
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(500) // wait 1/2 second
+  
+  // is username given?
+  const username = args.username
+  if(!username)
+    return setCodeAndMessage(response, 400, 'No username argument given')
+  // else
+  
+  if(/[\/\.]/g.test(username))
+    return setCode(response, 400, `Bad username argument given`)
+  // else
+  
+  // read and send the challenge
+  const userDir = path.join('./users/', username)
+  const challengeFile = path.join(userDir, '.challenge.json')
+  if(fs.existsSync(challengeFile)) {
+    const challengeResponseObj = JSON.parse(fs.readFileSync(challengeFile).toString())
+    response.statusCode = 200
+    response.write(challengeResponseObj.challenge)
+  } else {
+    return setCodeAndMessage(response, 404, 'No challenge associated with this username')
+  }
+}
+
+exports.respondToRequest.validateChallengeResponse = async function(request, response, getBody, args) {
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(10) // wait 10 seconds
+  
+  // is username given?
+  const username = args.username
+  if(!username)
+    return setCodeAndMessage(response, 400, 'No username argument given')
+  // else
+  
+  if(/[\/\.]/g.test(username))
+    return setCodeAndMessage(response, 400, `Bad username argument given`)
+  // else
+  
+  // is response given?
+  if(!args.response)
+    return setCodeAndMessage(response, 400, 'No response argument given')
+  // else
+  
+  // read and send the challenge
+  const userDir = path.join('./users/', username)
+  const challengeFile = path.join(userDir, '.challenge.json')
+  if(fs.existsSync(challengeFile)) {
+    const challengeResponseObj = JSON.parse(fs.readFileSync(challengeFile).toString())
+    if(challengeResponseObj.response === args.response) {
+      const oneTimePet = await generateOneTimePet(args.username)
+      response.statusCode = 200
+      response.write(oneTimePet)
+    } else {
+      return setCodeAndMessage(response, 400, `Bad response or no challenge associated with this username`)
+    }
+  } else {
+    return setCodeAndMessage(response, 400, 'Bad response or no challenge associated with this username')
+  }
 }

@@ -186,14 +186,46 @@ export async function setPasswordButtonClicked(callElem) {
   const pagelet = callElem.closest('.pagelet')
   const newPasswordInput = pagelet.querySelector(':scope > * > .change-password > input.new')
   const oldPasswordInput = pagelet.querySelector(':scope > * > .change-password > input.old')
-  let response = await fetch(
-    `/bin/user.s.js/changePassword?oldPassword=${encodeURIComponent(sha256(oldPasswordInput.value))
-    }&newPassword=${encodeURIComponent(sha256(newPasswordInput.value))}`
-  )
+  let urlSegs = [
+    `/bin/user.s.js/changePassword`,
+    `?newPassword=`, encodeURIComponent(sha256(newPasswordInput.value))
+  ]
+  if(oldPasswordInput.value)
+    urlSegs.push(`?oldPassword=`, encodeURIComponent(sha256(oldPasswordInput.value)))
+  let response = await fetch(urlSegs.join(''))
   lib.notificationFrom(callElem, [
     response.ok ? 'Success: ' : 'Failure: ',
     response.statusText, ' (', String(response.status), ')'
   ].join(''))
   lib.attentionFlashElement(callElem)
 }
+
+export async function submitNewChallenge(callElem) {
+  const lib = await import('/lib/lib.mjs')
+  const sha256 = await import('/lib/sha256.mjs').then(x => x.exp)
+  const pagelet = callElem.closest('.pagelet')
+  const challengeInput = pagelet.querySelector(':scope .challenge-response input.challenge')
+  const responseInput  = pagelet.querySelector(':scope .challenge-response input.response')
+  
+  const response = await fetch([
+    `/bin/user.s.js/newPasswordChallenge`,
+      `?challenge=`, encodeURIComponent(challengeInput.value),
+      `&response=`, encodeURIComponent(sha256(responseInput.value))
+  ].join(''))
+  
+  if(response.ok) {
+    lib.notificationFrom(callElem, `Success: challenge created`)
+    lib.attentionFlashElement(callElem)
+    challengeInput.value = ''
+    responseInput.value  = ''
+  } else {
+    lib.notificationFrom(callElem, `Error: ${response.status}, ${response.statusText}`, {error: true})
+  }
+}
+
+export async function updateModContactInfo(callElem) {
+  const lib = await import('/lib/lib.mjs')
+  const pagelet = callElem.closest('.pagelet')
+  const infoTextarea = pagelet.querySelector(':scope textarea.mod-contact-info')
+  // ...  
 }
