@@ -134,7 +134,7 @@ exports.respondToRequest.login = async function(request, response, getBody, args
 
 exports.respondToRequest.register = async function(request, response, getBody, args) {
   const lib = await ctx.runScript('./lib/lib.s.js')
-  await lib.asyncSleepFor(20) // wait 20 ms
+  await lib.asyncSleepFor(2000) // wait 2 seconds
   
   console.log(``)
   console.log(`user.s.js/register requested to register user ${args.username}`)
