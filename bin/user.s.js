@@ -102,6 +102,10 @@ exports.respondToRequest.login = async function(request, response, getBody, args
     return setCodeAndMessage(response, 400,  'No password argument given')
   // else
   
+  if(/[\/\.]/g.test(args.username))
+    return setCodeAndMessage(response, 400, 'Bad username argument given')
+  // else
+  
   let userDir = `./users/${args.username}/`
   if(!ctx.fs.existsSync(userDir))  
     return setCodeAndMessage(response, 400,  `User ${args.username} doesn't exist`)
