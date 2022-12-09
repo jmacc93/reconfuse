@@ -180,19 +180,20 @@ export async function saveDisplaynameClicked(callElemButton) {
   }
 }
 
-export async function setPasswordButtonClicked(callElemButton) {
+export async function setPasswordButtonClicked(callElem) {
   const lib = await import('/lib/lib.mjs')
   const sha256 = await import('/lib/sha256.mjs').then(x => x.exp)
-  const pagelet = callElemButton.closest('.pagelet')
+  const pagelet = callElem.closest('.pagelet')
   const newPasswordInput = pagelet.querySelector(':scope > * > .change-password > input.new')
   const oldPasswordInput = pagelet.querySelector(':scope > * > .change-password > input.old')
   let response = await fetch(
     `/bin/user.s.js/changePassword?oldPassword=${encodeURIComponent(sha256(oldPasswordInput.value))
     }&newPassword=${encodeURIComponent(sha256(newPasswordInput.value))}`
   )
-  lib.notificationFrom(callElemButton, [
+  lib.notificationFrom(callElem, [
     response.ok ? 'Success: ' : 'Failure: ',
     response.statusText, ' (', String(response.status), ')'
   ].join(''))
-  lib.attentionFlashElement(callElemButton)
+  lib.attentionFlashElement(callElem)
+}
 }
