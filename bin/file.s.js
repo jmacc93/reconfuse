@@ -36,7 +36,6 @@ if(...)
   return setCodeAndMessage(response, ..., '...')
 */
 function setCodeAndMessage(response, code, msg) {
-  console.log(response.uid, 'file.s.js ', msg)
   response.statusCode = code
   response.statusMessage = msg
   return true
