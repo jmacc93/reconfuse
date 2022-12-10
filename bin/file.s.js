@@ -739,6 +739,93 @@ exports.respondToRequest['list'] = async function(request, response, getBody, ar
   return true
 }
 
+
+function countMatches(str, regex) {
+  let count = 0
+  for(const _ of str.matchAll(regex))
+    count++
+  return count
+}
+
+function* walkFiles(startDir, maxDepth = -1) {
+  let alreadyTraversed = {}
+  let baseDepth = countMatches(startDir, /\//g) // count slashes in startDir
+  if(!(fs.statSync(startDir, {throwIfNoEntry: false})?.isDirectory() ?? false)) // file isn't a directory, or doesn't exist
+    return void 0
+  // else:
+  let dirStack = [startDir]
+  while(dirStack.length > 0) {
+    let currentDir = dirStack.pop()
+    let currentDepth = countMatches(currentDir, /\//g) - baseDepth + 1
+    alreadyTraversed[currentDir] = true
+    for(const filename of fs.readdirSync(currentDir)) {
+      let filepath = path.join(currentDir, filename)
+      let realFilepath
+      try {
+        realFilepath = ctx.path.relative('./', fs.realpathSync(filepath))
+      } catch(err) { continue }
+      let stat  = fs.statSync(realFilepath, {throwIfNoEntry: false})
+      
+      yield realFilepath
+      if(maxDepth >= 0 && currentDepth > maxDepth)
+        continue
+      // else
+      if(stat?.isDirectory() ?? false) {
+        if(!(realFilepath in alreadyTraversed))
+          dirStack.push(realFilepath)
+      }
+    }
+  }
+}
+
+exports.respondToRequest['search'] = async function(request, response, getBody, args) {
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(200) // wait 200 ms
+  
+  if(!args.directory)
+    return setCodeAndMessage(response, 400, `No directory argument given`)
+  // else
+  
+  args.directory = ctx.addPathDot(path.relative('./', ctx.addPathDot(args.directory)))
+  if(args.directory.startsWith('..'))
+    return setCodeAndMessage(response, 400, 'Directory argument cant start at directories higher than working directory')
+  // else
+  
+  if(!args.query)
+    return setCodeAndMessage(response, 400, `No query argument given`)
+  // else
+  
+  // Is directory inside a dot directory?
+  if(/\/\.[^\/]/.test(args.directory)) // eg: ./asdf/.zxcv/qwer/ because contains /.z
+    return setCodeAndMessage(response, 400, `Cannot access dot file directory`)
+  // else
+  
+  if(!ctx.fs.existsSync(args.directory))
+    return setCodeAndMessage(response, 400, `Given directory doesn't exist`)
+  // else
+  
+  // Is it actually a directory?
+  let dirStat = ctx.fs.statSync(args.directory)
+  if(!dirStat.isDirectory())
+    return setCodeAndMessage(response, 400, `Given directory argument isn't a directory`)
+  // else
+  
+  let maxDepth = args.subDirs ? (args.maxDepth ?? -1) : 0
+  let maxResultsCount = args.maxResults ? Math.max(parseInt(args.maxResults), 16) : 16
+  let resultNumber = 0
+  for(const file of walkFiles(args.directory, maxDepth)) { // file is regular file or directory
+    let basename     = ctx.path.basename(file)
+    if(basename.indexOf(args.query) !== -1) {
+      if(resultNumber++ > maxResultsCount) // only return N results
+        break
+      // else
+      response.write(file)
+      response.write('\n')
+    }
+  }
+  return true
+}
+
 /**
 Gets exactly the contents of the given file without any parsing or anything
 */
