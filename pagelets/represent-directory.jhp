@@ -24,6 +24,14 @@ if(!dirStat.isDirectory()) {
 let thisUrl = `/pagelets/represent-directory.jhp?directory=${clientDir}`
 let upUrl = `/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientDir)}`
 
+const commonOperationOptionsHtml = (file)=> /*html*/`
+  <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .file" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${file}&operation=copy">Copy to</option>
+  <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .file" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${file}&operation=move">Move to</option>
+  <!-- <option srcfn="...: mixinRemotePagelet" pagelet-src=".../dialog/file-to-operation.html?file=${file}&operation=link" target="...">Link to</option> -->
+  <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .file" pagelet-src="/pagelets/dialog/rename-file.html?file=${file}">Rename</option>
+  <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .file" pagelet-src="/pagelets/dialog/file-permissions.jhp">Permissions</option>
+`
+
 html`
 <div class="pagelet directory-representation" data-url="/pagelets/represent-directory.jhp?directory=${args.directory}" data-file=${clientDir} data-dir=${clientDir}>
   `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, args); html`
@@ -45,7 +53,7 @@ html`
     <button class="open linklike horizontal-margins">Open</button>
     <button class="as-file linklike horizontal-margins">As file</button>
   </span>
-  <div>`
+  <div class="file-list">`
     
     for(const fileBasename of ctx.fs.readdirSync(serverDir)) {
       let file = ctx.path.join(serverDir, fileBasename)
@@ -55,21 +63,23 @@ html`
       let fileStat = ctx.fs.statSync(file)
       if(fileStat.isDirectory()) {
         html`
-        <div>
+        <div class="file">
           <span class="dir symbol" data-file=${file}></span>
           <a href="/pagelets/represent-directory.jhp?directory=${file}" title="Directory ${file}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
           <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
             <option value="" style="color: gray">S</option>
+            ${commonOperationOptionsHtml(file)}
           </select>
         </div>
         `
       } else {
         html`
-        <div data-file=${file}>
+        <div class="file" data-file=${file}>
           <span class="file symbol"></span>
           <a href="/pagelets/represent-file.jhp?file=${file}" title="File: ${ctx.path.join(file)}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
           <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
             <option style="color: gray">S</option>
+            ${commonOperationOptionsHtml(file)}
             <option srcfn="/pagelets/represent-directory.mjs: openSimpleEditDialog">Open simple edit dialog</option>
             <option srcfn="/pagelets/represent-directory.mjs: openSimpleAppendDialog">Open simple append dialog</option>
             ${file.endsWith('.txt') ? '<option value="/pagelets/represent-directory.mjs: openAsList">Open as list</option>' : ''}
