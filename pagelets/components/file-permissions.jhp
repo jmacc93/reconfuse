@@ -1,0 +1,53 @@
+
+if(!args.file)
+  return void html`<div class="pagelet error">No file argument given</div>`
+// else
+
+const serverFile = ctx.addPathDot(ctx.path.relative('./', ctx.addPathDot(args.file)))
+const clientFile = serverFile.slice(1) // remove dot
+
+if(serverFile.indexOf('/..') !== -1)
+  return void html`<div class="pagelet error">Bad file argument (${clientFile}) given</div>`
+// else
+
+let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
+let parentDirectory = ctx.path.dirname(serverFile)
+
+const basename = ctx.path.basename(serverFile)
+
+const group = await ctx.runScript('./bin/group.s.js')
+
+let pNewDir     = group.userControlInclusionStatus(username, parentDirectory, ['newDir', 'dir'])
+let pUpdateFile = group.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file', `file(${basename})`, `updateFile(${basename})`])
+let pAppendFile = group.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file', `file(${basename})`, `updateFile(${basename})`, 'append', `append(${basename})`])
+let pMakeFile   = group.userControlInclusionStatus(username, parentDirectory, ['newFile', 'file', `file(${basename})`, `newFile(${basename})`])
+let pUploadFile = group.userControlInclusionStatus(username, parentDirectory, ['newFile', 'file', `file(${basename})`, `newFile(${basename})`])
+let pTrashFile  = group.userControlInclusionStatus(username, parentDirectory, ['trashFile', 'file', `file(${basename})`, `trashFile(${basename})`])
+let pMoveFile   = group.userControlInclusionStatus(username, parentDirectory, ['moveFile', 'file', `file(${basename})`, `moveFile(${basename})`])
+let pRenameFile = group.userControlInclusionStatus(username, parentDirectory, ['renameFile', 'file', `file(${basename})`, `renameFile(${basename})`])
+let pCopyFile   = group.userControlInclusionStatus(username, parentDirectory, ['copyFile', 'file', `file(${basename})`, `copyFile(${basename})`])
+
+html`
+// ...
+<div class="pagelet permission-display" data-file="${args.file}">
+  
+  <style>
+    .permission-display .allowed { color: green }
+    .permission-display .disallowed { color: red; text-decoration: red line-through }
+  </style>
+  Permissions for <code>${args.file}</code> for ${username}:
+  <div class="permissions">
+    <div class="${pUpdateFile ? 'allowed' : 'disallowed'}"> update files </div>
+    <div class="${pAppendFile ? 'allowed' : 'disallowed'}"> append to files </div>
+    <div class="${pMakeFile   ? 'allowed' : 'disallowed'}"> make files </div>
+    <div class="${pNewDir     ? 'allowed' : 'disallowed'}"> make directories </div>
+    <div class="${pUploadFile ? 'allowed' : 'disallowed'}"> upload to files </div>
+    <div class="${pTrashFile  ? 'allowed' : 'disallowed'}"> trash files </div>
+    <div class="${pMoveFile   ? 'allowed' : 'disallowed'}"> move files </div>
+    <div class="${pRenameFile ? 'allowed' : 'disallowed'}"> rename files </div>
+    <div class="${pCopyFile   ? 'allowed' : 'disallowed'}"> copy files </div>
+  </div>
+  
+</div>
+`
+
