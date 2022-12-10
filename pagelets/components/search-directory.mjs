@@ -1,9 +1,11 @@
 
-function makeResultLine(file) {
+async function makeResultLine(file) {
+  const lib = await import('/lib/lib.mjs')
   let ret = document.createElement('template')
+  let sanitizedFile = lib.sanitizeHTMLString(file)
   ret.innerHTML = /*html*/`
     <div class="file-search-result">
-      <span class="path">${file}</span>
+      <a href="/pagelets/represent-file.jhp?file=${sanitizedFile}">${file}</a>
       <button is="call-resource-button" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${file}" class="linklike">Copy</button>
     </div>
   `
@@ -28,7 +30,7 @@ export async function searchAndPopulate(callElem) {
       // else
       if(!file.startsWith('/'))
         file = '/' + file
-      resultListElem.append(makeResultLine(file))
+      resultListElem.append(await makeResultLine(file))
     }
   } else {
     lib.notificationFrom(callElem, `Error: ${response.status}, ${response.statusText}`, {error: true})
