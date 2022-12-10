@@ -24,6 +24,8 @@ export async function searchAndPopulate(callElem) {
   const response = await fetch(`/bin/file.s.js/search?directory=${dirInput.value}${subdirsInput.checked ? `&subDirs` : ''}&query=${queryInput.value}`)
   if(response.ok) {
     let resultLines = (await response.text()).split(/\s+/g)
+    if(resultLines.length <= 1)
+      resultListElem.innerHTML = '<span>Nothing found</span>'
     for(let file of resultLines) {
       if(file === '')
         continue
