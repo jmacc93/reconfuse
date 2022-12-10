@@ -329,7 +329,7 @@ exports.respondToRequest.getPasswordChallenge = async function(request, response
 
 exports.respondToRequest.validateChallengeResponse = async function(request, response, getBody, args) {
   const lib = await ctx.runScript('./lib/lib.s.js')
-  await lib.asyncSleepFor(10) // wait 10 seconds
+  await lib.asyncSleepFor(10000) // wait 10 seconds
   
   // is username given?
   const username = args.username
