@@ -24,6 +24,12 @@ if(!dirStat.isDirectory()) {
 let thisUrl = `/pagelets/represent-directory.jhp?directory=${clientDir}`
 let upUrl = `/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientDir)}`
 
+let dirFileCount = 0
+for(const _ of ctx.fs.readdirSync(serverDir))
+  dirFileCount++
+
+const maxFilesToShow = 16
+
 const commonOperationOptionsHtml = (file)=> /*html*/`
   <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .file" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${file}&operation=copy">Copy to</option>
   <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .file" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${file}&operation=move">Move to</option>
@@ -45,6 +51,7 @@ html`
     <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
       <option style="color: grey">S</option>
       <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy dir</option>
+      <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet >> child .open-file" pagelet-src="/pagelets/components/search-directory.html?directory=${clientDir}">Search</option>
     </select>
   </div>
   <call-resource srcfn="/pagelets/represent-directory.mjs: addOpenButtonFunctionality"></call-resource>
@@ -53,9 +60,20 @@ html`
     <button class="open linklike horizontal-margins">Open</button>
     <button class="as-file linklike horizontal-margins">As file</button>
   </span>
+  
   <div class="file-list">`
     
+    let currentFileCount = 0
     for(const fileBasename of ctx.fs.readdirSync(serverDir)) {
+      if(currentFileCount++ > maxFilesToShow) { // only show up to max number of files
+        html`
+          <div>Showing ${currentFileCount} of ${dirFileCount}</div>
+          <div>Search:</div>
+          <html-mixin src="/pagelets/components/search-directory.html?directory=${clientDir}"></html-mixin>
+        `
+        break
+      }
+      // else
       let file = ctx.path.join(serverDir, fileBasename)
       if(fileBasename[0] === '.') // no dot files listed
         continue
