@@ -19,6 +19,12 @@ exports.respondToRequest = async function(request, response, getBody, args) {
   return setCodeAndMessage(response, 500, `Please use a subfunction instead`)
 }
 
+const lib = await ctx.runScript('./lib/lib.s.js')
+controlObjArrayCache = new lib.Cache(
+  (path) => JSON.parse(ctx.fs.readFileSync(path).toString()), // generator
+  (path) => String(ctx.fs.statSync(path).mtimeMs) // etagger
+)
+
 /**
 Yields all control objects in all control.json files starting from directory up to server working directory in order
 Control objects look like {"file": ..., "newDir": ..., ...}
@@ -28,9 +34,8 @@ function* getAllControlObjDirs(directory) {
   while(true) {
     let controlJsonFile = ctx.path.join(currentDir, './control.json')
     if(ctx.fs.existsSync(controlJsonFile)) {
-      let fileContent     = ctx.fs.readFileSync(controlJsonFile).toString()
       try {
-        let controlObjArray = JSON.parse(fileContent).reverse()
+        const controlObjArray = controlObjArrayCache.get(controlJsonFile)
         for(const controlObj of controlObjArray)
           yield [controlObj, currentDir]
       } catch(err) {} // skip bad control object files
