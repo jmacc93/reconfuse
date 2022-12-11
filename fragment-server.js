@@ -30,7 +30,8 @@ function getUid() {
 _G.getUid = getUid
 
 const placeholderTransforms = {
-  dirname: (val) => path.dirname(val)
+  dirname: (val) => path.dirname(val),
+  basename: (val) => path.basename(val)
 }
 _G.placeholderTransforms = placeholderTransforms
 const _insertPlaceholderValuesDefaultRegex = /\-\[(.+?)\]\-/g // -[ asdf ]-
