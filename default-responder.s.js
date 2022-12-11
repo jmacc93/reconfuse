@@ -28,13 +28,12 @@ exports.respondToRequest = async function(request, response, getBody, args) {
   }
   // else
   
-  const clientReqPath = reqPath.slice(1)
   const basename = path.basename(args.requestPath)
   const replacementObj = {
     uid: ctx.getUid(),
-    file: clientReqPath,
+    file: reqPath.slice(1),
     filename: basename,
-    fileDir: path.dirname(reqPath)
+    fileDir: '/' + path.relative('./', path.dirname(reqPath))
   }
   for(const key in args) { // add all args to replacements
     if(key !== 'cookies')
