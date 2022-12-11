@@ -29,6 +29,10 @@ function getUid() {
 }
 _G.getUid = getUid
 
+const placeholderTransforms = {
+  dirname: (val) => path.dirname(val)
+}
+_G.placeholderTransforms = placeholderTransforms
 const _insertPlaceholderValuesDefaultRegex = /\-\[(.+?)\]\-/g // -[ asdf ]-
 const _insertPlaceholderFileDefaultRegex = /\-:\[(.+?)\]:\-/g // -:[ /pagelets/asdf.html ]:-
 function insertPlaceholderValues(str, obj, valueRegex = _insertPlaceholderValuesDefaultRegex, fileRegex = _insertPlaceholderFileDefaultRegex) {
@@ -36,7 +40,14 @@ function insertPlaceholderValues(str, obj, valueRegex = _insertPlaceholderValues
   let gFileRegex  = new RegExp(fileRegex, 'g')
   if(obj) {
     return str.replaceAll(gValueRegex, (str, cap) => { // Insert given obj[key] values for each -[key]-
-      return sanitizeHTMLString(obj[cap] ?? (obj.default ?? ''))
+      // apply any functions if captured form is like -[value|f1|f2|...]-
+      // ie: -[value|f1|f2]- -> f2(f1(value)) where f1, f2 are found using placeholderTransforms["f1"], etc
+      let splitCap = cap.split(/\s*\|\s*/g) // "file| dirname" -> ["file", "dirname"] // first array value is value, rest are functions to be applied
+      let transformedCap = splitCap.reduce((prev, current) =>
+        (prev === undefined) ? (obj[current] ?? (obj.default ?? '')) // only applies on first value
+                             : (placeholderTransforms[current]?.(prev) ?? prev) // apply function if it exists
+      , undefined)
+      return sanitizeHTMLString(transformedCap)
     }).replaceAll(gFileRegex, (str, cap) => { // Insert file filepath contents for each -:[filepath]:-
       let file = addPathDot(path.relative('./', addPathDot(cap)))
       return insertPlaceholderValues(fs.readFileSync(file).toString(), obj, valueRegex, fileRegex)
