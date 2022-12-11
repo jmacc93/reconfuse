@@ -203,9 +203,9 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   let [_contentType, isBinary] = ctx.extContentMap[ctx.path.extname(args.file)] ?? ctx.extContentMap.default
   let payload = args.body ?? (isBinary ? await getBody() : (await getBody()).toString()) // use args.body if given, else use request body
   if(args.tagged ?? false) // tagged append
-    await fsp.appendFile(args.file, `\n${username ?? `anonymous(${anonId})`} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n${payload}`)
+    await fsp.appendFile(args.file, `\n\n${username ?? `anonymous(${anonId})`} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n${payload}`)
   else // regular append
-    await fsp.appendFile(args.file, payload)
+    await fsp.appendFile(args.file, `\n\n` + payload)
   console.log(`[${request.uid}]`, `update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
     utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' appended ', payload.length, ' chars to ', ctx.path.basename(args.file), '\n'
