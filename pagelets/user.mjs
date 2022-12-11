@@ -133,9 +133,11 @@ export async function installCheckOnInputFunctionality(callElem) {
   }
   checkOnInput()
   
-  displaynameInput.addEventListener('input', () => { checkOnInput() })
-  usernameInput.addEventListener(   'input', () => { usernameHadInput = true; checkOnInput() })
-  passwordInput.addEventListener(   'input', () => { passwordHadInput = true; checkOnInput() })
+  let timeoutId = -1
+  
+  displaynameInput.addEventListener('input', () => { if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=>checkOnInput(), 500) })
+  usernameInput.addEventListener(   'input', () => { usernameHadInput = true; if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=>checkOnInput(), 500) })
+  passwordInput.addEventListener(   'input', () => { passwordHadInput = true; if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=>checkOnInput(), 500) })
 }
 
 export async function registerButtonClicked(callElemButton) {
