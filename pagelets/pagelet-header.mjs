@@ -193,7 +193,7 @@ async function decorateTextField(textfield) {
   
   // Text substitutions
   if(!textfield.hasAttribute('no-substitutions')) {
-    let attrSubList = textfield.dataset.subtitute?.split(/\s*\;\s*/g).map(x=> x.split(/\s*\:\s*/g)) ?? [] // "a:b; x:y" -> [["a","b"],["x","y"]]
+    let attrSubList = textfield.dataset.substitute?.split(/\s*\;\s*/g).map(x=> x.split(/\s*\:\s*/g)) ?? [] // "a:b; x:y" -> [["a","b"],["x","y"]]
     const textExpansionSpec = {...lib.stdTextExpansions}
     for(const attrSub of attrSubList)
       if(attrSub.length === 2)
