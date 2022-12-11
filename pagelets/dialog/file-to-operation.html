@@ -1,6 +1,6 @@
 <div class="pagelet file-to-operation" data-file="-[arg-file]-" data-operation="-[arg-operation]-">
   -:[/pagelets/pagelet-header.html]:-
-  <input autofocus type="text" placeholder="Location to -[arg-operation]- to">
+  <input autofocus type="text" placeholder="Location to -[arg-operation]- to" data-substitute="DIR:-[arg-file|dirname]-">
   <button is="call-resource-button" class="linklike" srcfn="/pagelets/dialog/file-to-operation.mjs: submitOperation">Submit</button>
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"><call-resource>
 </div>
