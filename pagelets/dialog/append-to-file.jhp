@@ -19,6 +19,7 @@ html`
   `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
   <style>.pagelet.unsaved {outline: 1px solid red}</style>
   <textarea 
+    autofocus
     class="vertical-resizable width100p" 
     ctrl-enter-srcfn="/pagelets/dialog/append-to-file.mjs: taggedAppend" 
     input-srcfn="/pagelets/dialog/append-to-file.mjs: setUnsaved"
