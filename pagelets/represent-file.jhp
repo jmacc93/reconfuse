@@ -83,7 +83,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: reload">Reload</option>
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
-        <option srcfn="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
+        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-file.jhp?file=${clientFile}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
         <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
@@ -111,7 +111,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: reload">Reload</option>
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
-        <option srcfn="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
+        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-file.jhp?file=${clientFile}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
         <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
@@ -139,7 +139,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: openSimpleAppendDialog">Append dialog</option>
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
-        <option srcfn="/pagelets/represent-file.mjs: enframe">Enframe</option>
+        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-file.jhp?file=${clientFile}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
         <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
@@ -162,7 +162,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: makeIt">Make it</option>
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Open editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Open directory</option>
-        <option srcfn="/pagelets/represent-file.mjs: enframe">Enframe pagelet</option>
+        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-file.jhp?file=${clientFile}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
         <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
