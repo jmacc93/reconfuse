@@ -86,7 +86,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" payload="${clientFile}">Copy url</option>
       </select>
     </div>
     `
@@ -114,7 +114,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" payload="${clientFile}">Copy url</option>
       </select>
     </div>
     `
@@ -142,7 +142,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" payload="${clientFile}">Copy url</option>
       </select>
     </div>
     `
@@ -165,7 +165,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Open editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Open directory</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
+        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" payload="${clientFile}">Copy url</option>
       </select>
     </div>
     `
