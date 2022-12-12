@@ -52,6 +52,8 @@ if(exists) {
   // else
 }
 
+const thisUrl = `/pagelets/represent-file.jhp?file=${args.file}${args.focus ? '&' + args.focus : ''}`
+
 let extContent  = ctx.extContentMap[ctx.path.extname(serverFile)]
 let [contentType, isBinary] = extContent ?? [undefined, undefined]
 if(contentType === undefined)
@@ -62,7 +64,7 @@ principleContentType = ctx.splitAtFirst(contentType, ';')?.[0] ?? contentType
 if(isBinary) {
   if(exists) {
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="/pagelets/represent-file.jhp?file=${clientFile}">
+    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       
@@ -83,7 +85,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: reload">Reload</option>
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-file.jhp?file=${clientFile}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
+        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
         <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
@@ -91,7 +93,7 @@ if(isBinary) {
     return true
   } else { // binary file, doesn't exist
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="/pagelets/represent-file.jhp?file=${clientFile}">
+    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       <script src="/lib/callib/callib0.mjs" type="module"></script>
@@ -111,7 +113,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: reload">Reload</option>
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-file.jhp?file=${clientFile}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
+        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
         <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
@@ -121,7 +123,7 @@ if(isBinary) {
 } else { // textual file
   if(exists) {
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="/pagelets/represent-file.jhp?file=${clientFile}">
+    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       
@@ -139,7 +141,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: openSimpleAppendDialog">Append dialog</option>
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Directory</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-file.jhp?file=${clientFile}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
+        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
         <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>
@@ -147,7 +149,7 @@ if(isBinary) {
     return true
   } else { // textual file, doesn't exist
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="/pagelets/represent-file.jhp?file=${clientFile}">
+    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>Non existent file ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       <script src="/lib/callib/callib0.mjs" type="module"></script>
@@ -162,7 +164,7 @@ if(isBinary) {
         <option srcfn="/pagelets/represent-file.mjs: makeIt">Make it</option>
         <option srcfn="/pagelets/represent-file.mjs: openEditor">Open editor</option>
         <option srcfn="/pagelets/represent-file.mjs: openDirectory">Open directory</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-file.jhp?file=${clientFile}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
+        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
         <option srcfn="/pagelets/represent-file.mjs: copyUrl">Copy url</option>
       </select>
     </div>

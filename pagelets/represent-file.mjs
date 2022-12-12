@@ -101,12 +101,24 @@ export async function initializeContentDisplay(callElem) {
   
   const pagelet = callElem.closest('.pagelet')
   const contentDisplay = pagelet.querySelector(':scope > .content-display')
+  const focus = pagelet.dataset.focus
   
   // let contentResponse = await fetch('${args.raw === 'true' ? '/bin/file.s.js/raw?file=' : ''}${clientFile}')
   let contentResponse = await fetch(`/bin/file.s.js/raw?file=${pagelet.dataset.file}`)
   if(contentResponse.ok) {
     let contentText = await contentResponse.text()
-    await lib.renderContentTo(contentDisplay, contentText, contentResponse.headers.get('content-type') ?? 'text/plain')
+    if(contentText.length === 0) { // empty content
+      let emptyMsgTemplate = document.createElement('template')
+      emptyMsgTemplate.innerHTML = /*html*/`<span style="opacity: 50%">...</span>`
+      contentDisplay.appendChild(emptyMsgTemplate.content)
+    } else { // not empty:
+      await lib.renderContentTo(contentDisplay, contentText, contentResponse.headers.get('content-type') ?? 'text/plain')
+      if(focus) {
+        let focusElem = contentDisplay.querySelector(`#${focus}`)
+        if(focusElem)
+          focusElem.classList.add('highlighted')
+      }
+    }
   } else if(contentResponse.status === 404) {
     let newLink = document.createElement('a')
     newLink.href = `/pagelets/file-editor.jhp?file=${pagelet.dataset.file}`

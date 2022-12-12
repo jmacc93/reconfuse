@@ -51,6 +51,12 @@
     body.appendChild(escm.parsePreprocessEval('\\header1(ticon:)\n', escset))
     body.appendChild(escm.parsePreprocessEval('\\ticon(arrow-left)\n', escset))
     body.appendChild(escm.parsePreprocessEval('\\header1(ticon:)\n\\copyable(copyable|heres the payload)\n', escset))
+    body.appendChild(escm.parsePreprocessEval('\\header1(anchor:)\n\\anchor(anchor|anchorid)\n', escset))
+    
+    let longElem = document.createElement('div')
+    longElem.style.height = '256em'
+    body.appendChild(longElem)
+    body.appendChild(escm.parsePreprocessEval('\\header1(anchor:)\n\\anchor(anchor|anchorid2)\n', escset))
     
   })()</script>
 </head>

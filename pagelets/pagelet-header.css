@@ -15,3 +15,8 @@
   0%   {opacity: 0%}
   100% {opacity: 100%}
 }
+
+.highlighted {
+  outline: 1px solid lightblue;
+  background: rgb(96, 231, 240, 50%);
+}
