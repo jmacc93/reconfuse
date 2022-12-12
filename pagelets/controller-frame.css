@@ -64,3 +64,16 @@
 .controller-frame + .controller-frame {
   border-top: 4px solid var(--controller-frame-border-color, rgba(0, 0, 0, 10%));
 }
+
+
+.drop-hovered {
+  outline: 1px solid orange
+}
+.drop-hovered.top-hovered::before {
+  content: 'Drop';
+  color: orange;
+}
+.drop-hovered.bottom-hovered::after {
+  content: 'Drop';
+  color: orange;
+}

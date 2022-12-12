@@ -207,22 +207,6 @@ body > * + div {
   user-select: none;
 }
 
-.drop-hovered {
-  outline: 1px solid orange
-}
-.drop-hovered.top-hovered::before {
-  position: absolute;
-  width: 0; height: 0;
-  content: 'Drop';
-  color: orange;
-}
-.drop-hovered.bottom-hovered::after {
-  position: absolute;
-  width: 0; height: 0;
-  content: 'Drop';
-  color: orange;
-}
-
 body.dragging-element {
   cursor: crosshair
 }
