@@ -248,6 +248,16 @@ async function decorateTextField(textfield) {
     })
   }
   
+  // Override default ctrl-s, history navigation alt-left / alt-right, etc functionality
+  textfield.addEventListener('keydown', downEvent => {
+    if(downEvent.key === 's' && downEvent.ctrlKey)
+      downEvent.preventDefault()
+    else if(downEvent.key === 'ArrowRight' && downEvent.altKey)
+      downEvent.preventDefault()
+    else if(downEvent.key === 'ArrowLeft' && downEvent.altKey)
+      downEvent.preventDefault()
+  })
+  
   // input functionality
   const inputSrcfn  = textfield.getAttribute('input-srcfn')
   if(inputSrcfn) {
