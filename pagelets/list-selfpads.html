@@ -1,0 +1,11 @@
+<div class="pagelet selfpad-list">
+  -:[/pagelets/pagelet-header.html]:-
+  <call-resource srcfn="/pagelets/selfpad.mjs: listPads"></call-resource>
+  <div class="list"></div>
+  <div>
+    <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
+      <option style="color: gray">S</option>
+      <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="replace-noframe this parent .pagelet">Reload</option>
+    </select>
+  </duv>
+</div>

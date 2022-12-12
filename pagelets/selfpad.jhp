@@ -17,6 +17,7 @@ html`
     <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
       <option style="color: gray">S</option>
       <option srcfn="/pagelets/selfpad.mjs: updateButton">Update</option>
+      <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="after this parent .pagelet">List all</option>
     </select>
   </div>
   

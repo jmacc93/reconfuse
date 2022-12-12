@@ -54,3 +54,20 @@ export async function updateButton(callElem) {
   
   renderTextareaContent(textarea, contentDisplay, pagelet)
 }
+
+export async function listPads(callElem) {
+  const pagelet = callElem.closest('.pagelet')
+  const listElem = pagelet.querySelector(':scope > .list')
+  listElem.innerHTML = ''
+  let listItemTemplate = document.createElement('template')
+  for(let i = 0; i < localStorage.length; i++) {
+    const ithKey = localStorage.key(i)
+    if(ithKey.startsWith('selfpad-')) {
+      const name = ithKey.slice(8) // remove "selfpad-"
+      listItemTemplate.innerHTML = /*html*/`<div><a href="/pagelets/selfpad.jhp?name=${name}">${name}</a></div>`
+      listElem.appendChild(listItemTemplate.content)
+    }
+  }
+  if(listElem.childElementCount === 0)
+    listElem.innerHTML = /*html*/`<span>No selfpads found</span>`
+}
