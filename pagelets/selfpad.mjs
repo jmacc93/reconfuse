@@ -5,9 +5,10 @@ async function renderTextareaContent(textarea, contentDisplay, pagelet) {
   const lib = await import('/lib/lib.mjs')
   const contentType = pagelet.dataset.contenttype
   const name        = pagelet.dataset.name
+  const itemName    = `selfpad-${name}`
   let trimmedValue = textarea.value.trim()
   if(trimmedValue === '') {
-    localStorage.removeItem(name)
+    localStorage.removeItem(itemName)
   } else if(contentType) { // content type given
     lib.renderContentTo(contentDisplay, trimmedValue, pagelet.dataset.contenttype)
   } else if(name.indexOf('.') !== -1) { // name has an extension
@@ -21,7 +22,7 @@ async function renderTextareaContent(textarea, contentDisplay, pagelet) {
       contentType = firstLine.slice(5).trim() // remove 'type:' and whitespace
     lib.renderContentTo(contentDisplay, trimmedValue, contentType)
   }
-  localStorage.setItem(name, trimmedValue)
+  localStorage.setItem(itemName, trimmedValue)
 }
 
 export async function installFunctionality(callElem) {
@@ -30,9 +31,10 @@ export async function installFunctionality(callElem) {
   const contentDisplay = pagelet.querySelector('.content-display')
   const textarea       = pagelet.querySelector('textarea.input')
   
-  const padName = pagelet.dataset.name
+  const name     = pagelet.dataset.name
+  const itemName = `selfpad-${name}`
   
-  let fromStorage = localStorage.getItem(padName)
+  let fromStorage = localStorage.getItem(itemName)
   if(fromStorage !== null) {
     textarea.value = fromStorage
     if(textarea.value !== '')
