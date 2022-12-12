@@ -1,5 +1,5 @@
 html`
-<div class="pagelet selfpad" data-name="selfpad-${args.name ?? 'misc'}" ${args.contentType ? `data-contenttype="${args.contentType}"` : ''}>
+<div class="pagelet selfpad" data-name="${args.name ?? 'misc'}" ${args.contentType ? `data-contenttype="${args.contentType}"` : ''}>
   `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
   
   <title>Selfpad ${ args.name ?? 'misc'}</title>
