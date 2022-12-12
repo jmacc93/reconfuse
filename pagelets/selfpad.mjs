@@ -1,6 +1,13 @@
 
 // const placeholderHtml = /*html*/`<span class="light-color">Write here. It gets stored in local storage on your computer</span>`
 
+async function updateLocalStorage(textarea, pagelet) {
+  const name        = pagelet.dataset.name
+  const trimmedValue = textarea.value.trim()
+  const itemName    = `selfpad-${name}`
+  localStorage.setItem(itemName, trimmedValue)
+}
+
 async function renderTextareaContent(textarea, contentDisplay, pagelet) {
   const lib = await import('/lib/lib.mjs')
   const contentType = pagelet.dataset.contenttype
@@ -22,7 +29,7 @@ async function renderTextareaContent(textarea, contentDisplay, pagelet) {
       contentType = firstLine.slice(5).trim() // remove 'type:' and whitespace
     lib.renderContentTo(contentDisplay, trimmedValue, contentType)
   }
-  localStorage.setItem(itemName, trimmedValue)
+  updateLocalStorage(textarea, pagelet)
 }
 
 export async function installFunctionality(callElem) {
@@ -37,13 +44,22 @@ export async function installFunctionality(callElem) {
   let fromStorage = localStorage.getItem(itemName)
   if(fromStorage !== null) {
     textarea.value = fromStorage
-    if(textarea.value !== '')
+    if(textarea.value !== '') {
+      updateLocalStorage(textarea, pagelet)
       renderTextareaContent(textarea, contentDisplay, pagelet)
+    }
   }
   
+  let timeoutId = -1
+  
   textarea.addEventListener('keydown', keyEvent => {
-    if(keyEvent.ctrlKey && keyEvent.key === 'Enter')
+    if(timeoutId !== -1)
+      clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => updateLocalStorage(textarea, pagelet), 1000)
+    if(keyEvent.ctrlKey && keyEvent.key === 'Enter') {
+      updateLocalStorage(textarea, pagelet)
       renderTextareaContent(textarea, contentDisplay, pagelet)
+    }
   })
 }
   
@@ -52,6 +68,7 @@ export async function updateButton(callElem) {
   const textarea = pagelet.querySelector('textarea')
   const contentDisplay = pagelet.querySelector('.content-display')
   
+  updateLocalStorage(textarea, pagelet)
   renderTextareaContent(textarea, contentDisplay, pagelet)
 }
 
