@@ -29,12 +29,18 @@ export async function checkResponse(callElem) {
   const username = usernameInput.value
   const response = responseInput.value
   
+  if(pagelet.classList.contains('waiting-for-server'))
+    return void lib.notificationFrom(callElem, `Please wait for current check to finish`, {error: true, transient: true})
+  // else
+  
+  pagelet.classList.add('waiting-for-server')
   statusElem.textContent = 'Please wait 10 seconds'
   const serverResponse = await fetch([
     `/bin/user.s.js/validateChallengeResponse`,
     `?username=`, username,
     `&response=`, sha256(response)
   ].join(''))
+  pagelet.classList.remove('waiting-for-server')
   statusElem.textContent = ''
   
   if(serverResponse.ok) {
