@@ -124,6 +124,17 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
     return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot modify the file ${args.file}`)
   // else
   
+  // is there mid-air-collision file conflict?
+  const stat = ctx.fs.statSync(args.file)
+  const currentETag = String(stat.mtimeMs)
+  if(request.headers['if-match'] !== currentETag) { // etags dont match, send current content
+    response.setHeader('ETag', currentETag)
+    response.statusCode = 409
+    response.write(await ctx.fsp.readFile(args.file))
+    return true
+  }
+  // else
+  
   // Register anonymous user if anonymous
   let anonId
   if(username === undefined)
@@ -133,6 +144,9 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   let [_contentType, isBinary] = ctx.extContentMap[ctx.path.extname(args.file)] ?? ctx.extContentMap.default
   let payload = args.body ?? (isBinary ? await getBody() : (await getBody()).toString()) // use args.body if given, else use request body
   await fsp.writeFile(args.file, payload)
+  const newStat = ctx.fs.statSync(args.file)
+  let newETag = String(newStat.mtimeMs)
+  response.setHeader('ETag', newETag)
   console.log(`[${request.uid}]`, `update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
     utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' updated ', ctx.path.basename(args.file), ' with ', payload.length, ' chars\n'
