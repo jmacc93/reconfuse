@@ -92,7 +92,7 @@ if(isBinary) {
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" payload="${clientFile}">Copy url</option>
+        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</option>
       </select>
     </div>
     `
@@ -124,7 +124,7 @@ if(isBinary) {
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" payload="${clientFile}">Copy url</option>
+        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</option>
       </select>
     </div>
     `
@@ -156,7 +156,7 @@ if(isBinary) {
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" payload="${clientFile}">Copy url</option>
+        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</option>
       </select>
     </div>
     `
@@ -183,7 +183,7 @@ if(isBinary) {
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" payload="${clientFile}">Copy url</option>
+        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</option>
       </select>
     </div>
     `
