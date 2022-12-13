@@ -17,7 +17,11 @@ html`
 <div class="pagelet" data-file="${args.file}">
   <title>Append to ${ctx.path.basename(args.file)} - ${args.file}</title>
   `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, {}); html`
-  <style>.pagelet.unsaved {outline: 1px solid red}</style>
+  <style>
+    .pagelet.unsaved {outline: 1px solid red}
+    .pagelet.no-submit .red-no-submit {color: red}
+  </style>
+  <call-resource srcfn="/pagelets/dialog/append-to-file.mjs: checkPrivileges"></call-resource>
   <textarea 
     autofocus
     class="vertical-resizable width100p" 
@@ -25,8 +29,8 @@ html`
     input-srcfn="/pagelets/dialog/append-to-file.mjs: setUnsaved"
   ></textarea>
   <div>
-    <button is="call-resource-button" class="linklike" srcfn="/pagelets/dialog/append-to-file.mjs: taggedAppend">Append</button>,
-    <button is="call-resource-button" class="linklike" srcfn="/pagelets/dialog/append-to-file.mjs: append">Without tag</button>,
+    <button is="call-resource-button" class="linklike red-no-submit" srcfn="/pagelets/dialog/append-to-file.mjs: taggedAppend">Append</button>,
+    <button is="call-resource-button" class="linklike red-no-submit" srcfn="/pagelets/dialog/append-to-file.mjs: append">Without tag</button>,
     <button is="call-resource-button" class="linklike" srcfn="/pagelets/dialog/edit-file.mjs: showPreview">Preview</button>
   </div>
   <span class="preview-display"></span>

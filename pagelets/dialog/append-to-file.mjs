@@ -1,4 +1,12 @@
 
+export async function checkPrivileges(callElem) {
+  const pagelet = callElem.closest('.pagelet')
+  const file = pagelet.dataset.file
+  let updatePrivilege = await fetch(`/bin/group.s.js/has-privilege?file=${file}&privilege=updateFile,appendFile,file`).then(x=>x.text())
+  if(updatePrivilege === 'false')
+    pagelet.classList.add('no-submit')
+}
+
 export async function taggedAppend(callElem) {
   const lib = await import('/lib/lib.mjs')
   const pagelet = callElem.closest('.pagelet[data-file]')
