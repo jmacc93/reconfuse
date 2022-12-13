@@ -73,6 +73,9 @@ export async function setInitialValue(callElem) {
   const textarea = pagelet.querySelector(':scope > textarea')
   const initialElem = pagelet.querySelector(':scope > .initial-value')
   const file = pagelet.dataset.file
+  let updatePrivilege = await fetch(`/bin/group.s.js/has-privilege?file=${file}&privilege=updateFile,file`).then(x=>x.text())
+  if(updatePrivilege === 'false')
+    pagelet.classList.add('no-submit')
   let response = await fetch(`/bin/file.s.js/raw?file=${file}`)
   if(!response.ok)
     return void lib.notificationFrom(callElem, `Error: ${response.status}, ${response.statusText}`, {error: true})

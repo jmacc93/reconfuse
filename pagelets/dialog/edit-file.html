@@ -1,7 +1,10 @@
 <div class="pagelet" data-file="-[arg-file]-">
   -:[/pagelets/pagelet-header.html]:-
   <title>Editing -[arg-file]- </title>
-  <style>.pagelet.unsaved { outline: 1px solid red } </style>
+  <style>
+    .pagelet.unsaved { outline: 1px solid red }
+    .pagelet.no-submit .red-no-submit {color: red}
+  </style>
   
   <textarea autofocus class="width100p" placeholder="Text written here updates -[arg-file]-'s content"></textarea>
   <pre class="conflict-display boxed" style="color: gray; display: none"></pre>
@@ -10,7 +13,7 @@
   <call-resource srcfn="/pagelets/dialog/edit-file.mjs: setUnsavedClassOnEdit"></call-resource>
   <span class="initial-value" hidden></span>
   <div>
-    <button is="call-resource-button" class="linklike" srcfn="/pagelets/dialog/edit-file.mjs: submit">Submit</button>,
+    <button is="call-resource-button" class="linklike red-no-submit" srcfn="/pagelets/dialog/edit-file.mjs: submit">Submit</button>,
     <button is="call-resource-button" class="linklike" srcfn="/pagelets/dialog/edit-file.mjs: showPreview">Preview</button>
   </div>
   <span class="preview-display"></span>
