@@ -201,7 +201,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   let parentDirectory = ctx.path.dirname(args.file)
   let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, [
     'updateFile', 'file', `file(${filename})`, `updateFile(${filename})`,
-    'append', `append(${filename})`
+    'appendFile', `appendFile(${filename})`
   ])
   if(!isAllowed)
     return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot modify the file ${args.file}`)
