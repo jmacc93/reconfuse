@@ -10,11 +10,12 @@ export async function newFrameAfter(optionCallElem) {
 export async function installTitleMirrorFunctionality(callElem) {
   const lib   = await import('/lib/lib.mjs')
   const frame = callElem.closest('.controller-frame')
-  const titleMirror    = frame.querySelector(':scope > .infobar > .child-title-mirror')
-  lib.applyOnNewChildren(frame, () => {
-    let firstTitle = frame.querySelector('title')
+  const titleMirror = frame.querySelector(':scope > .infobar > .child-title-mirror')
+  const childContainer = frame.querySelector(':scope > .child-container')
+  lib.applyOnNewChildren(childContainer, () => {
+    let firstTitle = childContainer.querySelector('title')
     titleMirror.textContent = firstTitle.textContent
-  })
+  }, true) // true = deep
   titleMirror.textContent = frame.querySelector('title')?.textContent
 }
 
