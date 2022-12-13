@@ -31,8 +31,6 @@ if(!dirStat.isDirectory()) {
 html`
 <div class="pagelet" data-channel=${args.channel ?? 'nochannel'} data-directory=${args.directory ?? 'nodir'}>
   `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, args); html`
-  <script type="module" src="/lib/callib/callib0.mjs"></script>
-  <script type="module" src="/lib/mixin.mjs"></script>
   
   <call-resource srcfn="/pagelets/represent-message-list.mjs: installFunctionality"></call-resource>
   
