@@ -35,6 +35,7 @@ html`
     .permission-display .allowed { color: green }
     .permission-display .disallowed { color: red; text-decoration: red line-through }
   </style>
+  <title>Permissions for ${args.file}</title>
   Permissions for <code>${args.file}</code> for ${username}:
   <div class="permissions">
     <div class="${pUpdateFile ? 'allowed' : 'disallowed'}"> update files </div>
