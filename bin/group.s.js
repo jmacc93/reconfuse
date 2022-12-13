@@ -161,7 +161,7 @@ Checks if the given username is in the given group
 */
 // args: {username, group} and cookies.username
 exports.respondToRequest['in-group'] = async function(request, response, getBody, args) {
-  let username = args.username ?? args.cookies.username
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies.username : undefined)
   if(!username) 
     return setCodeAndMessage(response, 400, `No username argument given (use ?argname=... or log in)`)
   // else
@@ -184,7 +184,7 @@ directory: directory string eg: './aaa/bbb/'
 */
 // args: {username, file, directory} and cookies.username
 exports.respondToRequest['has-access'] = async function(request, response, getBody, args) {
-  let username = args.username ?? args.cookies.username
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies.username : undefined)
   if(!username) 
     return setCodeAndMessage(response, 400, `No username argument given (use ?username=...)`)
   
@@ -222,7 +222,7 @@ Here we make the exports.respondToRequest['...'] functions specified above
 */
 for(const names of respondToRequestNameMap) {
   exports.respondToRequest[names.functionName] = async function(request, response, getBody, args) {
-    let username = args.username ?? args.cookies.username
+    let username = args.username ?? (args.cookies?.loggedin ? args.cookies.username : undefined)
     if(!username) 
       return setCodeAndMessage(response, 400, `No username argument given (use ?username=...)`)
     // else
