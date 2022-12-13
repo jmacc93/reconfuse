@@ -53,6 +53,7 @@
     body.appendChild(escm.parsePreprocessEval('\\header1(ticon:)\n\\copyable(copyable|heres the payload)\n', escset))
     body.appendChild(escm.parsePreprocessEval('\\header1(anchor:)\n\\anchor(anchor|anchorid)\n', escset))
     body.appendChild(escm.parsePreprocessEval('\\header1(md:)\n\\md(# md header\n*italic text*)', escset))
+    body.appendChild(escm.parsePreprocessEval('\\header1(jump:)\n\\jump(\\rainbow(jump)|#anchorid2)', escset))
     
     let longElem = document.createElement('div')
     longElem.style.height = '256em'
