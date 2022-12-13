@@ -245,6 +245,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
   args.file = ctx.addPathDot(args.file)
   let filename = ctx.path.basename(args.file)
   
+  // Does file already exist?
   if(ctx.fs.existsSync(args.file))
     return setCodeAndMessage(response, 400, `File ${args.file} already exists`)
   // else
