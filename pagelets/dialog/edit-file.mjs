@@ -26,7 +26,9 @@ export async function submit(callElem) {
   if(!response.ok) {
     if(response.status === 409) { // conflict
       conflictDisplay.style.display = 'block'
-      conflictDisplay.textContent = await response.text()
+      const conflictedContent = await response.text()
+      conflictDisplay.textContent = conflictedContent
+      new BroadcastChannel(`content-${file}`).postMessage(conflictedContent)
       if(etag)
         pagelet.dataset.etag = etag
       lib.notificationFrom(callElem, `File on server is newer than expected\nPlease review current file state (shown in gray above) and resubmit`)
@@ -40,6 +42,7 @@ export async function submit(callElem) {
       pagelet.dataset.etag = etag
     const initialElem = pagelet.querySelector(':scope > .initial-value')
     initialElem.textContent = textarea.value
+    new BroadcastChannel(`content-${file}`).postMessage(textarea.value)
     lib.notificationFrom(callElem, `Success`, {transient: true})
   }
 }
@@ -78,6 +81,7 @@ export async function setInitialValue(callElem) {
   if(etag)
     pagelet.dataset.etag = etag
   const initialValue = await response.text()
+  new BroadcastChannel(`content-${file}`).postMessage(initialValue)
   initialElem.textContent = initialValue
   textarea.value = initialValue
 }
