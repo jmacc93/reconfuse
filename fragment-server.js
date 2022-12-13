@@ -31,7 +31,8 @@ _G.getUid = getUid
 
 const placeholderTransforms = {
   dirname: (val) => path.dirname(val),
-  basename: (val) => path.basename(val)
+  basename: (val) => path.basename(val),
+  capitalize: (val) => `${val[0].toUpperCase()}${val.slice(1)}`
 }
 _G.placeholderTransforms = placeholderTransforms
 const _insertPlaceholderValuesDefaultRegex = /\-\[(.+?)\]\-/g // -[ asdf ]-
