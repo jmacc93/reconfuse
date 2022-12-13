@@ -246,21 +246,19 @@ Writes either 'true' or 'false' to body to indicate having the privilege or not 
 */
 // args: {username, file, directory, controlName} and cookies.username
 exports.respondToRequest['has-privilege'] = async function(request, response, getBody, args) {
-  let username = args.username ?? args.cookies.username
-  if(!username) 
-    return setCodeAndMessage(response, 400, `No username argument given (use ?username=...)`)
-  // else
+  let username = args.username ?? (args.cookies?.loggedin ? args.cookies.username : undefined)
   
-  if(!args.controlName)
-    return setCodeAndMessage(response, 400, `No controlName argument given (user ?controlName=...)`)
+  if(!args.privilege)
+    return setCodeAndMessage(response, 400, `No privilege argument given (user ?privilege=...)`)
   //
+  let privilegeArray = args.privilege.split(/\s*,\s*/g) // "file, updateFile" -> ["file", "updateFile"]
   
   if(!args.file && !args.directory)
     return setCodeAndMessage(response, 400, `No file or directory argument given`)
   //
   
   response.statusCode = 200
-  let isAllowed = userControlInclusionStatus(username, args.file ?? args.directory, args.controlName)
+  let isAllowed = userControlInclusionStatus(username, args.file ?? args.directory, privilegeArray)
   response.write(isAllowed ? 'true' : 'false')
   return true
 }
