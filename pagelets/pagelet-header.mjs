@@ -191,6 +191,8 @@ async function decorateTextField(textfield) {
   const lib = await import('/lib/lib.mjs')
   let pagelet = textfield.closest('.pagelet')
   
+  textfield.classList.add('decorated-textfield')
+  
   // Text substitutions
   if(!textfield.hasAttribute('no-substitutions')) {
     let attrSubList = textfield.dataset.substitute?.split(/\s*\;\s*/g).map(x=> x.split(/\s*\:\s*/g)) ?? [] // "a:b; x:y" -> [["a","b"],["x","y"]]
