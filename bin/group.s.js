@@ -30,7 +30,7 @@ Yields all control objects in all control.json files starting from directory up 
 Control objects look like {"file": ..., "newDir": ..., ...}
 */
 function* getAllControlObjDirs(directory) {
-  let currentDir = directory
+  let currentDir = ctx.addPathDot(directory)
   while(true) {
     let controlJsonFile = ctx.path.join(currentDir, './control.json')
     if(ctx.fs.existsSync(controlJsonFile)) {
