@@ -12,19 +12,36 @@ export async function showPreview(callElem) {
 export async function submit(callElem) {
   const lib = await import('/lib/lib.mjs')
   const pagelet = callElem.closest('.pagelet')
+  const conflictDisplay = pagelet.querySelector('.conflict-display')
   const file = pagelet.dataset.file
   if(!file)
     return void console.error(`No data-file attribute given on edit-file pagelet`)
   // else
   const textarea = pagelet.querySelector(':scope > textarea')
-  let response = await fetch(`/bin/file.s.js/update?file=${file}`, {method: "POST", body: textarea.value})
-  if(!response.ok)
-    return void lib.notificationFrom(callElem, `Error: ${response.status}, ${response.statusText}`, {error: true})
-  // else
-  pagelet.classList.remove('unsaved')
-  const initialElem = pagelet.querySelector(':scope > .initial-value')
-  initialElem.textContent = textarea.value
-  lib.notificationFrom(callElem, `Success`, {transient: true})
+  let headers = {}
+  if(pagelet.dataset.etag)
+    headers['If-Match'] = pagelet.dataset.etag
+  const response = await fetch(`/bin/file.s.js/update?file=${file}`, {method: "POST", body: textarea.value, headers: headers})
+  const etag = response.headers.get('ETag')
+  if(!response.ok) {
+    if(response.status === 409) { // conflict
+      conflictDisplay.style.display = 'block'
+      conflictDisplay.textContent = await response.text()
+      if(etag)
+        pagelet.dataset.etag = etag
+      lib.notificationFrom(callElem, `File on server is newer than expected\nPlease review current file state (shown in gray above) and resubmit`)
+    } else { // misc bad response
+      return void lib.notificationFrom(callElem, `Error: ${response.status}, ${response.statusText}`, {error: true})
+    }
+  } else { // response ok
+    conflictDisplay.style.display = 'none'
+    pagelet.classList.remove('unsaved')
+    if(etag)
+      pagelet.dataset.etag = etag
+    const initialElem = pagelet.querySelector(':scope > .initial-value')
+    initialElem.textContent = textarea.value
+    lib.notificationFrom(callElem, `Success`, {transient: true})
+  }
 }
 
 export async function installCtrlEnterFunctionality(callElem) {
@@ -57,6 +74,9 @@ export async function setInitialValue(callElem) {
   if(!response.ok)
     return void lib.notificationFrom(callElem, `Error: ${response.status}, ${response.statusText}`, {error: true})
   // else
+  const etag = response.headers.get('ETag')
+  if(etag)
+    pagelet.dataset.etag = etag
   const initialValue = await response.text()
   initialElem.textContent = initialValue
   textarea.value = initialValue
