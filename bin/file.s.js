@@ -894,6 +894,14 @@ exports.respondToRequest['raw'] = async function(request, response, getBody, arg
     return setCodeAndMessage(response, 400, `Given file is a directory`)
   // else
   
+  // is user allowed to do this here?
+  const parentDirectory = ctx.path.dirname(args.file)
+  const groupLib = await ctx.runScript('./bin/group.s.js')
+  const username = args.username ?? (args.cookies?.loggedin ? args.cookies.username : undefined)
+  const isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
+  if(!isAllowed)
+    return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot access the file ${args.file}`)
+  // else
   
   // Set / check ETag header
   let etag = String(stat.mtimeMs)
