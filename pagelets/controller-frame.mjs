@@ -14,7 +14,8 @@ export async function installTitleMirrorFunctionality(callElem) {
   const childContainer = frame.querySelector(':scope > .child-container')
   lib.applyOnNewChildren(childContainer, () => {
     let firstTitle = childContainer.querySelector('title')
-    titleMirror.textContent = firstTitle.textContent
+    if(firstTitle)
+      titleMirror.textContent = firstTitle.textContent
   }, true) // true = deep
   titleMirror.textContent = frame.querySelector('title')?.textContent
 }
