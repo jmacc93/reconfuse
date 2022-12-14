@@ -894,6 +894,12 @@ exports.respondToRequest['raw'] = async function(request, response, getBody, arg
     return setCodeAndMessage(response, 400, `Given file is a directory`)
   // else
   
+  // is user actually who they say they are?
+  let userLib = await ctx.runScript('./bin/user.s.js')
+  if(!userLib.handleUserAuthcheck(response, args))
+    return true
+  // else
+  
   // is user allowed to do this here?
   const parentDirectory = ctx.path.dirname(args.file)
   const groupLib = await ctx.runScript('./bin/group.s.js')
