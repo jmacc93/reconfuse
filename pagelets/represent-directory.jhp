@@ -114,7 +114,7 @@ html`
         html`
         <div class="file" data-file=${file}>
           <span class="file symbol"></span>
-          <a href="/pagelets/represent-file.jhp?file=${file}" title="File: ${ctx.path.join(file)}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
+          <a href="/pagelets/represent-file.jhp?file=${file}" title="File: ${file}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
           <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
             <option style="color: gray">S</option>
             ${commonOperationOptionsHtml(file)}
