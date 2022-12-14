@@ -125,13 +125,13 @@ export async function initializeContentDisplay(callElem) {
   if(contentResponse.ok) {
     new BroadcastChannel(`content-${pagelet.dataset.file}`).postMessage(await contentResponse.text())
   } else if(contentResponse.status === 404) {
-    let newLink = document.createElement('a')
-    newLink.href = `/pagelets/file-editor.jhp?file=${pagelet.dataset.file}`
-    newLink.setAttribute('target', "replace-noframe this parent .pagelet")
-    newLink.setAttribute('style', 'color: red')
-    newLink.textContent = '404'
+    let fofElem = document.createElement('span')
+    // fofElem.href = `/pagelets/file-editor.jhp?file=${pagelet.dataset.file}`
+    // fofElem.setAttribute('target', "replace-noframe this parent .pagelet")
+    fofElem.setAttribute('style', 'color: red')
+    fofElem.textContent = '404'
     contentDisplay.innerHTML = ''
-    contentDisplay.appendChild(newLink)
+    contentDisplay.appendChild(fofElem)
   } else {
     contentDisplay.innerHTML = ''
     contentDisplay.textContent = ['Error during response, ', String(contentResponse.status), ', ', contentResponse.statusText].join('')
