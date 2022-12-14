@@ -374,7 +374,8 @@ function buildJFP(filepath) {
   })
   
   fs.writeFileSync('last-jfp-source.js', jfpSource)
-  const jfpFunction = AsyncFunction('dirPath', 'rootPath', 'ctx', 'request', 'response', 'args', jfpSource)
+  let internalFunctionName = `JFP body: ${filepath}`
+  const jfpFunction = Function(`return {['${internalFunctionName}']: async function(dirPath, rootPath, ctx, request, response, args){\n${jfpSource}\n}}`)()[internalFunctionName]
   let stat = fs.statSync(filepath)
   jfpCache[filepath] = {fn: jfpFunction, time: stat.mtimeMs}
   return jfpFunction
