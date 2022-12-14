@@ -33,15 +33,15 @@ const maxFilesToShow = 16
   
 // is user actually who they say they are?
 let userLib = await ctx.runScript('./bin/user.s.js')
+let username = args.cookies?.loggedin ? args.cookies.username : undefined
 if(!userLib.handleUserAuthcheck(response, args))
-  return true
+  username = undefined
 // else
 
 // is user allowed to do this here?
 const parentDirectory = ctx.path.dirname(serverDir)
 const basename = ctx.path.basename(serverDir)
 const groupLib = await ctx.runScript('./bin/group.s.js')
-const username = args.cookies?.loggedin ? args.cookies.username : undefined
 const isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
 if(!isAllowed) {
   html`<div class="error">${username ? 'User ' + username : 'Anonymous users '} cannot access the file ${serverDir}</div>`
@@ -57,6 +57,8 @@ const commonOperationOptionsHtml = (file)=> /*html*/`
   <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .file" pagelet-src="/pagelets/dialog/trash-file.html?file=${file}">Trash</option>
   <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .file" pagelet-src="/pagelets/components/file-permissions.jhp?file=${file}">Permissions</option>
 `
+
+response.statusCode = 200
 
 html`
 <div class="pagelet directory-representation" data-url="/pagelets/represent-directory.jhp?directory=${args.directory}" data-file=${clientDir} data-dir=${clientDir}>

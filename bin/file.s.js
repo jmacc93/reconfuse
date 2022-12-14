@@ -896,14 +896,14 @@ exports.respondToRequest['raw'] = async function(request, response, getBody, arg
   
   // is user actually who they say they are?
   let userLib = await ctx.runScript('./bin/user.s.js')
+  let username = args.cookies?.loggedin ? args.cookies.username : undefined
   if(!userLib.handleUserAuthcheck(response, args))
-    return true
+    username = undefined
   // else
   
   // is user allowed to do this here?
   const parentDirectory = ctx.path.dirname(args.file)
   const groupLib = await ctx.runScript('./bin/group.s.js')
-  const username = args.cookies?.loggedin ? args.cookies.username : undefined
   const isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
   if(!isAllowed)
     return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot access the file ${args.file}`)
@@ -919,6 +919,11 @@ exports.respondToRequest['raw'] = async function(request, response, getBody, arg
   // else
   
   // serve the file
+  if(response.statusCode === 401) // possibly set by handleUserAuthcheck
+    response.statusMessage = 'File served; please log in again'
+  else
+    response.statusMessage = 'File served'
+  response.statusCode = 200
   await ctx.serveFile(args.file, response)
   
   
