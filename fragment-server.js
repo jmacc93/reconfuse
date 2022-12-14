@@ -318,7 +318,7 @@ async function runScript(scriptPath) {
   } // else, make script from file:
   return fsp.readFile(scriptPath).then(sourceCode => {
     let internalFunctionName = `Script body: ${scriptPath}`
-    let wrappedSource = `return {['${internalFunctionName}']: async function(exports, script, dirPath, rootPath, ctx){\n${sourceCode?.toString()}}}`
+    let wrappedSource = `return {['${internalFunctionName}']: async function(exports, script, dirPath, rootPath, ctx){\n${sourceCode?.toString()}\n}}`
     const fn = Function(wrappedSource)()[internalFunctionName]
     return _runScriptFunction(scriptPath, fn)
   })
