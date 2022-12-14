@@ -157,6 +157,25 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   return true
 }
 
+const appendHeaderMakers = {
+  // anonId is undefined if should use username, otherwise use anonId
+  default: (anonId, username, displayname) => `\n\n${anonId ? `anonymous(${anonId})` : username} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n`,
+  ['.md']: (anonId, username, displayname) => {
+    return ['\n\n---\n',
+      anonId ? `anonymous(${anonId}) ` :`[${username}](/users/${username}/) `,
+      displayname ? `(as ${displayname}) ` : '',
+      (new Date()).toUTCString(), '\n'
+    ].join('')
+  },
+  ['.escm']: (anonId, username, displayname) => {
+    return ['\n\n\\separator() ',
+      anonId ? `anonymous(${anonId}) ` :`\\link(/users/${username}/|${username}) `,
+      displayname ? `(as ${displayname}) ` : '',
+      `\\itime(`, Date.now(), `)\n`
+    ].join('')
+  },
+}
+
 /**
 Appends to a file, also updates the file's directory's changelog.autogen.txt
 Can use argument body or request body (http message body) to append to the file
@@ -216,10 +235,13 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   let displayname = args.displayname ?? args.cookies?.displayname
   let [_contentType, isBinary] = ctx.extContentMap[ctx.path.extname(args.file)] ?? ctx.extContentMap.default
   let payload = args.body ?? (isBinary ? await getBody() : (await getBody()).toString()) // use args.body if given, else use request body
-  if(args.tagged ?? false) // tagged append
-    await fsp.appendFile(args.file, `\n\n${username ?? `anonymous(${anonId})`} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n${payload}`)
-  else // regular append
+  if(args.tagged ?? false) { // tagged append
+    let extension = ctx.path.extname(args.file)
+    let headerMaker = appendHeaderMakers[extension] ?? appendHeaderMakers.default
+    await fsp.appendFile(args.file, headerMaker(anonId, username, args.displayname ?? (args.cookies?.loggedin ? args.cookies.displayname : undefined)) + payload)
+  } else { // regular append
     await fsp.appendFile(args.file, `\n\n` + payload)
+  }
   console.log(`[${request.uid}]`, `update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
     utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' appended ', payload.length, ' chars to ', ctx.path.basename(args.file), '\n'
