@@ -103,7 +103,7 @@ html`
         html`
         <div class="file">
           <span class="dir symbol" data-file=${file}></span>
-          <a href="/pagelets/represent-directory.jhp?directory=${file}" title="Directory ${file}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
+          <a href="/pagelets/represent-directory.jhp?directory=${file}" title="Directory ${file}" target="after this">${fileBasename}</a>
           <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
             <option value="" style="color: gray">S</option>
             ${commonOperationOptionsHtml(file)}
