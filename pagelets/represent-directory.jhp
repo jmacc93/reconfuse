@@ -116,11 +116,11 @@ html`
           <span class="file symbol"></span>
           <a href="/pagelets/represent-file.jhp?file=${file}" title="File: ${file}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
           <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-            <option style="color: gray">S</option>
+            <option value="" style="color: gray">S</option>
             ${commonOperationOptionsHtml(file)}
-            <option srcfn="/pagelets/represent-directory.mjs: openSimpleEditDialog">Open simple edit dialog</option>
-            <option srcfn="/pagelets/represent-directory.mjs: openSimpleAppendDialog">Open simple append dialog</option>
-            ${file.endsWith('.txt') ? '<option value="/pagelets/represent-directory.mjs: openAsList">Open as list</option>' : ''}
+            <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${file}" target="after this parent select">Edit</option>
+            <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${file}" target="after this parent select">Append</option>
+            ${file.endsWith('.txt') ? '<option srcfn="/pagelets/represent-directory.mjs: openAsList">Open as list</option>' : ''}
           </select>
         </div>`
       }
