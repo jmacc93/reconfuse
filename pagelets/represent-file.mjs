@@ -42,31 +42,31 @@ export async function reload(optionCallElem) {
   }
 }
 
-export async function openSimpleEditDialog(optionCallElem) {
-  const lib = await import('/lib/lib.mjs')
-  const pagelet = optionCallElem.closest('.pagelet')
-  lib.openPageletAt(optionCallElem, `/pagelets/dialog/edit-file.html?file=${pagelet.dataset.file}`, 'after this parent select')
-}
+// export async function openSimpleEditDialog(optionCallElem) {
+//   const lib = await import('/lib/lib.mjs')
+//   const pagelet = optionCallElem.closest('.pagelet')
+//   lib.openPageletAt(optionCallElem, `/pagelets/dialog/edit-file.html?file=${pagelet.dataset.file}`, 'after this parent select')
+// }
 
-export async function openSimpleAppendDialog(optionCallElem) {
-  const lib = await import('/lib/lib.mjs')
-  const pagelet = optionCallElem.closest('.pagelet')
-  lib.openPageletAt(optionCallElem, `/pagelets/dialog/append-to-file.jhp?file=${pagelet.dataset.file}`, 'after this parent select')
-}
+// export async function openSimpleAppendDialog(optionCallElem) {
+//   const lib = await import('/lib/lib.mjs')
+//   const pagelet = optionCallElem.closest('.pagelet')
+//   lib.openPageletAt(optionCallElem, `/pagelets/dialog/append-to-file.jhp?file=${pagelet.dataset.file}`, 'after this parent select')
+// }
 
-export async function openEditor(optionCallElem) {
-  const lib = await import('/lib/lib.mjs')
-  const pagelet = optionCallElem.closest('.pagelet')
-  let donePart = '&doneUrl=' + encodeURIComponent(`/pagelets/file-editor.jhp?file=${pagelet.dataset.file}`)
-  const destyle = lib.styleInProgress(pagelet)
-  try {
-    const replacementPagelet = await lib.getRemotePagelet(`/pagelets/file-editor.jhp?file=${pagelet.dataset.file}${donePart}`, lib.ERRORONNOTOK)
-    pagelet.replaceWith(replacementPagelet)
-  } catch(err) {
-    destyle()
-    lib.notificationFrom(optionCallElem, `Error: ${err.message}`, {error: true})
-  }
-}
+// export async function openEditor(optionCallElem) {
+//   const lib = await import('/lib/lib.mjs')
+//   const pagelet = optionCallElem.closest('.pagelet')
+//   let donePart = '&doneUrl=' + encodeURIComponent(`/pagelets/file-editor.jhp?file=${pagelet.dataset.file}`)
+//   const destyle = lib.styleInProgress(pagelet)
+//   try {
+//     const replacementPagelet = await lib.getRemotePagelet(`/pagelets/file-editor.jhp?file=${pagelet.dataset.file}${donePart}`, lib.ERRORONNOTOK)
+//     pagelet.replaceWith(replacementPagelet)
+//   } catch(err) {
+//     destyle()
+//     lib.notificationFrom(optionCallElem, `Error: ${err.message}`, {error: true})
+//   }
+// }
 
 export async function openDirectory(optionCallElem) {
   const lib = await import('/lib/lib.mjs')
