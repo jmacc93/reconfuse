@@ -81,7 +81,6 @@ if(isBinary) {
       
       <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
         <option style="color:gray">S</option>
-        ${!exists ? /*html*/`<option srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</option>` : ''}
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent select" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent select" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</option>
@@ -114,8 +113,8 @@ if(isBinary) {
       html`
       <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
         <option style="color:gray">S</option>
-        <option srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</option>
+        <option srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=move">Move to</option>
@@ -174,6 +173,7 @@ if(isBinary) {
       <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
         <option style="color:gray">S</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</option>
+        <option srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</option>
         <option srcfn="/pagelets/represent-file.mjs: makeIt">Make it</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</option>
         <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</option>
