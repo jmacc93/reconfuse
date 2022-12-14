@@ -30,6 +30,25 @@ for(const _ of ctx.fs.readdirSync(serverDir))
 
 const maxFilesToShow = 16
 
+  
+// is user actually who they say they are?
+let userLib = await ctx.runScript('./bin/user.s.js')
+if(!userLib.handleUserAuthcheck(response, args))
+  return true
+// else
+
+// is user allowed to do this here?
+const parentDirectory = ctx.path.dirname(serverDir)
+const basename = ctx.path.basename(serverDir)
+const groupLib = await ctx.runScript('./bin/group.s.js')
+const username = args.cookies?.loggedin ? args.cookies.username : undefined
+const isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
+if(!isAllowed) {
+  html`<div class="error">${username ? 'User ' + username : 'Anonymous users '} cannot access the file ${serverDir}</div>`
+  return true
+}
+// else
+
 const commonOperationOptionsHtml = (file)=> /*html*/`
   <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${file}">Copy path</option>
   <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .file" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${file}&operation=copy">Copy to</option>
