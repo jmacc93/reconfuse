@@ -65,11 +65,11 @@ function validateUserWithToken(username, authtoken) {
 exports.validateUserWithToken = validateUserWithToken
 
 function handleUserAuthcheck(response, args) {
-  if(!args.cookies.loggedin)
+  if(!args.cookies?.loggedin)
     return true // anonymous user
   // else
-  let username  = args.username ?? args.cookies?.username
-  let authtoken = args.authtoken ?? args.cookies?.authtoken
+  let username  = args.cookies.username
+  let authtoken = args.cookies.authtoken
   if(username) { // not anonymous (username === undefined <=> user is anonymous)
     if(!authtoken) {
       setCodeAndMessage(response, 401, 'No authtoken given; try logging in again')

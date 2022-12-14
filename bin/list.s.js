@@ -81,12 +81,6 @@ exports.respondToRequest.add = async function(request, response, getBody, args) 
     return setCodeAndMessage(response, 400, `File ${args.file} doesn't exist`)
   // else
   
-  // is user logged in
-  let username = args.cookies.username
-  if(!username || !args.cookies.authtoken)
-    return setCodeAndMessage(response, 400, `Can only add name to list if logged in`)
-  // else
-  
   // is user actually who they say they are?
   let userLib = await ctx.runScript('./bin/user.s.js')
   if(!userLib.handleUserAuthcheck(response, args))
@@ -96,6 +90,7 @@ exports.respondToRequest.add = async function(request, response, getBody, args) 
   // is user allowed to do this here?
   let parentDirectory = ctx.path.dirname(args.file)
   const groupLib = await ctx.runScript('./bin/group.s.js')
+  let username = args.cookies?.loggedin ? args.cookies.username : undefined
   let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, [
     'updateFile', 'file', `file(${filename})`, `updateFile(${filename})`, 'vote', `vote(${filename})`, 'listAdd', `listAdd(${filename})`
   ])
