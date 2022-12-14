@@ -110,8 +110,8 @@ if(isBinary) {
         html`<span style="color: red">Image 404</span>`
       else
         html`<span style="color: red">File 404</span>`
+        
       html`
-      
       <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
         <option style="color:gray">S</option>
         <option srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</option>
