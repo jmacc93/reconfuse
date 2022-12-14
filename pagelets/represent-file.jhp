@@ -105,7 +105,6 @@ if(isBinary) {
       <script src="/lib/callib/callib0.mjs" type="module"></script>
       <script src="/lib/mixin.mjs" type="module"></script>
       <link href="/pagelets/represent-file.css" rel="stylesheet">
-      
       `
       if(principleContentType.startsWith('image/')) // is an image, use <img> element
         html`<span style="color: red">Image 404</span>`
