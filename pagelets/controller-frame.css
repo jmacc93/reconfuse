@@ -66,14 +66,14 @@
 }
 
 
-.drop-hovered {
+.controller-frame.drop-hovered {
   outline: 1px solid orange
 }
-.drop-hovered.top-hovered::before {
+.controller-frame.drop-hovered.top-hovered::before {
   content: 'Drop';
   color: orange;
 }
-.drop-hovered.bottom-hovered::after {
+.controller-frame.drop-hovered.bottom-hovered::after {
   content: 'Drop';
   color: orange;
 }
