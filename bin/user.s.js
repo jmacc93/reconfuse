@@ -163,6 +163,19 @@ exports.respondToRequest.login = async function(request, response, getBody, args
   return true
 }
 
+exports.respondToRequest.validate = async function(request, response, getBody, args) {
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(200) // wait 1/5 second
+  
+  const username  = args.cookies?.loggedin ? args.cookies.username : undefined
+  const authtoken = args.cookies?.loggedin ? args.cookies.authtoken : undefined
+  
+  response.statusCode = 200
+  response.statusMessage = validateUserWithToken(username, authtoken)
+  
+  return true
+}
+
 exports.respondToRequest.register = async function(request, response, getBody, args) {
   const lib = await ctx.runScript('./lib/lib.s.js')
   await lib.asyncSleepFor(2000) // wait 2 seconds
