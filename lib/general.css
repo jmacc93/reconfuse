@@ -256,3 +256,18 @@ body.dragging-element .drop-hovered {
   cursor: move
 }
 
+
+/* ---------------------------- */
+/*          Dropdown            */
+
+
+.dropdown-root {
+  position: absolute;
+}
+.dropdown-relative {
+  position: relative;
+  min-width: 8em;
+  background: white;
+  border: 1px solid gray;
+  padding: 4px;
+}
