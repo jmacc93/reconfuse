@@ -110,6 +110,7 @@ export async function initializeContentDisplay(callElem) {
     if(contentText.length === 0) { // empty content
       let emptyMsgTemplate = document.createElement('template')
       emptyMsgTemplate.innerHTML = /*html*/`<span style="opacity: 50%">...</span>`
+      contentDisplay.innerHTML = ''
       contentDisplay.appendChild(emptyMsgTemplate.content)
     } else { // not empty:
       await lib.renderContentTo(contentDisplay, contentText, fileExtension)
