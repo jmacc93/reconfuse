@@ -7,6 +7,14 @@ export async function setInitialState(callElem) {
   const loggedInAsUsernameElem = pagelet.querySelector(':scope > .logged-in-as .username')
   const loggedInAsDispnameElem = pagelet.querySelector(':scope > .logged-in-as .displayname')
   
+  fetch(`/bin/user.s.js/validate`).then(async response => {
+    const statusText = response.statusText
+    if(statusText === 'Bad authtoken' || statusText === 'Authtoken is expired') {
+      const validationMsgElem = pagelet.querySelector(':scope > .initial-validation-msg')
+      validationMsgElem.textContent = `${statusText}, please log in again`
+    }
+  })
+  
   let username = window.localStorage.getItem('username')
   usernameInput.value = username ?? ''
   
@@ -48,6 +56,9 @@ export async function loginButtonClicked(callElemButton) {
   const loggedInAsUsernameElem = pagelet.querySelector(':scope > .logged-in-as .username')
   const loggedInAsDispnameElem = pagelet.querySelector(':scope > .logged-in-as .displayname')
   const loginButton = pagelet.querySelector(':scope > * > .login')
+  const validationMsgElem = pagelet.querySelector(':scope > .initial-validation-msg')
+  
+  validationMsgElem.textContent = ''
   
   if(pagelet.dataset.loggedin === 'true')
     return void lib.notificationFrom(callElemButton, 'Already logged in')

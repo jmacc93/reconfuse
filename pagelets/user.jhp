@@ -24,6 +24,7 @@ html`
     <span>(as <span class="displayname"></span>)</span> 
   </div>
   <div class="logged-out logged-in-hide"> Logged out </div>
+  <div class="initial-validation-msg"></div>
   
   <div>
     <input class="displayname" type="displayname" placeholder="displayname" maxlength="32"/>
