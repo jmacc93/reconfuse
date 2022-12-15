@@ -159,17 +159,17 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
 
 const appendHeaderMakers = {
   // anonId is undefined if should use username, otherwise use anonId
-  default: (anonId, username, displayname) => `\n\n${anonId ? `anonymous(${anonId})` : username} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n`,
+  default: (anonId, username, displayname) => `\n\n${(anonId !== undefined) ? `anonymous(${anonId})` : username} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n`,
   ['.md']: (anonId, username, displayname) => {
     return ['\n\n---\n',
-      anonId ? `anonymous(${anonId}) ` :`[${username}](/users/${username}/) `,
+      (anonId !== undefined) ? `anonymous(${anonId}) ` :`[${username}](/users/${username}/) `,
       displayname ? `(as ${displayname}) ` : '',
       (new Date()).toUTCString(), '\n'
     ].join('')
   },
   ['.escm']: (anonId, username, displayname) => {
     return ['\n\n\\separator() ',
-      anonId ? `anonymous(${anonId}) ` :`\\link(/users/${username}/|${username}) `,
+      (anonId !== undefined) ? `anonymous(${anonId}) ` :`\\link(/users/${username}/|${username}) `,
       displayname ? `(as ${displayname}) ` : '',
       `\\itime(`, Date.now(), `)\n`
     ].join('')
@@ -228,7 +228,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   
   // Register anonymous user if anonymous
   let anonId
-  if(username === undefined)
+  if(!username)
     anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
   
   // Update the file
