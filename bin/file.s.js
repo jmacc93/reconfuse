@@ -929,3 +929,80 @@ exports.respondToRequest['raw'] = async function(request, response, getBody, arg
   
   return setCodeAndMessage(response, 200, `Served ${args.file}`)
 }
+
+exports.respondToRequest['tail'] = async function(request, response, getBody, args) {
+  // console.log(`[${request.uid}]`, `file.s.js/raw requested to serve a ${args.file} raw`)
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(200) // wait for 1/5 second
+  
+  if(!args.file)
+    return setCodeAndMessage(response, 400, `No file argument given`)
+  // else
+  
+  if(!args.lines)
+    return setCodeAndMessage(response, 400, `No lines argument given`)
+  // else
+  const lineCount = parseInt(args.lines)
+  if(isNaN(lineCount))
+    return setCodeAndMessage(response, 400, `Lines argument is not a number: ${lineCount}`)
+  // else
+  if(lineCount <= 0)
+    return setCodeAndMessage(response, 400, `Lines argument must be greater than 0: ${lineCount}`)
+  // else
+    
+  
+  // Is file outside working directory tree
+  args.file = ctx.addPathDot(path.relative('./', ctx.addPathDot(args.file)))
+  if(args.file.startsWith('..'))
+    return setCodeAndMessage(response, 400, 'File argument cant start at directories higher than working directory')
+  // else
+  
+  let basename = path.basename(args.file)
+  if(basename.startsWith('.'))
+    return setCodeAndMessage(response, 400, `Cannot access dot files`)
+  // else
+  
+  if(!ctx.fs.existsSync(args.file))
+    return setCodeAndMessage(response, 404, `File doesn't exist`)
+  // else
+  
+  let stat = ctx.fs.statSync(args.file)
+  if(!stat.isFile())
+    return setCodeAndMessage(response, 400, `Given file is a directory`)
+  // else
+  
+  // is user actually who they say they are?
+  let userLib = await ctx.runScript('./bin/user.s.js')
+  let username = args.cookies?.loggedin ? args.cookies.username : undefined
+  if(!userLib.handleUserAuthcheck(response, args))
+    username = undefined
+  // else
+  
+  // is user allowed to do this here?
+  const parentDirectory = ctx.path.dirname(args.file)
+  const groupLib = await ctx.runScript('./bin/group.s.js')
+  const isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
+  if(!isAllowed)
+    return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot access the file ${args.file}`)
+  // else
+  
+  // Set / check ETag header
+  let etag = String(stat.mtimeMs)
+  response.setHeader('ETag', etag)
+  if((request.headers['if-none-match'] ?? '') === etag) {
+    response.statusCode = 304 // no change
+    return true
+  }
+  // else
+  
+  // serve the file (definitely needs optimization)
+  let fileContents = await ctx.fsp.readFile(args.file)
+  let lineArray = fileContents.toString().split('\n')
+  let tailArray = lineArray.slice(lineArray.length - lineCount)
+  
+  response.statusCode = 200
+  response.statusText = `Served tail of ${args.file}`
+  response.write(tailArray.join('\n'))
+  
+  return true
+}
