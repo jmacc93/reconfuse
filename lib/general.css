@@ -197,26 +197,6 @@ body > * + div {
   margin-top: 1em
 }
 
-
-
-/* ---------------------------- */
-/*      Element dragging        */
-
-
-.unselectable {
-  user-select: none;
-}
-
-body.dragging-element {
-  cursor: crosshair
-}
-body.dragging-element .drop-hovered {
-  cursor: move
-}
-
-
-
-
 /* ---------------------------- */
 
 .attention-flashing            { animation: af-outline-pulse    .5s ease; }
@@ -258,3 +238,21 @@ html-mixin {
   min-width: 2em;
   min-height: 2em;
 }
+
+
+
+/* ---------------------------- */
+/*      Element dragging        */
+
+
+.unselectable {
+  user-select: none;
+}
+
+body.dragging-element {
+  cursor: crosshair
+}
+body.dragging-element .drop-hovered {
+  cursor: move
+}
+
