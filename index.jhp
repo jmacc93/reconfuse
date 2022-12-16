@@ -33,16 +33,16 @@ html`
       <div class="header darker-background boxed padded" style="margin-top: 0; border-top: none">
         
         <span>Reconfuse</span>
-        <a href="/pagelets/represent-file.jhp?file=/intro.md">Intro</a>
-        <a href="/pagelets/settings.html">Settings</a>
-        <a href="/pagelets/user.jhp">User</a>
-        <a href="/pagelets/represent-directory.jhp?directory=/">Root</a>
+        <a href="/pagelets/represent-file.jhp?file=/intro.md">Intro</a>, 
+        <a href="/pagelets/settings.html">Settings</a>, 
+        <a href="/pagelets/user.jhp">User</a>, 
+        <a href="/pagelets/represent-directory.jhp?directory=/">Root</a>, 
         `
         let username = (args.cookies?.loggedin ? args.cookies?.username : undefined)
         if(username)
-          html`<a href="/pagelets/represent-directory.jhp?directory=/users/${username}/">${username}</a>`
+          html`<a href="/pagelets/represent-directory.jhp?directory=/users/${username}/">${username}</a>, `
         html`
-        
+        <a href="/pagelets/open-dialog.html">New frame</a>
       </div>
       
       `
