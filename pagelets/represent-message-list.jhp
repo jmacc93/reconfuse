@@ -18,8 +18,13 @@ if(args.directory.startsWith('..')) {
 if(!args.directory.endsWith('/'))
   args.directory += '/'
 
-if(!ctx.fs.existsSync(args.directory))
-  return ctx.serveJHP('./pagelets/non-existent-file.jhp', request, response, {...args, doneUrl:`/pagelets/represent-message-list.jhp?directory=${args.directory}&channel=${args.channel}`})
+if(!ctx.fs.existsSync(args.directory)) {
+  return ctx.serveFile('./pagelets/dialog/make-dir.html', response, {
+    ['arg-directory']: args.directory,
+    ['arg-after-url']: `/pagelets/represent-message-list.jhp?directory=${args.directory}&channel=${args.channel}`
+  })
+  // return ctx.serveJHP('./pagelets/non-existent-file.jhp', request, response, {...args, doneUrl:`/pagelets/represent-message-list.jhp?directory=${args.directory}&channel=${args.channel}`})
+}
 
 let dirStat = ctx.fs.statSync(args.directory)
 if(!dirStat.isDirectory()) {
