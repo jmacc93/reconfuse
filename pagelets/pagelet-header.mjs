@@ -225,6 +225,8 @@ async function decorateTextField(textfield) {
         let height = parseInt(window.getComputedStyle(textfield).height.slice(0, -2))
         height = Math.max(height + Math.ceil(wheelEvent.deltaY / 4), 92)
         textfield.style.height = `${height}px`
+        wheelEvent.stopImmediatePropagation()
+        wheelEvent.stopPropagation()
       }
     })
   }
