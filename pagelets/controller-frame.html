@@ -16,7 +16,7 @@
     <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
       <template><div class="dropdown" remove-on-click>
         <button is="call-resource-button" class="linklike" srcfn="/pagelets/controller-frame.mjs: newFrameAfter">New frame</button><br>
-        <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: toggleClassname" which="this parent .controller-frame" classname="resizable">Toggle resizable</button><br>
+        <button is="call-resource-button" class="linklike" srcfn="/pagelets/controller-frame.mjs: toggleResizable">Toggle resizable</button><br>
         Highlight: 
         <button is="call-resource-button" class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="red">red</button>, 
         <button is="call-resource-button" class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="blue">blue</button>, 
