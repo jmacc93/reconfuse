@@ -1,9 +1,9 @@
 
 
 
-export async function newFrameAfter(optionCallElem) {
+export async function newFrameAfter(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
-  const frame = optionCallElem.closest('.controller-frame')
+  const frame = lib.getParentMatching(dropdownCallElem, '.controller-frame')
   frame.insertAdjacentElement('beforebegin', await lib.controllerFrameAround(await lib.getRemotePagelet('/pagelets/open-dialog.html')))
 }
 
@@ -20,9 +20,10 @@ export async function installTitleMirrorFunctionality(callElem) {
   titleMirror.textContent = frame.querySelector('title')?.textContent
 }
 
-export async function installDragHandleFunctionality(callElem) {
-  const frame = callElem.closest('.controller-frame')
-  const dragHandle     = frame.querySelector(':scope > .infobar > span.drag-handle')
+export async function installDragHandleFunctionality(dropdownCallElem) {
+  const lib = await import('/lib/lib.mjs')
+  const frame = lib.getParentMatching(dropdownCallElem, '.controller-frame')
+  const dragHandle = frame.querySelector(':scope > .infobar > span.drag-handle')
   
   dragHandle.addEventListener('dragstart', startEvent => {
     frame.id = 'dragged-controller-frame'
