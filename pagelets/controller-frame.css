@@ -18,10 +18,9 @@
   margin-bottom: 4px
 }
 
-.controller-frame.highlighted[data-color="red"   ] { outline: 4px solid red   }
-.controller-frame.highlighted[data-color="blue"  ] { outline: 4px solid blue  }
-.controller-frame.highlighted[data-color="green" ] { outline: 4px solid green }
-.controller-frame:not(.highlighted) > .infobar > select.color-selector { display: none }
+.controller-frame[data-color="red"   ] { outline: 4px solid red   }
+.controller-frame[data-color="blue"  ] { outline: 4px solid blue  }
+.controller-frame[data-color="green" ] { outline: 4px solid green }
 
 .controller-frame button {
   padding: 1px;
