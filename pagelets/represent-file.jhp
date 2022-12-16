@@ -82,8 +82,8 @@ if(isBinary) {
       <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
         <template><div class="dropdown" remove-on-click>
           <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
-          <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent button.s-menu" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</button><br>
-          <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent button.s-menu" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</button><br>
+          <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</button><br>
+          <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</button><br>
           <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</button><br>
           <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</button><br>
           <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=move">Move to</button><br>
@@ -147,8 +147,8 @@ if(isBinary) {
       <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
         <template><div class="dropdown" remove-on-click>
           <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
-          <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent button.s-menu" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</button><br>
-          <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent button.s-menu" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</button><br>
+          <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</button><br>
+          <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</button><br>
           <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</button><br>
           <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</button><br>
           <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=move">Move to</button><br>
