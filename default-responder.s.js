@@ -152,17 +152,6 @@ exports.respondToRequest = async function(request, response, getBody, args) {
     return setCodeAndMessage(response, 401, `Cannot access the file ${args.requestPath}`)
   // else
   
-  // check file has been modified, if requested
-  const headers = request.headers
-  const reqEtag = headers['if-none-match']
-  const stat    = await ctx.fsp.stat(args.requestPath)
-  const fileEtag = String(stat.mtimeMs)
-  if(fileEtag === reqEtag) { // etags match, don't serve
-    response.statusCode = 304
-    response.setHeader('ETag', fileEtag)
-    return true
-  }
-  
   const replacementObj = {
     uid: ctx.getUid(),
     file: args.requestPath.slice(1),
@@ -175,9 +164,24 @@ exports.respondToRequest = async function(request, response, getBody, args) {
   }
   
   // does file exist?
-  if(!(ctx.fs.existsSync(args.requestPath))) // doesn't exist, serve 404
-    return ctx.serveJHP('./404.jhp', request, response, {cookies: args.cookies, file: args.requestPath})
+  if(!(ctx.fs.existsSync(args.requestPath))) { // doesn't exist, serve 404
+    response.statusCode = 404
+    response.statusMessage = `File ${args.requestPath} doesn't exist`
+    return true
+    // return ctx.serveJHP('./404.jhp', request, response, {cookies: args.cookies, file: args.requestPath})
+  }
   // else
+  
+  // check file has been modified, if requested
+  const headers = request.headers
+  const reqEtag = headers['if-none-match']
+  const stat    = await ctx.fsp.stat(args.requestPath)
+  const fileEtag = String(stat.mtimeMs)
+  if(fileEtag === reqEtag) { // etags match, don't serve
+    response.statusCode = 304
+    response.setHeader('ETag', fileEtag)
+    return true
+  }
   
   // File exists, all clear, serve it up:
   if(response.statusCode === 401) // possibly set by handleUserAuthcheck
