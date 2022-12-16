@@ -55,7 +55,7 @@ export async function installDragHandleFunctionality(dropdownCallElem) {
     let bottomFrame = overElem.closest('.controller-frame')
     if(!bottomFrame)
       bottomFrame = frame
-    bottomFrame.id = 'controller-frame-drop-target' // ERROR: Uncaught TypeError: bottomFrame is null; go to user.jhp from index.jhp, make new frame via S menu
+    bottomFrame.id = 'controller-frame-drop-target'
     overEvent.stopPropagation()
     overEvent.stopImmediatePropagation()
     overEvent.preventDefault()
