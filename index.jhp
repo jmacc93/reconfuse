@@ -46,7 +46,7 @@ html`
       </div>
       
       `
-      if(args.mixin) {
+      if(args.mixin !== undefined) {
         let splitMixinArg = args.mixin.split(/\s*,\s*/g).map(x =>x.replaceAll(/\\([\&\=\?])/g, (_str,cap)=>cap))
         for(const url of splitMixinArg)
           html`<html-mixin src="${url}" framed></html-mixin>`
