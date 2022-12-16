@@ -61,3 +61,15 @@ export async function installDragHandleFunctionality(dropdownCallElem) {
     overEvent.preventDefault()
   })
 }
+
+
+export async function toggleResizable(dropdownCallElem) {
+  const lib = await import('/lib/lib.mjs')
+  const frame = lib.getParentMatching(dropdownCallElem, '.controller-frame')
+  const childContainer = frame.querySelector('.child-container')
+  frame.classList.toggle('resizable')
+  if(frame.classList.contains('resizable')) { // was not resizable; just turned resizable
+    if(!childContainer.style.height)
+      childContainer.style.height = `8em`
+  }
+}
