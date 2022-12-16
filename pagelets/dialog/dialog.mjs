@@ -9,10 +9,11 @@ const simpleEditDialogTemplate = makeTemplate(/*html*/`
   <div class="pagelet edit">
     <textarea class="vertical-resizable width100p" style="height: 16em"></textarea>
     <button class="linklike">Done</button>
-    <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-      <option style="color:gray">S</option>
-      <option srcfn="/lib/elem-functions.mjs: removeElement" which="this parent .pagelet.edit">Cancel</option>
-    </select>
+    <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <template><div class="dropdown" remove-on-click>
+        <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: removeElement" which="this parent .pagelet.edit">Cancel</button>
+      </div></template>
+    </button>
   </div>
 `)
 
@@ -46,10 +47,11 @@ const simpleLineDialogTemplate = makeTemplate(/*html*/`
   <div class="pagelet edit">
     <input type="text"/>
     <button class="linklike">Done</button>
-    <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-      <option style="color:gray">S</option>
-      <option srcfn="/lib/elem-functions.mjs: removeElement" which="this parent .pagelet.edit">Cancel</option>
-    </select>
+    <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <template><div class="dropdown" remove-on-click>
+        <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: removeElement" which="this parent .pagelet.edit">Cancel</button>
+      </div></template>
+    </button>
   </div>
 `)
 

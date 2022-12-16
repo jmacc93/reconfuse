@@ -53,11 +53,12 @@ if(args.username) { // requested about a user, check user voted
     <link href="/pagelets/represent-list.css" rel="stylesheet"/>
     <span class="count">${count}</span>
     <span class="user-listd" data-inlist="${userInList}">${args.username} ${userInList ? 'is in this list' : "isn't in this list"}</span>
-    <select is="call-selection" class="linklike" style="width: 1em; appearance:none">
-      <option style="color:gray">S</option>
-      <option srcfn="" style="color:gray">List ${clientFile}</option>
-      <option srcfn="/pagelets/represent-list.mjs: refresh">Refresh</option>
-    </select>
+    <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <template><div class="dropdown" remove-on-click>
+        <div>List ${clientFile}<div>
+        <button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-list.mjs: refresh">Refresh</button>
+      </div></template>
+    </button>
   </div>
   `
 } else if(args.cookies.username) { // logged in user requested, full controls
@@ -69,15 +70,16 @@ if(args.username) { // requested about a user, check user voted
     <link href="/pagelets/represent-list.css" rel="stylesheet"/>
     <span class="count">${count}</span>
     <span class="user-listd" data-inlist="${userInList}">You (${args.cookies.username}) ${userInList ? 'are in this list' : "aren't in this list"}</span>
-    <select is="call-selection" class="linklike" style="width: 1em; appearance:none">
-      <option style="color:gray">S</option>
-      <option srcfn="" style="color:gray">List ${clientFile}</option>
-      <option srcfn="/pagelets/represent-list.mjs: refresh">Refresh</option>
-      ${userInList ?
-        /*html*/`<option value="/pagelets/represent-list.mjs: listOut">Leave list</option>` :
-        /*html*/`<option value="/pagelets/represent-list.mjs: listIn">Join list</option>`
-      }
-    </select>
+    <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <template><div class="dropdown" remove-on-click>
+        <div>List ${clientFile}<div>
+        <button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-list.mjs: refresh">Refresh</button><br>
+        ${userInList ?
+          /*html*/`<button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-list.mjs: listOut">Leave list</button>` :
+          /*html*/`<button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-list.mjs: listIn">Join list</button>`
+        }
+      </div></template>
+    </button>
   </div>
   `
 } else { // anonymous user requested, just show count
@@ -87,11 +89,12 @@ if(args.username) { // requested about a user, check user voted
     <title>List ${ctx.path.basename(args.file)}</title>
     <link href="/pagelets/represent-list.css" rel="stylesheet"/>
     <span class="count">${count}</span>
-    <select is="call-selection" class="linklike" style="width: 1em; appearance:none">
-      <option style="color:gray">S</option>
-      <option style="color:gray">List ${clientFile}</option>
-      <option srcfn="/pagelets/represent-list.mjs: refresh">Refresh</option>
-    </select>
+    <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <template><div class="dropdown" remove-on-click>
+        <div>List ${clientFile}<div>
+        <button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-list.mjs: refresh">Refresh</button>
+      </div></template>
+    </button>
   </div>
   `
 }

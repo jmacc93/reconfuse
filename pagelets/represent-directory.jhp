@@ -121,6 +121,10 @@ html`
           <a href="/pagelets/represent-file.jhp?file=${file}" title="File: ${file}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
           <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
             <template><div class="dropdown" remove-on-click>
+              `
+              if(file.endsWith('.txt'))
+                html`<button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-list.jhp?file=${file}" target="after this parent button.s-menu">As list</button><br>`
+              html`
               ${commonOperationOptionsHtml(file)}<br>
               <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${file}" target="after this parent button.s-menu">Edit</button><br>
               <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${file}" target="after this parent button.s-menu">Append</button>

@@ -1,73 +1,73 @@
 
-export async function makeIt(optionCallElem) {
+export async function makeIt(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
-  const pagelet = optionCallElem.closest('.pagelet')
+  const pagelet = lib.getParentMatching(dropdownCallElem, '.pagelet')
   let response = await fetch(`/bin/file.s.js/make?file=${pagelet.dataset.file}`, {method: 'PUT'})
   if(response.ok) {
-    reload(optionCallElem)
+    reload(dropdownCallElem)
   } else {
-    lib.notificationFrom(optionCallElem, `Error: ${response.status}, ${response.statusText}`, {error: true})
+    lib.notificationFrom(dropdownCallElem, `Error: ${response.status}, ${response.statusText}`, {error: true})
   }
 }
 
-export async function uploadIt(optionCallElem) {
+export async function uploadIt(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
-  const pagelet = optionCallElem.closest('.pagelet')
+  const pagelet = lib.getParentMatching(dropdownCallElem, '.pagelet')
   let fakeFileInput = document.createElement('input')
   fakeFileInput.setAttribute('type', 'file')
   fakeFileInput.setAttribute('accept', lib.extname(pagelet.dataset.file))
   fakeFileInput.addEventListener('input', async () => {
     let fileObj = fakeFileInput.files.item(0) // File
     if(fileObj.size > 12e6) // too big (size > 12 MB)
-      return void lib.notificationFrom(optionCallElem, 'File too large', {error: true})
+      return void lib.notificationFrom(dropdownCallElem, 'File too large', {error: true})
     let response = await fetch(`/bin/file.s.js/upload?file=${pagelet.dataset.file}`, {method: "POST", body: fileObj})
     if(response.ok)
-      lib.openPageletAt(optionCallElem, `${pagelet.dataset.doneUrl ?? `/pagelets/represent-file.jhp?file=${pagelet.dataset.file}`}`, 'replace-noframe this parent .pagelet')
+      lib.openPageletAt(dropdownCallElem, `${pagelet.dataset.doneUrl ?? `/pagelets/represent-file.jhp?file=${pagelet.dataset.file}`}`, 'replace-noframe this parent .pagelet')
     else
-      lib.notificationFrom(optionCallElem, ['Server returned: ', response.status, ', ', response.statusText].join(''), {error: true})
+      lib.notificationFrom(dropdownCallElem, ['Server returned: ', response.status, ', ', response.statusText].join(''), {error: true})
   })
   fakeFileInput.click()
 }
 
-export async function reload(optionCallElem) {
+export async function reload(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
-  const pagelet = optionCallElem.closest('.pagelet')
+  const pagelet = lib.getParentMatching(dropdownCallElem, '.pagelet')
   const destyle = lib.styleInProgress(pagelet)
   try {
     const replacementPagelet = await lib.getRemotePagelet(pagelet.dataset.url, lib.ERRORONNOTOK)
     pagelet.replaceWith(replacementPagelet)
   } catch(err) {
     destyle()
-    lib.notificationFrom(optionCallElem, `Error: ${err.message}`, {error: true})
+    lib.notificationFrom(dropdownCallElem, `Error: ${err.message}`, {error: true})
   }
 }
 
-export async function openDirectory(optionCallElem) {
+export async function openDirectory(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
-  const pagelet = optionCallElem.closest('.pagelet')
+  const pagelet = lib.getParentMatching(dropdownCallElem, '.pagelet')
   const destyle = lib.styleInProgress(pagelet)
   try {
     const replacementPagelet = await lib.getRemotePagelet(`/pagelets/represent-file.jhp?file=${lib.dirname(pagelet.dataset.file)}`, lib.ERRORONNOTOK)
     pagelet.replaceWith(replacementPagelet)
   } catch(err) {
     destyle()
-    lib.notificationFrom(optionCallElem, `Error: ${err.message}`, {error: true})
+    lib.notificationFrom(dropdownCallElem, `Error: ${err.message}`, {error: true})
   }
 }
 
-export async function enframe(optionCallElem) {
+export async function enframe(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
-  const pagelet = optionCallElem.closest('.pagelet')
+  const pagelet = lib.getParentMatching(dropdownCallElem, '.pagelet')
   let frame = await lib.controllerFrameAround()
   pagelet.replaceWith(frame)
   frame.appendChild(pagelet)
 }
 
-export async function copyUrl(optionCallElem) {
-  const pagelet = optionCallElem.closest('.pagelet')
+export async function copyUrl(dropdownCallElem) {
+  const pagelet = lib.getParentMatching(dropdownCallElem, '.pagelet')
   navigator.clipboard.writeText(pagelet.dataset.file)
   const lib = await import('/lib/lib.mjs')
-  lib.notificationFrom(optionCallElem, `Copied`, {transient: true})
+  lib.notificationFrom(dropdownCallElem, `Copied`, {transient: true})
 }
 
 export async function initializeContentDisplay(callElem) {

@@ -1,8 +1,8 @@
 
 
-export async function refresh(callOptionElem) {
+export async function refresh(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
-  const pagelet = callOptionElem.closest('.pagelet')
+  const pagelet = lib.getParentMatching(dropdownCallElem, '.pagelet')
   const url     = pagelet.dataset.url
   const destyle = lib.styleInProgress(pagelet)
   try {
@@ -10,33 +10,33 @@ export async function refresh(callOptionElem) {
     pagelet.replaceWith(newPagelet)
   } catch(err) {
     destyle()
-    lib.notificationFrom(callOptionElem, `Error, ${err.message}`, {error: true})
+    lib.notificationFrom(dropdownCallElem, `Error, ${err.message}`, {error: true})
   }
 }
 
-export async function listIn(callOptionElem) {
+export async function listIn(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
-  const pagelet = callOptionElem.closest('.pagelet')
+  const pagelet = lib.getParentMatching(dropdownCallElem, '.pagelet')
   const file    = pagelet.dataset.file
   let response = await fetch(`/bin/list.s.js/add?file=${file}`, {method: "PUT"}) // username through cookies
   if(response.ok) {
-    lib.notificationFrom(callOptionElem, `Added name`)
-    refresh(callOptionElem)
+    lib.notificationFrom(dropdownCallElem, `Added name`)
+    refresh(dropdownCallElem)
   } else {
-    lib.notificationFrom(callOptionElem, `Error: ${response.status}, ${response.statusText}`)
+    lib.notificationFrom(dropdownCallElem, `Error: ${response.status}, ${response.statusText}`)
   }
 }
 
-export async function listOut(callOptionElem) {
+export async function listOut(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
-  const pagelet = callOptionElem.closest('.pagelet')
+  const pagelet = lib.getParentMatching(dropdownCallElem, '.pagelet')
   const file    = pagelet.dataset.file
   let response = await fetch(`/bin/list.s.js/remove?file=${file}`, {method: "PUT"}) // username through cookies
   if(response.ok) {
-    lib.notificationFrom(callOptionElem, `Removed name`)
-    refresh(callOptionElem)
+    lib.notificationFrom(dropdownCallElem, `Removed name`)
+    refresh(dropdownCallElem)
   } else {
-    lib.notificationFrom(callOptionElem, `Error: ${response.status}, ${response.statusText}`)
+    lib.notificationFrom(dropdownCallElem, `Error: ${response.status}, ${response.statusText}`)
   }
 }
 
