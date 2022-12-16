@@ -136,6 +136,17 @@ body > * + div {
   color: blue;
   cursor: pointer;
 }
+.linklike:hover {
+  text-decoration: underline blue;
+}
+
+a {
+  color: blue;
+  text-decoration: unset;
+}
+a:hover {
+  text-decoration: underline blue;
+}
 
 .no-border {
   border: none
