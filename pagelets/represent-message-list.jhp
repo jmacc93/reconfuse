@@ -41,7 +41,7 @@ html`
   
   <title>${args.channel} message list in ${args.directory}</title>
   
-  <div class="message-list vertical-resizable height32">
+  <div class="message-list vertical-resizable height16">
     <!--
     <div class="message" data-mtime="...">...</div>
     -->
