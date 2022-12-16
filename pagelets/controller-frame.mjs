@@ -62,6 +62,16 @@ export async function installDragHandleFunctionality(dropdownCallElem) {
   })
 }
 
+function resizeContainerHandler(wheelEvent) {
+  const containerElem = wheelEvent.currentTarget
+  if(wheelEvent.shiftKey) {
+    let height = parseInt(window.getComputedStyle(containerElem).height.slice(0, -2))
+    height = Math.max(height + Math.ceil(wheelEvent.deltaY / 4), 92)
+    containerElem.style.height = `${height}px`
+    wheelEvent.stopImmediatePropagation()
+    wheelEvent.stopPropagation()
+  }
+}
 
 export async function toggleResizable(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
@@ -71,5 +81,8 @@ export async function toggleResizable(dropdownCallElem) {
   if(frame.classList.contains('resizable')) { // was not resizable; just turned resizable
     if(!childContainer.style.height)
       childContainer.style.height = `8em`
+    childContainer.addEventListener('wheel', resizeContainerHandler)
+  } else {
+    childContainer.removeEventListener('wheel', resizeContainerHandler)
   }
 }
