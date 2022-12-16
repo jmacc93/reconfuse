@@ -1,8 +1,8 @@
 <div class="controller-frame" data-expanded="true" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElement">
   <!-- This isn't actually a pagelet, but its in the pagelet folder anyway -->
+  -:[/pagelets/pagelet-header.html]:-
   <script src="/lib/callib/callib0.mjs" type="module"></script>
-  <link rel="stylesheet" href="/pagelets/controller-frame.css"></link>
-  <link href="/lib/general.css" rel="stylesheet"></link>
+  <call-resource srcfn="/lib/elem-functions.mjs: addStyleToHead" href="/pagelets/controller-frame.css"></call-resource>
   
   <call-resource srcfn="/pagelets/controller-frame.mjs: installTitleMirrorFunctionality"></call-resource>
   <!-- <call-resource srcfn="/pagelets/controller-frame.mjs: installDragHandleFunctionality"></call-resource> -->
