@@ -371,9 +371,7 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   args.file = ctx.addPathDot(args.file)
   let filename = ctx.path.basename(args.file)
   
-  if(fs.existsSync(args.file))
-    return setCodeAndMessage(response, 404, `No such file ${args.file}`)
-  // else
+  const alreadyExisted = fs.existsSync(args.file)
   
   let [_contentType, isBinary] = ctx.extContentMap[path.extname(args.file)] ?? ctx.extContentMap.default
   let body = await getBody()
@@ -416,9 +414,15 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   }
   
   await fsp.writeFile(args.file, body)
-  fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' uploaded ', ctx.path.basename(args.file), ' with ', body.length, ' initial chars\n'
-  ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js upload: ${err.message}`))
+  if(alreadyExisted) {
+    fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
+      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' replaced ', ctx.path.basename(args.file), ' with new upload of', body.length, ' chars\n'
+    ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js upload: ${err.message}`))
+  } else {
+    fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
+      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' uploaded ', ctx.path.basename(args.file), ' with ', body.length, ' initial chars\n'
+    ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js upload: ${err.message}`))
+  }
   
   return setCodeAndMessage(response, 200, 'Upload successful')
 }
