@@ -203,8 +203,8 @@ async function decorateTextField(textfield) {
     if(pagelet) {
       if(pagelet.dataset.file)
         textExpansionSpec['!FILE'] = {to: ()=>pagelet.dataset.file, endPosition: -1}
-      if(pagelet.dataset.dir)
-        textExpansionSpec['!DIR'] = {to: ()=>pagelet.dataset.dir, endPosition: -1}
+      if(pagelet.dataset.dir || pagelet.dataset.directory)
+        textExpansionSpec['!DIR'] = {to: ()=>(pagelet.dataset.dir ?? pagelet.dataset.directory), endPosition: -1}
       if(pagelet.dataset.url)
         textExpansionSpec['!URL'] = {to: ()=>pagelet.dataset.url, endPosition: -1}
     }
