@@ -43,7 +43,7 @@ html`
   
   <title>${args.channel} message list in ${clientDir}</title>
   
-  <div class="message-list vertical-resizable height16">
+  <div class="message-list">
     <!--
     <div class="message" data-mtime="...">...</div>
     -->
