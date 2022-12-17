@@ -90,7 +90,7 @@ if(isBinary) {
       <link href="/pagelets/represent-file.css" rel="stylesheet">
       `
       if(principleContentType.startsWith('image/')) // is an image, use <img> element
-        html`<img class="current-content" src="${clientFile}?random=${fileMTime}" style="padding: 4px" cache="no-cache" title="Current content"/>`
+        html`<img class="current-content" src="${clientFile}?random=${fileMTime}" style="padding: 4px; width: 16em; height: auto" cache="no-cache" title="Current content"/>`
       else
         html`<div>File</div>`
       html`
