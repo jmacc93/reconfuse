@@ -64,7 +64,7 @@ principleContentType = ctx.splitAtFirst(contentType, ';')?.[0] ?? contentType
 if(isBinary) {
   if(exists) {
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
+    <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       
@@ -99,7 +99,7 @@ if(isBinary) {
     return true
   } else { // binary file, doesn't exist
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
+    <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       <script src="/lib/callib/callib0.mjs" type="module"></script>
@@ -126,14 +126,14 @@ if(isBinary) {
           <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</button>
         </div></template>
       </button>
-    </div>
+    </span>
     `
     return true
   }
 } else { // textual file
   if(exists) {
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
+    <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       
@@ -159,12 +159,12 @@ if(isBinary) {
           <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</button><br>
         </div></template>
       </button>
-    </div>
+    </span>
     `
     return true
   } else { // textual file, doesn't exist
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
+    <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>Non existent file ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       <script src="/lib/callib/callib0.mjs" type="module"></script>
@@ -188,7 +188,7 @@ if(isBinary) {
           <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</button>
         </div></template>
       </button>
-    </div>
+    </span>
     `
     return true
   }
