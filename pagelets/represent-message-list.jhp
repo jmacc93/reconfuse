@@ -3,43 +3,45 @@ if(!args.channel)
   args.channel = 'std'
 
 if(!args.directory) {
-  html`<div class="pagelet error">No directory argument given</div>`
+  html`
+  <div class="pagelet error">No directory argument given</div>
+  `
   return true
 }
 
-args.directory = ctx.addPathDot(ctx.path.relative('./', ctx.addPathDot(args.directory)))
+let serverDir = ctx.addPathDot(ctx.path.relative('./', ctx.addPathDot(args.directory)))
+if(!serverDir.endsWith('/'))
+  serverDir += '/'
+const clientDir = serverDir.slice(1) // remove dot
 
-if(args.directory.startsWith('..')) {
-  html`<div class="pagelet error">Cannot use ${args.directory} because it references a directory outside of the server's directory tree</div>`
+if(serverDir.startsWith('..')) {
+  html`<div class="pagelet error">Cannot use ${serverDir} because it references a directory outside of the server's directory tree</div>`
   return true
 }
 // else
 
-if(!args.directory.endsWith('/'))
-  args.directory += '/'
-
-if(!ctx.fs.existsSync(args.directory)) {
+if(!ctx.fs.existsSync(serverDir)) {
   return ctx.serveFile('./pagelets/dialog/make-dir.html', response, {
-    ['arg-directory']: args.directory,
-    ['arg-after-url']: `/pagelets/represent-message-list.jhp?directory=${args.directory}&channel=${args.channel}`
+    ['arg-directory']: clientDir,
+    ['arg-after-url']: `/pagelets/represent-message-list.jhp?directory=${clientDir}&channel=${args.channel}`
   })
   // return ctx.serveJHP('./pagelets/non-existent-file.jhp', request, response, {...args, doneUrl:`/pagelets/represent-message-list.jhp?directory=${args.directory}&channel=${args.channel}`})
 }
 
-let dirStat = ctx.fs.statSync(args.directory)
+let dirStat = ctx.fs.statSync(serverDir)
 if(!dirStat.isDirectory()) {
-  html`<div class="pagelet error">Given directory ${args.directory} isn't a directory</div>`
+  html`<div class="pagelet error">Given directory ${clientDir} isn't a directory</div>`
   return true
 }
 // else
 
 html`
-<div class="pagelet" data-channel=${args.channel ?? 'nochannel'} data-directory=${args.directory ?? 'nodir'}>
+<div class="pagelet" data-channel=${args.channel ?? 'nochannel'} data-directory=${clientDir}>
   `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, args); html`
   
   <call-resource srcfn="/pagelets/represent-message-list.mjs: installFunctionality"></call-resource>
   
-  <title>${args.channel} message list in ${args.directory}</title>
+  <title>${args.channel} message list in ${clientDir}</title>
   
   <div class="message-list vertical-resizable height16">
     <!--
