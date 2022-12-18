@@ -9,6 +9,7 @@ html`
     <script type="module" src="/lib/mixin.mjs"></script>
     <script type="module" src="/lib/callib/callib0.mjs"></script>
     <link rel="stylesheet" href="/lib/callib/callib0.css"/>
+    <link rel="stylesheet" href="/index.css"/>
     
     `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
   </head>
@@ -34,8 +35,10 @@ html`
         if(username)
           html`<a href="/pagelets/represent-directory.jhp?directory=/users/${username}/">${username}</a>, `
         html`
-        <a href="/pagelets/open-dialog.html">New frame</a>
+        <a href="/pagelets/open-dialog.html">New frame</a>, 
+        <a href="/pagelets/two-column-dropframe.html">2-column frame</a>
       </div>
+      <div class="droptarget general-styling width100p" style="height: 1em" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="after this"></div>
       
       `
       if(args.mixin !== undefined) {
@@ -51,6 +54,7 @@ html`
       html`
       
     </div>
+    <div class="droptarget general-styling absolute-styling width100p" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementBefore"></div>
     <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent body"></call-resource>
     <div class="overscroll" style="height: 16em"></div>
   </body>
