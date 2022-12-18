@@ -7,6 +7,8 @@ html`
   
   <call-resource srcfn="/pagelets/selfpad.mjs: installFunctionality"></call-resource>
   
+  <div class="droptarget general-styling absolute-styling width100p" style="height: 1em" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="before this parent .pagelet"></div>
+    
   <div class="content-display padded"></div>
   <textarea 
     class="input fullwidth vertical-resizable" 
@@ -23,5 +25,6 @@ html`
     </button>
   </div>
   
+  <div class="droptarget general-styling absolute-styling width100p" style="height: 1em" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="after this parent .pagelet"></div>
 </div>
 `
