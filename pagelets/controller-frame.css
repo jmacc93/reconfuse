@@ -56,6 +56,10 @@
   resize: vertical;
 }
 
+.controller-frame.resizable > .child-container {
+  padding-bottom: 8em;
+}
+
 .controller-frame:not(.resizable) > .child-container {
   height: fit-content !important
 }
