@@ -52,6 +52,8 @@ if(exists) {
   // else
 }
 
+const isDir = clientFile.endsWith('/')
+
 const thisUrl = `/pagelets/represent-file.jhp?file=${args.file}${args.focus ? '&' + args.focus : ''}`
 
 let extContent  = ctx.extContentMap[ctx.path.extname(serverFile)]
@@ -163,7 +165,7 @@ if(isBinary) {
     html`
     <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
-      <title>Non existent file ${ctx.path.basename(clientFile)} - ${clientFile}</title>
+      <title>Non existent ${isDir ? 'directory' : 'file'} ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       <script src="/lib/callib/callib0.mjs" type="module"></script>
       <script src="/lib/mixin.mjs" type="module"></script>
       <link href="/pagelets/represent-file.css" rel="stylesheet">
