@@ -84,7 +84,7 @@ const commonNonExistingFileOperations = /*HTML*/ `
   <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</button><br>
 `
 
-const commonFileDropdownPart = /*HTML*/`<div>File <code>${clientFile}</code> <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy</button></div>`
+const commonFileDropdownPart = /*HTML*/`<div>File <code>${clientFile}</code> <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy</button></div>`
 
 if(isBinary) {
   if(exists) {
