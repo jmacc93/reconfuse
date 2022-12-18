@@ -1,5 +1,3 @@
-const todoElem = (str) => /*html*/`<span style="color:yellow; border: 1px solid yellow">to do: ${str}</span>`
-
 html`
 <!DOCTYPE html>
 <html>
