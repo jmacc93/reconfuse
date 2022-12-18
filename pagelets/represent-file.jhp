@@ -13,6 +13,12 @@ if(args.file === undefined) { // no file argument given
 }
 // else
 
+// Is file actually hosted on this server?
+if(args.file.startsWith('http://') || args.file.startsWith('https://')) {
+  html`<div class="pagelet file-representation">Trying to get a file outside this webpage, don't use represent-file for this!</div>`
+  return true
+}
+
 let serverFile = ctx.sanitizeHTMLString(ctx.addPathDot(args.file))
 let clientFile = ctx.sanitizeHTMLString(serverFile.slice(1))
 
