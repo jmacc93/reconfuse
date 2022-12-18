@@ -162,14 +162,14 @@ const appendHeaderMakers = {
   default: (anonId, username, displayname) => `\n\n${(anonId !== undefined) ? `anonymous(${anonId})` : username} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n`,
   ['.md']: (anonId, username, displayname) => {
     return ['\n\n---\n',
-      (anonId !== undefined) ? `anonymous(${anonId}) ` :`[${username}](/users/${username}/) `,
+      (anonId !== undefined) ? `anonymous(${anonId}) ` :`[${username}](/pagelets/represent-file.jhp?file=/users/${username}/) `,
       displayname ? `(as ${displayname}) ` : '',
       (new Date()).toUTCString(), '\n'
     ].join('')
   },
   ['.escm']: (anonId, username, displayname) => {
     return ['\n\n\\separator() ',
-      (anonId !== undefined) ? `anonymous(${anonId}) ` :`\\link(/users/${username}/|${username}) `,
+      (anonId !== undefined) ? `anonymous(${anonId}) ` :`\\link(/pagelets/represent-file.jhp?file=/users/${username}/|${username}) `,
       displayname ? `(as ${displayname}) ` : '',
       `\\itime(`, Date.now(), `)\n`
     ].join('')
