@@ -1,4 +1,4 @@
-<div class="controller-frame" data-expanded="true" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElement">
+<div class="controller-frame" data-expanded="true">
   <!-- This isn't actually a pagelet, but its in the pagelet folder anyway -->
   -:[/pagelets/pagelet-header.html]:-
   <script src="/lib/callib/callib0.mjs" type="module"></script>
@@ -7,6 +7,7 @@
   <call-resource srcfn="/pagelets/controller-frame.mjs: installTitleMirrorFunctionality"></call-resource>
   <!-- <call-resource srcfn="/pagelets/controller-frame.mjs: installDragHandleFunctionality"></call-resource> -->
   
+  <div class="droptarget general-styling absolute-styling width100p" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="before this parent .controller-frame"></div>
   <div class="infobar">
     <button is="call-resource-button" srcfn="/lib/elem-functions.mjs: removeElement" class="linklike" which="this parent .controller-frame">X</button>
     <span class="child-title-mirror"></span>
@@ -32,5 +33,6 @@
     </slot>
   </div>
   
+  <div class="droptarget general-styling absolute-styling width100p" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="after this parent .controller-frame"></div>
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .controller-frame"></call-resource>
 </div>
