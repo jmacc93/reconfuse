@@ -3,11 +3,12 @@ if(args.file === undefined) { // no file argument given
   if(args.directory !== undefined)
     return ctx.serveJHP('./pagelets/represent-directory.jhp', request, response, args)
   // else
-  html`<div class="pagelet file-representation" data-url="/pagelets/represent-file.jhp?file=undefined">`
-    await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response)
-    html`<title>Bad file representation</title>`
-    html`<div>No <code>file</code> argument given (use <code>/pagelets/represent-file.jhp?file=<span style="red">...</span></code> to specify the file to represent)</div>`
-  html`</div>`
+  html`
+  <div class="pagelet file-representation" data-url="/pagelets/represent-file.jhp?file=undefined">
+    <title>Bad file representation</title>
+    <div>No <code>file</code> argument given (use <code>/pagelets/represent-file.jhp?file=<span style="color: red">...</span></code> to specify the file to represent)</div>
+  </div>
+  `
   return true
 }
 // else
