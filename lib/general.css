@@ -208,6 +208,10 @@ a:hover {
   margin-top: 1em
 }
 
+.unselectable {
+  user-select: none;
+}
+
 /* ---------------------------- */
 
 .attention-flashing            { animation: af-outline-pulse    .5s ease; }
@@ -255,10 +259,6 @@ html-mixin {
 /* ---------------------------- */
 /*      Element dragging        */
 
-
-.unselectable {
-  user-select: none;
-}
 
 body.dragging-element {
   cursor: crosshair
