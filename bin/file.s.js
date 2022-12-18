@@ -167,11 +167,12 @@ const appendHeaderMakers = {
       (new Date()).toUTCString(), '\n'
     ].join('')
   },
-  ['.escm']: (anonId, username, displayname) => {
+  ['.escm']: async (anonId, username, displayname) => {
+    const lib = await ctx.runScript('./lib/lib.s.js')
     return ['\n\n\\separator() ',
       (anonId !== undefined) ? `anonymous(${anonId}) ` :`\\link(/pagelets/represent-file.jhp?file=/users/${username}/|${username}) `,
       displayname ? `(as ${displayname}) ` : '',
-      `\\itime(`, Date.now(), `)\n`
+      `\\itime(`, Date.now(), `) \\anchor(A|${lib.randomTokenString(5)})\n`
     ].join('')
   },
 }
