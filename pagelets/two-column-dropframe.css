@@ -1,0 +1,22 @@
+
+.two-column-dropframe .two-column-dropframe-styling.droptarget {
+  width: 50%;
+  vertical-align: top
+}
+ .two-column-dropframe .two-column-dropframe-styling.droptarget:empty {
+  height: 4em;
+}
+.two-column-dropframe .two-column-dropframe-styling.droptarget:empty::before {
+  content: "Drop";
+  position: relative;
+  top: 0px; left: 45%;
+  height: 0px;
+  color: rgba(211, 211, 211, 0.475)
+}
+.two-column-dropframe .two-column-dropframe-styling.droptarget.drop-hovered {
+  outline: 2px dashed orange
+}
+/* .two-column-dropframe .two-column-dropframe-styling.droptarget.drop-hovered::before {
+  content: "Drop";
+  color: orange
+} */
