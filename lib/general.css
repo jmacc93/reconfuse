@@ -267,6 +267,30 @@ body.dragging-element .drop-hovered {
   cursor: move
 }
 
+*[droptarget-srcfn].absolute-styling {
+  position: absolute;
+  height: 1em; width: 4em;
+}
+body:not(.dragging-element) *[droptarget-srcfn].absolute-styling {
+  display: none;
+}
+body.dragging-element *[droptarget-srcfn].absolute-styling {
+  display: unset;
+}
+
+body.dragging-element *[droptarget-srcfn].general-styling {
+  outline: 2px dashed lightgray;
+}
+body.dragging-element *[droptarget-srcfn].general-styling.drop-hovered {
+  outline: 2px dashed orange;
+}
+body.dragging-element *[droptarget-srcfn].general-styling.drop-hovered::before {
+  content: "Drop";
+  position: relative;
+  /* top: 0px; left: 45%; */
+  color: orange
+}
+
 
 /* ---------------------------- */
 /*          Dropdown            */
