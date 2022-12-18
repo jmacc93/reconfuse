@@ -238,7 +238,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   if(args.tagged ?? false) { // tagged append
     let extension = ctx.path.extname(args.file)
     let headerMaker = appendHeaderMakers[extension] ?? appendHeaderMakers.default
-    await fsp.appendFile(args.file, headerMaker(anonId, username, args.displayname ?? (args.cookies?.loggedin ? args.cookies.displayname : undefined)) + payload)
+    await fsp.appendFile(args.file, await headerMaker(anonId, username, args.displayname ?? (args.cookies?.loggedin ? args.cookies.displayname : undefined)) + payload)
   } else { // regular append
     await fsp.appendFile(args.file, `\n\n` + payload)
   }
