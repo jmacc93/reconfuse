@@ -282,6 +282,31 @@ async function decorateTextField(textfield) {
   }
 }
 
+//#endregion
+
+//#region automatically decorate buttons
+
+document.addEventListener('click', async clickEvent => {
+  const parentButton = clickEvent.target.closest('button')
+  const parentLink   = clickEvent.target.closest('a')
+  if(parentButton || parentLink) {
+    const button = parentButton ?? parentLink
+    const lib = await import('/lib/lib.mjs')
+    lib.attentionFlashElement(button)
+    
+    if(button.getAttribute('is') !== 'call-resource-button') {
+      const srcfn = button.getAttribute('srcfn')
+      if(srcfn) {
+        const lib = await import('/lib/lib.mjs')
+        let [src, fnName] = lib.splitAtFirst(srcfn  , /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
+        callFunctionInModule(src, fnName, button)
+      }
+    }
+  }
+})
+
+//#endregion
+
 async function callFunctionInModule(modName, fnName, ...args) {
   let mod = await import(modName)
   if(!mod)
