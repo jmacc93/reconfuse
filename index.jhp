@@ -18,9 +18,8 @@ html`
     <div class="pagelet root-pagelet separated-children">
       
       <div class="goarea boxed padded" style="margin-bottom: 0; border-bottom: none">
-        <call-resource srcnf="/pagelets/index-jhp.mjs: installGoFieldFunctionality"></call-resource>
-        <input is="substituting-input" type="text" placeholder="open pagelet" style="width: 80%"/>
-        <button class="linklike">Go</button>
+        <input ctrl-enter-srcfn="/pagelets/index-jhp.mjs: goClicked" type="text" placeholder="Open pagelet" style="width: 80%"/>
+        <button is="call-resource-button" srcfn="/pagelets/index-jhp.mjs: goClicked" class="linklike">Go</button>
       </div>
       
       <div class="header darker-background boxed padded" style="margin-top: 0; border-top: none">
