@@ -58,6 +58,9 @@ export async function loginButtonClicked(callElemButton) {
   const loginButton = pagelet.querySelector(':scope > * > .login')
   const validationMsgElem = pagelet.querySelector(':scope > .initial-validation-msg')
   
+  if(callElemButton.classList.contains('deactivated'))
+    return void lib.notificationFrom(callElemButton, 'Please wait!', {transient: true})
+  
   validationMsgElem.textContent = ''
   
   if(pagelet.dataset.loggedin === 'true')
@@ -72,7 +75,9 @@ export async function loginButtonClicked(callElemButton) {
     uriSegs.push('&displayname=', encodeURIComponent(displaynameInput.value))
   if(rememberMeBox.checked)
     uriSegs.push('&rememberme')
+  callElemButton.classList.add('deactivated')
   let response = await fetch(uriSegs.join(''))
+  callElemButton.classList.remove('deactivated')
   lib.notificationFrom(loginButton, [
     response.ok ? 'Success: ' : 'Failure: ',
     response.statusText, ' (', String(response.status), ')'
