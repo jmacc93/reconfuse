@@ -19,7 +19,7 @@ html`
       
       <div class="goarea boxed padded" style="margin-bottom: 0; border-bottom: none">
         <input ctrl-enter-srcfn="/pagelets/index-jhp.mjs: goClicked" type="text" placeholder="Open pagelet" style="width: 80%"/>
-        <button is="call-resource-button" srcfn="/pagelets/index-jhp.mjs: goClicked" class="linklike">Go</button>
+        <button srcfn="/pagelets/index-jhp.mjs: goClicked" class="linklike">Go</button>
       </div>
       
       <div class="header darker-background boxed padded" style="margin-top: 0; border-top: none">
