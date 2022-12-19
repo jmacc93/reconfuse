@@ -214,22 +214,22 @@ a:hover {
 
 /* ---------------------------- */
 
-.attention-flashing            { animation: af-outline-pulse    .5s ease; }
-.attention-flashing-color      { animation: af-color-pulse      .5s ease; }
-.attention-flashing-outline    { animation: af-outline-pulse    .5s ease; }
-.attention-flashing-background { animation: af-background-pulse .5s ease; }
+.attention-flashing            { animation: af-outline-pulse    .2s ease; }
+.attention-flashing-color      { animation: af-color-pulse      .2s ease; }
+.attention-flashing-outline    { animation: af-outline-pulse    .2s ease; }
+.attention-flashing-background { animation: af-background-pulse .2s ease; }
 
 @keyframes af-color-pulse {
-  0%   {color:  #86ff86}
+  0%   {color:  #86a6ff}
   100% {color:    unset  }
 }
 @keyframes af-outline-pulse {
-  0%   {outline: 4px solid  #86ff86}
-  100% {outline: 0px dashed #80ff80}
+  0%   {outline: 4px solid  #8696ff}
+  100% {outline: 0px dashed #80c8ff}
 }
 @keyframes af-background-pulse {
-  0%   {background: #98ff98  }
-  40%  {background: #76ff7633}
+  0%   {background: #ab98ff  }
+  40%  {background: #768fff33}
   100% {background:   unset    }
 }
 
