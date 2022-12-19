@@ -164,13 +164,19 @@ export async function registerButtonClicked(callElemButton) {
   const usernameInput = pagelet.querySelector(':scope > * > input.username')
   const passwordInput = pagelet.querySelector(':scope > * > input.password')
   
+  if(callElemButton.classList.contains('deactivated'))
+    return void lib.notificationFrom(callElemButton, 'Please wait!')
+  // else
+  
   let uriSegs = [
     '/bin/user.s.js/register?username=', encodeURIComponent(usernameInput.value),
     '&password=', encodeURIComponent(sha256(passwordInput.value))
   ]
   if((displaynameInput.value ?? '') !== '')
     uriSegs.push('&displayname=', encodeURIComponent(displaynameInput.value))
+  callElemButton.classList.add('deactivated')
   let response = await fetch(uriSegs.join(''))
+  callElemButton.classList.remove('deactivated')
   lib.notificationFrom(callElemButton, [
     response.ok ? 'Success: ' : 'Failure: ',
     response.statusText, ' (', String(response.status), ')'
@@ -204,13 +210,20 @@ export async function setPasswordButtonClicked(callElem) {
   const pagelet = callElem.closest('.pagelet')
   const newPasswordInput = pagelet.querySelector(':scope > * > .change-password > input.new')
   const oldPasswordInput = pagelet.querySelector(':scope > * > .change-password > input.old')
+  
+  if(callElem.classList.contains('deactivated'))
+    return void lib.notificationFrom(callElem, 'Please wait!')
+  // else
+  
   let urlSegs = [
     `/bin/user.s.js/changePassword`,
     `?newPassword=`, encodeURIComponent(sha256(newPasswordInput.value))
   ]
   if(oldPasswordInput.value)
-    urlSegs.push(`?oldPassword=`, encodeURIComponent(sha256(oldPasswordInput.value)))
+    urlSegs.push(`&oldPassword=`, encodeURIComponent(sha256(oldPasswordInput.value)))
+  callElem.classList.add('deactivated')
   let response = await fetch(urlSegs.join(''))
+  callElem.classList.remove('deactivated')
   lib.notificationFrom(callElem, [
     response.ok ? 'Success: ' : 'Failure: ',
     response.statusText, ' (', String(response.status), ')'
@@ -225,11 +238,17 @@ export async function submitNewChallenge(callElem) {
   const challengeInput = pagelet.querySelector(':scope .challenge-response input.challenge')
   const responseInput  = pagelet.querySelector(':scope .challenge-response input.response')
   
+  if(callElem.classList.contains('deactivated'))
+    return void lib.notificationFrom(callElem, 'Please wait!')
+  // else
+  
+  callElem.classList.add('deactivated')
   const response = await fetch([
     `/bin/user.s.js/newPasswordChallenge`,
       `?challenge=`, encodeURIComponent(challengeInput.value),
       `&response=`, encodeURIComponent(sha256(responseInput.value))
   ].join(''))
+  callElem.classList.remove('deactivated')
   
   if(response.ok) {
     lib.notificationFrom(callElem, `Success: challenge created`)
