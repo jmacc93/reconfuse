@@ -20,7 +20,9 @@ html`
     <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
       <template><div class="dropdown" remove-on-click>
         <button is="call-resource-button" class="linklike" srcfn="/pagelets/selfpad.mjs: updateButton">Update</button><br>
-        <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="after this parent .pagelet">List all</button>
+        <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="after this parent .pagelet">List all</button><br>
+        <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/pad.html" target="after this parent .pagelet">Pad</button><br>
+        <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/open-dialog.html" target="after this parent .pagelet">Open</button>
       </div></template>
     </button>
   </div>
