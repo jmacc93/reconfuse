@@ -53,12 +53,12 @@ const commonOperationOptionsHtml = (file, selector)=> /*html*/`
   <details>
     <summary class="linklike" no-removal-on-click>File operations</summary>
     <div class="indented">
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${file}">Copy path</button><br>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="${selector ?? 'after this parent .file'}" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${file}&operation=copy">Copy to</button><br>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="${selector ?? 'after this parent .file'}" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${file}&operation=move">Move to</button><br>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="${selector ?? 'after this parent .file'}" pagelet-src="/pagelets/dialog/rename-file.html?file=${file}">Rename</button><br>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="${selector ?? 'after this parent .file'}" pagelet-src="/pagelets/dialog/trash-file.html?file=${file}">Trash</button><br>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="${selector ?? 'after this parent .file'}" pagelet-src="/pagelets/components/file-permissions.jhp?file=${file}">Permissions</button>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${file}">Copy path</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="${selector ?? 'after this parent .file'}" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${file}&operation=copy">Copy to</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="${selector ?? 'after this parent .file'}" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${file}&operation=move">Move to</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="${selector ?? 'after this parent .file'}" pagelet-src="/pagelets/dialog/rename-file.html?file=${file}">Rename</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="${selector ?? 'after this parent .file'}" pagelet-src="/pagelets/dialog/trash-file.html?file=${file}">Trash</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="${selector ?? 'after this parent .file'}" pagelet-src="/pagelets/components/file-permissions.jhp?file=${file}">Permissions</button>
     </div>
   </details>
 `
@@ -74,11 +74,11 @@ html`
     Files inside directory <code>${clientDir}</code>
     <a href="${thisUrl}" title="reload" target="replace-noframe this parent .pagelet">R</a>
     <a href="${upUrl}" title="go to parent directory" target="replace-noframe this parent .pagelet">Up</a>
-    <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+    <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
       <template><div class="dropdown" remove-on-click>
-        <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy dir</button><br>
+        <button class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy dir</button><br>
         ${commonOperationOptionsHtml(clientDir, 'after this parent button.s-menu')}
-        <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet >> child .open-file" pagelet-src="/pagelets/components/search-directory.html?directory=${clientDir}">Search</button>
+        <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet >> child .open-file" pagelet-src="/pagelets/components/search-directory.html?directory=${clientDir}">Search</button>
       </div></template>
     </button>
   </div>
@@ -112,7 +112,7 @@ html`
         <div class="file">
           <span class="dir symbol" data-file=${file}></span>
           <a href="/pagelets/represent-directory.jhp?directory=${file}" title="Directory ${file}" target="after this">${fileBasename}</a>
-          <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+          <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
             <template><div class="dropdown" remove-on-click>
               ${commonOperationOptionsHtml(file)}
             </div></template>
@@ -124,15 +124,15 @@ html`
         <div class="file" data-file=${file}>
           <span class="file symbol"></span>
           <a href="/pagelets/represent-file.jhp?file=${file}" title="File: ${file}" target="after this" alttarget="replace-noframe this parent .pagelet">${fileBasename}</a>
-          <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+          <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
             <template><div class="dropdown" remove-on-click>
               `
               if(file.endsWith('.txt'))
-                html`<button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-list.jhp?file=${file}" target="after this parent button.s-menu">As list</button><br>`
+                html`<button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-list.jhp?file=${file}" target="after this parent button.s-menu">As list</button><br>`
               html`
               ${commonOperationOptionsHtml(file)}
-              <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${file}" target="after this parent button.s-menu">Edit</button><br>
-              <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${file}" target="after this parent button.s-menu">Append</button>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${file}" target="after this parent button.s-menu">Edit</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${file}" target="after this parent button.s-menu">Append</button>
             </div></template>
           </button>
         </div>`

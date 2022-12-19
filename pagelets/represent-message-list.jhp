@@ -54,8 +54,8 @@ html`
       <button class="submit linklike clickable">Submit</button> as
       <input class="filename-input" type="text" placeholder="filename" value=".md" pattern="[^\.]*\.\S+"/>  <span class="filename-input-error-msg"></span>
       <button class="refresh linklike">Refresh</button>, 
-      <button is="call-resource-button" srcfn="/pagelets/represent-message-list.mjs: updatePreview" class="linklike">Update preview</button>, 
-      <button is="call-resource-button" srcfn="/lib/elem-functions.mjs: toggleHidden" which="this parent .submission-area >> child .submission-preview" class="linklike">Toggle preview</button>
+      <button srcfn="/pagelets/represent-message-list.mjs: updatePreview" class="linklike">Update preview</button>, 
+      <button srcfn="/lib/elem-functions.mjs: toggleHidden" which="this parent .submission-area >> child .submission-preview" class="linklike">Toggle preview</button>
     </div>
     <div class="submission-preview"></div>
     <textarea class="submission-input fullwidth vertical-resizable" placeholder="Submission input"></textarea>

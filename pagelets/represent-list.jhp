@@ -53,10 +53,10 @@ if(args.username) { // requested about a user, check user voted
     <link href="/pagelets/represent-list.css" rel="stylesheet"/>
     <span class="count">${count}</span>
     <span class="user-listd" data-inlist="${userInList}">${args.username} ${userInList ? 'is in this list' : "isn't in this list"}</span>
-    <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+    <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
       <template><div class="dropdown" remove-on-click>
         <div>List ${clientFile}<div>
-        <button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-list.mjs: refresh">Refresh</button>
+        <button class="linklike" srcfn="/pagelets/represent-list.mjs: refresh">Refresh</button>
       </div></template>
     </button>
   </div>
@@ -70,13 +70,13 @@ if(args.username) { // requested about a user, check user voted
     <link href="/pagelets/represent-list.css" rel="stylesheet"/>
     <span class="count">${count}</span>
     <span class="user-listd" data-inlist="${userInList}">You (${args.cookies.username}) ${userInList ? 'are in this list' : "aren't in this list"}</span>
-    <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+    <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
       <template><div class="dropdown" remove-on-click>
         <div>List ${clientFile}<div>
-        <button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-list.mjs: refresh">Refresh</button><br>
+        <button class="linklike" srcfn="/pagelets/represent-list.mjs: refresh">Refresh</button><br>
         ${userInList ?
-          /*html*/`<button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-list.mjs: listOut">Leave list</button>` :
-          /*html*/`<button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-list.mjs: listIn">Join list</button>`
+          /*html*/`<button class="linklike" srcfn="/pagelets/represent-list.mjs: listOut">Leave list</button>` :
+          /*html*/`<button class="linklike" srcfn="/pagelets/represent-list.mjs: listIn">Join list</button>`
         }
       </div></template>
     </button>
@@ -89,10 +89,10 @@ if(args.username) { // requested about a user, check user voted
     <title>List ${ctx.path.basename(args.file)}</title>
     <link href="/pagelets/represent-list.css" rel="stylesheet"/>
     <span class="count">${count}</span>
-    <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+    <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
       <template><div class="dropdown" remove-on-click>
         <div>List ${clientFile}<div>
-        <button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-list.mjs: refresh">Refresh</button>
+        <button class="linklike" srcfn="/pagelets/represent-list.mjs: refresh">Refresh</button>
       </div></template>
     </button>
   </div>

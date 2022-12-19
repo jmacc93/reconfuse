@@ -2,9 +2,9 @@
   -:[/pagelets/pagelet-header.html]:-
   <call-resource srcfn="/pagelets/selfpad.mjs: listPads"></call-resource>
   <div class="list"></div>
-  <button is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown" class="s-menu linklike">S
+  <button srcfn="/lib/elem-functions.mjs: makeDropdown" class="s-menu linklike">S
     <template><div class="dropdown" remove-on-click>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="replace-noframe this parent .pagelet">Reload</button>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="replace-noframe this parent .pagelet">Reload</button>
     </div></template>
   </button>
 </div>

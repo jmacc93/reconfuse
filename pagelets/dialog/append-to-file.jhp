@@ -29,9 +29,9 @@ html`
     input-srcfn="/pagelets/dialog/append-to-file.mjs: setUnsaved"
   ></textarea>
   <div>
-    <button is="call-resource-button" class="linklike red-no-submit" srcfn="/pagelets/dialog/append-to-file.mjs: taggedAppend">Append</button>,
-    <button is="call-resource-button" class="linklike red-no-submit" srcfn="/pagelets/dialog/append-to-file.mjs: append">Without tag</button>,
-    <button is="call-resource-button" class="linklike" srcfn="/pagelets/dialog/edit-file.mjs: showPreview">Preview</button>
+    <button class="linklike red-no-submit" srcfn="/pagelets/dialog/append-to-file.mjs: taggedAppend">Append</button>,
+    <button class="linklike red-no-submit" srcfn="/pagelets/dialog/append-to-file.mjs: append">Without tag</button>,
+    <button class="linklike" srcfn="/pagelets/dialog/edit-file.mjs: showPreview">Preview</button>
   </div>
   <span class="preview-display"></span>
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>

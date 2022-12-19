@@ -5,18 +5,18 @@
   <call-resource srcfn="/pagelets/file-tail.mjs: initializeContentDisplay"></call-resource>
   <span class="content-display"></span>
   
-  <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+  <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
     <template><div class="dropdown" remove-on-click>
-      <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/file-tail.html?file=-[arg-file]-&lines=-[arg-lines]-">Reload</button><br>
-      <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent button.s-menu" pagelet-src="/pagelets/dialog/edit-file.html?file=-[arg-file]-">Edit</button><br>
-      <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent button.s-menu" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=-[arg-file]-">Append</button><br>
-      <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=-[arg-file|dirname]-">Directory</button><br>
-      <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=-[arg-file]-&operation=copy">Copy to</button><br>
-      <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=-[arg-file]-&operation=move">Move to</button><br>
-      <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/dialog/rename-file.html?file=-[arg-file]-">Rename</button><br>
-      <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=-[arg-file]-">Trash</button><br>
-      <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=-[arg-file]-">Permissions</button><br>
-      <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="-[arg-file]-">Copy url</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/file-tail.html?file=-[arg-file]-&lines=-[arg-lines]-">Reload</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent button.s-menu" pagelet-src="/pagelets/dialog/edit-file.html?file=-[arg-file]-">Edit</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent button.s-menu" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=-[arg-file]-">Append</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=-[arg-file|dirname]-">Directory</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=-[arg-file]-&operation=copy">Copy to</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=-[arg-file]-&operation=move">Move to</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/dialog/rename-file.html?file=-[arg-file]-">Rename</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=-[arg-file]-">Trash</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .dropdown-root >> jump data-origin >> parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=-[arg-file]-">Permissions</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="-[arg-file]-">Copy url</button><br>
     </div></template>
   </button>
 </div>

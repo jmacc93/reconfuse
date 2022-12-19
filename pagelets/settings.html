@@ -28,8 +28,8 @@
   <call-resource srcfn="/pagelets/settings.mjs: loadLibSettingsElements"></call-resource>
   
   <div>
-    <button is="call-resource-button" srcfn="/pagelets/settings.mjs: saveSelfpadData" class="linklike">Save selfpad data</button>, 
-    <button is="call-resource-button" srcfn="/pagelets/settings.mjs: loadSelfpadData" class="linklike">Load selfpad data</button>
+    <button srcfn="/pagelets/settings.mjs: saveSelfpadData" class="linklike">Save selfpad data</button>, 
+    <button srcfn="/pagelets/settings.mjs: loadSelfpadData" class="linklike">Load selfpad data</button>
   </div>
   
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"></call-resource>

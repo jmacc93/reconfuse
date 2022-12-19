@@ -74,22 +74,22 @@ const commonExistingFileOperations = /*HTML*/ `
   <details>
     <summary class="linklike" no-removal-on-click>File operations</summary>
     <div class="indented">
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</button><br>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</button><br>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=move">Move to</button><br>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/rename-file.html?file=${clientFile}">Rename</button><br>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</button><br>
-      <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</button>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=move">Move to</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/rename-file.html?file=${clientFile}">Rename</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</button>
     </div>
   </details>
 `
 
 const commonNonExistingFileOperations = /*HTML*/ `
-  <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</button><br>
-  <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</button><br>
+  <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</button><br>
+  <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</button><br>
 `
 
-const commonFileDropdownPart = /*HTML*/`<div>File <code>${clientFile}</code> <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy</button></div>`
+const commonFileDropdownPart = /*HTML*/`<div>File <code>${clientFile}</code> <button class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy</button></div>`
 
 if(isBinary) {
   if(exists) {
@@ -109,11 +109,11 @@ if(isBinary) {
         html`<div>File</div>`
       html`
       
-      <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
         <template><div class="dropdown" remove-on-click>
           ${commonFileDropdownPart}
           <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
-          <button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-file.mjs: uploadIt">Replace with upload</button><br>
+          <button class="linklike" srcfn="/pagelets/represent-file.mjs: uploadIt">Replace with upload</button><br>
           ${commonExistingFileOperations}
         </div></template>
       </button>
@@ -135,11 +135,11 @@ if(isBinary) {
         html`<span style="color: red">File 404</span>`
         
       html`
-      <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
         <template><div class="dropdown" remove-on-click>
           ${commonFileDropdownPart}
-          <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
-          <button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</button><br>
+          <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
+          <button class="linklike" srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</button><br>
           ${commonNonExistingFileOperations}
         </div></template>
       </button>
@@ -161,12 +161,12 @@ if(isBinary) {
       <call-resource srcfn="/pagelets/represent-file.mjs: initializeContentDisplay"></call-resource>
       <span class="content-display"></span>
       
-      <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
         <template><div class="dropdown" remove-on-click>
           ${commonFileDropdownPart}
-          <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
-          <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</button><br>
-          <button class="linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</button><br>
+          <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
+          <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</button><br>
+          <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</button><br>
           ${commonExistingFileOperations}
         </div></template>
       </button>
@@ -184,12 +184,12 @@ if(isBinary) {
       
       <span style="color:red" title="${clientFile} doesn't exist">404</span>
       
-      <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
         <template><div class="dropdown" remove-on-click>
           ${commonFileDropdownPart}
-          <button is="call-resource-button" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
-          <button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</button><br>
-          <button is="call-resource-button" class="linklike" srcfn="/pagelets/represent-file.mjs: makeIt">Make it</button><br>
+          <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
+          <button class="linklike" srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</button><br>
+          <button class="linklike" srcfn="/pagelets/represent-file.mjs: makeIt">Make it</button><br>
           ${commonNonExistingFileOperations}
         </div></template>
       </button>

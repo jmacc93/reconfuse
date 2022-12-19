@@ -9,20 +9,20 @@
   
   <div class="droptarget general-styling absolute-styling width100p" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="before this parent .controller-frame"></div>
   <div class="infobar">
-    <button is="call-resource-button" srcfn="/lib/elem-functions.mjs: removeElement" class="linklike" which="this parent .controller-frame">X</button>
+    <button srcfn="/lib/elem-functions.mjs: removeElement" class="linklike" which="this parent .controller-frame">X</button>
     <span class="child-title-mirror"></span>
-    <button is="call-resource-button" class="expander linklike" srcfn="/lib/elem-functions.mjs: toggleClassname" which="this parent .controller-frame" classname="collapsed"></button> <!-- Content set in css file -->
+    <button class="expander linklike" srcfn="/lib/elem-functions.mjs: toggleClassname" which="this parent .controller-frame" classname="collapsed"></button> <!-- Content set in css file -->
     <!-- <span class="drag-handle" draggable="true">///</span> -->
     <call-resource srcfn="/lib/elem-functions.mjs: makeIntoDragHandle" draggable-target="this parent .controller-frame" class="unselectable">///</call-resource>
-    <button class="s-menu linklike" is="call-resource-button" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+    <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
       <template><div class="dropdown" remove-on-click>
-        <button is="call-resource-button" class="linklike" srcfn="/pagelets/controller-frame.mjs: newFrameAfter">New frame</button><br>
-        <button is="call-resource-button" class="linklike" srcfn="/pagelets/controller-frame.mjs: toggleResizable">Toggle resizable</button><br>
+        <button class="linklike" srcfn="/pagelets/controller-frame.mjs: newFrameAfter">New frame</button><br>
+        <button class="linklike" srcfn="/pagelets/controller-frame.mjs: toggleResizable">Toggle resizable</button><br>
         Highlight: 
-        <button is="call-resource-button" class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="red">red</button>, 
-        <button is="call-resource-button" class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="blue">blue</button>, 
-        <button is="call-resource-button" class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="green">green</button>, 
-        <button is="call-resource-button" class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="">none</button><br>
+        <button class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="red">red</button>, 
+        <button class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="blue">blue</button>, 
+        <button class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="green">green</button>, 
+        <button class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="">none</button><br>
       </div></template>
     </button>
   </div>
