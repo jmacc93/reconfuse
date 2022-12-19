@@ -293,21 +293,3 @@ async function callFunctionInModule(modName, fnName, ...args) {
   // else
   fn(...args)
 }
-
-//#endregion
-
-function makeTemplate(source) {
-  let template = document.createElement('template')
-  template.innerHTML = source
-  return template
-}
-
-let headerTemplate
-setTimeout(async ()=>{
-  let response = await fetch('/pagelets/pagelet-header.html')
-  if(!response.ok)
-    return void console.error(`ERROR: pagelet-header.mjs could not get pagelet-header.html`)
-  // else
-  headerTemplate = makeTemplate(await response.text())
-})
-
