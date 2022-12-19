@@ -296,22 +296,6 @@ async function callFunctionInModule(modName, fnName, ...args) {
 
 //#endregion
 
-class DecoratedTextareaElement extends HTMLTextAreaElement {
-  constructor() {
-    super()
-    this.addEventListener('wheel', wheelEvent => {
-      if(wheelEvent.shiftKey) {
-        let height = parseInt(window.getComputedStyle(this).height.slice(0, -2))
-        height = Math.max(height + Math.ceil(wheelEvent.deltaY / 4), 92)
-        this.style.height = `${height}px`
-      }
-    })
-  }
-}
-if(!customElements.get('decorated-textarea'))
-  customElements.define('decorated-textarea', DecoratedTextareaElement, {extends: 'textarea'})
-
-
 function makeTemplate(source) {
   let template = document.createElement('template')
   template.innerHTML = source
