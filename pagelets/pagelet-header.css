@@ -20,3 +20,16 @@
   outline: 1px solid lightblue;
   background: rgb(96, 231, 240, 50%);
 }
+
+/* -------------------------- */
+/* ----Default styling ------ */
+
+button {
+  border: none;
+  background: unset;
+  color: blue;
+  cursor: pointer;
+}
+button:hover {
+  text-decoration: underline blue;
+}
