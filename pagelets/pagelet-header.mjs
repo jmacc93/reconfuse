@@ -163,15 +163,15 @@ function decorateImage(img) {
 //#endregion
 
 
-//#region automatically decorate textareas
+//#region automatically decorate textareas, input fields
 
 function decorateTextFieldChildren(elem) {
   if(elem.matches('textarea:not(.decorated-textfield)') || elem.matches('input[type="text"]:not(.decorated-textfield)'))
-    decorateTextField(img)
-  for(const img of elem.querySelectorAll('textarea:not(.decorated-textfield)'))
-    decorateTextField(img)
-  for(const img of elem.querySelectorAll('input[type="text"]:not(.decorated-textfield)'))
-    decorateTextField(img)
+    decorateTextField(elem)
+  for(const textarea of elem.querySelectorAll('textarea:not(.decorated-textfield)'))
+    decorateTextField(textarea)
+  for(const input of elem.querySelectorAll('input[type="text"]:not(.decorated-textfield)'))
+    decorateTextField(input)
 }
 
 const textareaObserver = new MutationObserver((records) => {
