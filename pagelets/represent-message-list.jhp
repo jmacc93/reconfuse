@@ -56,6 +56,24 @@ html`
       <button class="refresh linklike">Refresh</button>, 
       <button srcfn="/pagelets/represent-message-list.mjs: updatePreview" class="linklike">Update preview</button>, 
       <button srcfn="/lib/elem-functions.mjs: toggleHidden" which="this parent .submission-area >> child .submission-preview" class="linklike">Toggle preview</button>
+      <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+        <template><div class="dropdown" remove-on-click>
+          Directory: ${clientDir} <button srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy</button><br>
+          <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-file.jhp?directory=${clientDir}" target="replace-noframe this parent .pagelet">As directory</button><br>
+          <input type="text" srcfn="/pagelets/represent-message-list.mjs: initializeToChannelValue" change-srcfn="/pagelets/represent-message-list.mjs: changeChannel" no-removal-on-click>
+          <details>
+            <summary class="linklike" no-removal-on-click>File operations</summary>
+            <div class="indented">
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy path</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .submission-area" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientDir}&operation=copy">Copy to</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .submission-area" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientDir}&operation=move">Move to</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .submission-area" pagelet-src="/pagelets/dialog/rename-file.html?file=${clientDir}">Rename</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .submission-area" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientDir}">Trash</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .submission-area" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientDir}">Permissions</button>
+            </div>
+          </details>
+        </div></template>
+      </button>
     </div>
     <div class="submission-preview"></div>
     <textarea class="submission-input fullwidth vertical-resizable" placeholder="Submission input"></textarea>
