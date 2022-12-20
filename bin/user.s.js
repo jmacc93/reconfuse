@@ -15,14 +15,15 @@ if(!ctx.fs.existsSync('./users'))
   ctx.fs.mkdirSync('./users')
 
 const initialUserControlFileContent = (username)=> /*json*/ `[{
-  "file": {"tree": {"*all": "black"}}
+  "file": {"tree": {"*all": "black"}},
+  "dir": {"tree": {"*all": "black"}},
+  "access": {"tree": {"*all": "black"}}
 }, {
-  "modifyFile": {"tree": {"${username}": "white"}},
-  "newFile":    {"tree": {"${username}": "white"}},
-  "trashFile":  {"tree": {"${username}": "white"}},
-  "renameFile": {"tree": {"${username}": "white"}},
-  "newDir":     {"tree": {"${username}": "white"}},
-  "modifyFile": {"tree": {"${username}": "white"}}
+  "file": {"tree": {"${username}": "super-white"}},
+  "dir":    {"tree": {"${username}": "super-white"}},
+  "access": {"tree": {"${username}": "super-white"}}
+}, {
+  "access(mod-only.txt)": {"tree": {"*all": "black"}}
 }]`
 
 function setCodeAndMessage(response, code, msg) {
