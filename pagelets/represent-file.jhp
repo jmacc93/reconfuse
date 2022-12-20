@@ -98,9 +98,6 @@ if(isBinary) {
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       
-      <script src="/lib/callib/callib0.mjs" type="module"></script>
-      <script src="/lib/mixin.mjs" type="module"></script>
-      
       <link href="/pagelets/represent-file.css" rel="stylesheet">
       `
       if(principleContentType.startsWith('image/')) // is an image, use <img> element
@@ -125,8 +122,6 @@ if(isBinary) {
     <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
-      <script src="/lib/callib/callib0.mjs" type="module"></script>
-      <script src="/lib/mixin.mjs" type="module"></script>
       <link href="/pagelets/represent-file.css" rel="stylesheet">
       `
       if(principleContentType.startsWith('image/')) // is an image, use <img> element
@@ -154,8 +149,6 @@ if(isBinary) {
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       
-      <script src="/lib/callib/callib0.mjs" type="module"></script>
-      <script src="/lib/mixin.mjs" type="module"></script>
       <link href="/pagelets/represent-file.css" rel="stylesheet">
       
       <call-resource srcfn="/pagelets/represent-file.mjs: initializeContentDisplay"></call-resource>
@@ -178,8 +171,6 @@ if(isBinary) {
     <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>Non existent ${isDir ? 'directory' : 'file'} ${ctx.path.basename(clientFile)} - ${clientFile}</title>
-      <script src="/lib/callib/callib0.mjs" type="module"></script>
-      <script src="/lib/mixin.mjs" type="module"></script>
       <link href="/pagelets/represent-file.css" rel="stylesheet">
       
       <span style="color:red" title="${clientFile} doesn't exist">404</span>
