@@ -122,7 +122,7 @@ exports.respondToRequest.login = async function(request, response, getBody, args
   
   let userDir = `./users/${args.username}/`
   if(!ctx.fs.existsSync(userDir))  
-    return setCodeAndMessage(response, 400,  `User ${args.username} doesn't exist`)
+    return setCodeAndMessage(response, 400,  `Bad username - password pair`)
   // else
   
   const salt     = ctx.fs.readFileSync(userDir + '.salt.txt').toString()
@@ -134,11 +134,11 @@ exports.respondToRequest.login = async function(request, response, getBody, args
     if(ctx.fs.existsSync(oneTimePetFile)) {
       let pet = ctx.fs.readFileSync(oneTimePetFile).toString()
       if(args.password !== pet)
-        return setCodeAndMessage(response, 400,  `Incorrect password`)
+        return setCodeAndMessage(response, 400,  `Bad username - password pair`)
       // else
       fsp.writeFile(passBypassFile, '')
     } else {
-      return setCodeAndMessage(response, 400,  `Incorrect password`)
+      return setCodeAndMessage(response, 400,  `Bad username - password pair`)
     }
   } else { // correct password given
     if(fs.existsSync(passBypassFile))
