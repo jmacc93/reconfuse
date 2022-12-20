@@ -5,5 +5,6 @@
   "file(ofr-control.json)": {"tree": {"*admin": "super-white", "*mods": "super-white", "*supermods": "super-white"}}
 },
 {
-  "file(ofr-control.json)": {"tree": {"*all": "super-black"}}
+  "file(ofr-control.json)": {"tree": {"*all": "super-black"}},
+  "access(mod-only.txt)": {"tree": {"*mods": "super-white", "*supermods": "super-white"}}
 }]
