@@ -376,3 +376,20 @@ exports.respondToRequest.validateChallengeResponse = async function(request, res
     return setCodeAndMessage(response, 400, 'Bad response or no challenge associated with this username')
   }
 }
+
+exports.respondToRequest.getAnonId = async function(request, response, getBody, args) {
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(200) // wait 1/5 second
+  
+  // is logged in?
+  if(args.cookies?.loggedin)
+    return setCodeAndMessage(response, 400, 'Logged in already; you arent anonymous')
+  // else
+  
+  // Register anonymous user if anonymous
+  const anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
+  
+  response.statusCode = 200
+  response.statusMessage = String(anonId)
+  return true
+}
