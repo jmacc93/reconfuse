@@ -68,7 +68,7 @@ exports.respondToRequest = async function(request, response, getBody, args) {
   }
   
   // does file exist?
-  if(!(ctx.fs.existsSync(args.requestPath))) { // doesn't exist, serve 404
+  if(!ctx.fs.existsSync(args.requestPath)) { // doesn't exist, serve 404
     response.statusCode = 404
     response.statusMessage = `File ${args.requestPath} doesn't exist`
     return true
