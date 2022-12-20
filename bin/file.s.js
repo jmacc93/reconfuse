@@ -99,6 +99,7 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   
   const groupLib = await ctx.runScript('./bin/group.s.js')
   const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   
   if(fileIsOffLimits(args.file))
     return setCodeAndMessage(response, 400, `Cannot edit this file`)
@@ -149,7 +150,7 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   response.setHeader('ETag', newETag)
   console.log(`[${request.uid}]`, `update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' updated ', ctx.path.basename(args.file), ' with ', payload.length, ' chars\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' updated ', ctx.path.basename(args.file), ' with ', payload.length, ' chars\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
   
   response.statusCode = 200
@@ -233,7 +234,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
     anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
   
   // Update the file
-  let displayname = args.displayname ?? args.cookies?.displayname
+  let displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   let [_contentType, isBinary] = ctx.extContentMap[ctx.path.extname(args.file)] ?? ctx.extContentMap.default
   let payload = args.body ?? (isBinary ? await getBody() : (await getBody()).toString()) // use args.body if given, else use request body
   if(args.tagged ?? false) { // tagged append
@@ -245,7 +246,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   }
   console.log(`[${request.uid}]`, `update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' appended ', payload.length, ' chars to ', ctx.path.basename(args.file), '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' appended ', payload.length, ' chars to ', ctx.path.basename(args.file), '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
   
   response.statusCode = 200
@@ -296,6 +297,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
   // Register anonymous user if anonymous
   let anonId
   const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   if(username === undefined)
     anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
   
@@ -313,7 +315,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     // make the directory
     fs.mkdirSync(args.file, {recursive: true})
     ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' made the directory ', ctx.path.basename(args.file), '\n'
+      utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' made the directory ', ctx.path.basename(args.file), '\n'
     ].join(''))
     return true
     
@@ -344,7 +346,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     await fsp.writeFile(args.file, content)
     console.log(`[${request.uid}]`, `file.s.js/make successfully made file ${args.file}`)
     ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' made ', ctx.path.basename(args.file), ' with ', content.length, ' initial chars\n'
+      utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' made ', ctx.path.basename(args.file), ' with ', content.length, ' initial chars\n'
     ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js make: ${err.message}`))
     
     response.statusCode = 200
@@ -391,6 +393,7 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   const groupLib = await ctx.runScript('./bin/group.s.js')
   let parentDirectory = ctx.path.dirname(args.file)
   const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['newFile', 'file', `file(${filename})`, `newFile(${filename})`])
   if(isAllowed !== undefined && !isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make files here`)
@@ -417,11 +420,11 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   await fsp.writeFile(args.file, body)
   if(alreadyExisted) {
     fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' replaced ', ctx.path.basename(args.file), ' with new upload of', body.length, ' chars\n'
+      utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' replaced ', ctx.path.basename(args.file), ' with new upload of', body.length, ' chars\n'
     ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js upload: ${err.message}`))
   } else {
     fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' uploaded ', ctx.path.basename(args.file), ' with ', body.length, ' initial chars\n'
+      utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' uploaded ', ctx.path.basename(args.file), ' with ', body.length, ' initial chars\n'
     ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js upload: ${err.message}`))
   }
   
@@ -466,6 +469,7 @@ exports.respondToRequest["trash"] =  async function(request, response, getBody, 
   // is user allowed to do this here?
   let parentDirectory = ctx.path.dirname(args.file)
   const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['trashFile', 'file', `file(${filename})`, `trashFile(${filename})`])
   if(isAllowed !== undefined && !isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot trash files here`)
@@ -498,7 +502,7 @@ exports.respondToRequest["trash"] =  async function(request, response, getBody, 
   
   console.log(`[${request.uid}]`, `file.s.js/trash successfully trashed file ${args.file}`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' trashed ', args.file, ' to ', trashPath, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' trashed ', args.file, ' to ', trashPath, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js trash: ${err.message}`))
   
   return setCodeAndMessage(response, 200, `Trashed file ${args.file}`)
@@ -555,6 +559,7 @@ exports.respondToRequest['move'] = async function(request, response, getBody, ar
   let fromParentDirectory = ctx.path.dirname(args.from)
   let toParentDirectory   = ctx.path.dirname(args.to)
   const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   let isFromAllowed = groupLib.userControlInclusionStatus(username, fromParentDirectory, ['moveFile', 'file', `file(${frombasename})`, `moveFile(${frombasename})`])
   let isToAllowed   = groupLib.userControlInclusionStatus(username, toParentDirectory,   ['newFile', 'file', `file(${tobasename})`, `newFile(${tobasename})`])
   if(isFromAllowed !== undefined && !isFromAllowed)
@@ -571,7 +576,7 @@ exports.respondToRequest['move'] = async function(request, response, getBody, ar
   // Move the file (rename is equivalent to move in node api)
   await fsp.rename(args.from, args.to)
   fsp.appendFile(ctx.path.join(ctx.path.dirname(args.to), 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' moved ', args.from, ' to ', args.to, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' moved ', args.from, ' to ', args.to, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(ctx.path.dirname(args.to), 'changelog.autogen.txt')} in file.s.js move: ${err.message}`))
   
   return setCodeAndMessage(response, 200, `Moved ${args.from} to ${args.to}`)
@@ -605,6 +610,7 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
   
   let groupLib = await ctx.runScript('./bin/group.s.js')
   const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   if(fileIsOffLimits(args.file))
     return setCodeAndMessage(response, 400, `Cannot rename this file`)
   // else
@@ -639,7 +645,7 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
   await ctx.fsp.rename(args.file, `${parentDirectory}/${args.name}`)
   console.log(`[${request.uid}]`, `file.s.js/rename successfully renamed file ${args.file}`)
   ctx.fsp.appendFile(ctx.path.join(ctx.path.dirname(args.file), 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' renamed ', ctx.path.basename(args.file), ' to ', args.name, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' renamed ', ctx.path.basename(args.file), ' to ', args.name, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(ctx.path.dirname(args.file), 'changelog.autogen.txt')} in file.s.js rename: ${err.message}`))
   
   response.statusCode = 200
@@ -666,6 +672,7 @@ exports.respondToRequest["copy"] =  async function(request, response, getBody, a
   
   const groupLib = await ctx.runScript('./bin/group.s.js')
   const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   
   if(fileIsOffLimits(args.to))
     return setCodeAndMessage(response, 400, `Cannot copy file to this location with this file extension`)
@@ -710,7 +717,7 @@ exports.respondToRequest["copy"] =  async function(request, response, getBody, a
   await ctx.fsp.copyFile(args.from, args.to)
   console.log(`[${request.uid}]`, `file.s.js/copy successfully copied file ${args.from} to ${args.to}`)
   ctx.fsp.appendFile(ctx.path.join(toParentDirectory, 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' copied ', args.from, ' to ', args.to, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' copied ', args.from, ' to ', args.to, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
   
   response.statusCode = 200
