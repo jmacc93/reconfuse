@@ -260,9 +260,11 @@ export async function submitNewChallenge(callElem) {
   }
 }
 
-export async function updateModContactInfo(callElem) {
+export async function openModInfoFile(callElem) {
   const lib = await import('/lib/lib.mjs')
-  const pagelet = callElem.closest('.pagelet')
-  const infoTextarea = pagelet.querySelector(':scope textarea.mod-contact-info')
-  // ...  
+  const username = document.cookie.match(/username=(\w+);/)[1]
+  if(!username)
+    return void lib.notificationFrom(callElem, `Error: not logged in (how?)`, {error: true})
+  // else
+  lib.openPageletAt(callElem, `/pagelets/represent-file.jhp?file=/users/${username}/mod-only.txt`, `after this`)
 }

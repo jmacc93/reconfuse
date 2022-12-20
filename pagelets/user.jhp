@@ -84,10 +84,9 @@ html`
     
     <details>
       <summary class="linklike">Mod-only contact information</summary>
-      <textarea class="mod-contact-info width100p" change-srcfn="/pagelets/user.mjs: updateModContactInfo"></textarea>
+      <button srcfn="/pagelets/user.mjs: openModInfoFile">Mod info file</button>
       <div>
-        <div>Anything written is saved to a private dot file in your user directory</div>
-        <div>Only admins and mods may access it</div>
+        <div>Anything written in the above file is only visible to mods, unless you've given others permission to view it</div>
         <div>Its intended purpose is for mods to be able to contact you privately, primarily for password reset purposes</div>
       </div>
     </details>
