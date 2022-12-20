@@ -21,7 +21,7 @@ exports.respondToRequest = async function(request, response, getBody, args) {
 
 const lib = await ctx.runScript('./lib/lib.s.js')
 controlObjArrayCache = new lib.Cache(
-  (path) => JSON.parse(ctx.fs.readFileSync(path).toString()), // generator
+  (path) => JSON.parse(ctx.fs.readFileSync(path).toString())?.reverse(), // generator
   (path) => String(ctx.fs.statSync(path).mtimeMs) // etagger
 )
 
