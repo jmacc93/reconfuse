@@ -112,8 +112,16 @@ export async function installCheckOnInputFunctionality(callElem) {
   let usernameHadInput = false
   let passwordHadInput = false
   
-  const checkOnInput = () => {
-    // check username
+  let timeoutId = -1
+  
+  displaynameInput.addEventListener('input', () => { if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=> {
+    if(displaynameInput.value.length > 32) {
+      displaynameValidMsg.innerText = 'Displayname too long'
+    } else {
+      displaynameValidMsg.innerHTML = ''
+    }
+  }, 500) })
+  usernameInput.addEventListener(   'input', () => { usernameHadInput = true; if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=> {
     if(usernameInput.value.length === 0) {
       if(usernameHadInput) {
         usernameValidMsg.innerText = 'Username is empty'
@@ -126,15 +134,8 @@ export async function installCheckOnInputFunctionality(callElem) {
     } else {
       usernameValidMsg.innerHTML = ''
     }
-    
-    // check displayname
-    if(displaynameInput.value.length > 32) {
-      displaynameValidMsg.innerText = 'Displayname too long'
-    } else {
-      displaynameValidMsg.innerHTML = ''
-    }
-    
-    // check password
+  }, 500) })
+  passwordInput.addEventListener(   'input', () => { passwordHadInput = true; if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=> {
     if(passwordInput.value.length < 4) {
       if(passwordHadInput) {
         passwordValidMsg.innerText = 'Password is too short (must be length > 3; highly recommend a random password using all available characters with length > 8)'
@@ -142,16 +143,7 @@ export async function installCheckOnInputFunctionality(callElem) {
     } else {
       passwordValidMsg.innerHTML = ''
     }
-    
-    
-  }
-  checkOnInput()
-  
-  let timeoutId = -1
-  
-  displaynameInput.addEventListener('input', () => { if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=>checkOnInput(), 500) })
-  usernameInput.addEventListener(   'input', () => { usernameHadInput = true; if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=>checkOnInput(), 500) })
-  passwordInput.addEventListener(   'input', () => { passwordHadInput = true; if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=>checkOnInput(), 500) })
+  }, 500) })
 }
 
 export async function registerButtonClicked(callElemButton) {
