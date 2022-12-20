@@ -100,3 +100,20 @@ export async function updatePreview(callElemButton) {
   let filenameExtension = splitFilename.length > 0 ? '.' + splitFilename[splitFilename.length-1] : '.txt'
   lib.renderContentTo(preview, inputArea.value, filenameExtension)
 }
+
+export async function initializeToChannelValue(inputCallElem) {
+  const lib = await import('/lib/lib.mjs')
+  const pagelet = lib.getParentMatching(inputCallElem, '.pagelet')
+  const channel = pagelet.dataset.channel
+  inputCallElem.value = channel
+}
+
+export async function changeChannel(inputCallElem) {
+  const lib = await import('/lib/lib.mjs')
+  const pagelet = lib.getParentMatching(inputCallElem, '.pagelet')
+  const currentChannel = pagelet.dataset.channel
+  if(currentChannel === inputCallElem.value)
+    return void 0
+  // else
+  lib.openPageletAt(pagelet, `/pagelets/represent-message-list.jhp?directory=${pagelet.dataset.directory}&channel=${inputCallElem.value}`, `replace-noframe this`)
+}
