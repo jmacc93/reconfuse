@@ -66,9 +66,15 @@ export async function installFunctionality(callElem) {
     let timeStr     =  (new Date()).toUTCString()
     if(document.cookie.indexOf('loggedin=true') !== -1) {
       let username    = document.cookie.match(/username=([^;]+)/)[1]
-      submissionContent = [timeStr, ', ', username, displayname ? [' (as ', displayname, ')'].join('') : '', ':\n', submissionContent].join('')
+      submissionContent = `${timeStr}, ${username} ${displayname ? `(as ${displayname})` : ''}:\n${submissionContent}`
     } else {
-      submissionContent = [timeStr, ', anonymous', displayname ? [' as ', displayname].join('') : '', ':\n', submissionContent].join('')
+      let anonIdResponse = await fetch(`/bin/user.s.js/getAnonId`)
+      if(anonIdResponse.ok) {
+        const anonId = anonIdResponse.statusText
+        submissionContent = `${timeStr}, anonymous(${anonId}) ${displayname ? `(as ${displayname})` : ''}:\n${submissionContent}`
+      } else {
+        console.error(anonIdResponse)
+      }
     }
     const response = await fetch(['/bin/file.s.js/make?file=', newFilename].join(''), {method: "PUT", body: submissionContent})
     if(response.ok) {
