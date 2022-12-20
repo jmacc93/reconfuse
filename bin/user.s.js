@@ -37,31 +37,31 @@ Returns string validation status
 Returns 'valid' if valid, otherwise username - token pair given is invalid
 */
 function validateUserWithToken(username, authtoken) {
-  if(!username)
-    return `No username given`
-  // else 
+  // if(!username)
+  //   return `No username given`
+  // // else 
   
-  if(/[\.\/]/g.test(username)) // contains . or /
-    return 'Username contains invalid characters'
-  // else
+  // if(/[\.\/]/g.test(username)) // contains . or /
+  //   return 'Username contains invalid characters'
+  // // else
   
   let userDir = `./users/${username}/`
   if(!ctx.fs.existsSync(userDir))
-    return `User ${username} doesn't exist`
+    return false
   // else
   
   const userAuthtoken     = ctx.fs.readFileSync(userDir + '.authtoken.txt').toString()
   const userAuthtokenTime = parseInt(ctx.fs.readFileSync(userDir + '.authtoken-time.txt').toString())
   
   if(userAuthtoken !== authtoken)
-    return `Bad authtoken`
+    return false
   // else
   
   if(userAuthtokenTime + authtokenExpirationTime < Date.now())
-    return `Authtoken is expired`
+    return false
   // else
   
-  return 'Valid'
+  return true
 }
 exports.validateUserWithToken = validateUserWithToken
 
@@ -78,8 +78,8 @@ function handleUserAuthcheck(response, args) {
     }
     // else
     let validationStr = validateUserWithToken(username, authtoken) // 'Valid' | 'Bad authtoken' | ...
-    if(validationStr !== 'Valid') {
-      setCodeAndMessage(response, 401, validationStr)
+    if(!validationStr) {
+      setCodeAndMessage(response, 401, `Username - authtoken is invalid, please log in again`)
       return false
     }
     // else
