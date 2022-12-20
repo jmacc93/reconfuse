@@ -307,6 +307,42 @@ document.addEventListener('click', async clickEvent => {
 
 //#endregion
 
+//#region automatically call all srcfn
+
+
+function callAllSrcfns(elem) {
+  if(elem.matches('*[srcfn]:not(.srcfn-called):not(call-resource):not(button):not(.latent)'))
+    callElemSrcfn(elem)
+  for(const textarea of elem.querySelectorAll('*[srcfn]:not(.srcfn-called):not(call-resource):not(button):not(.latent)'))
+    callElemSrcfn(textarea)
+}
+
+const callSrcfnObserver = new MutationObserver((records) => {
+  for(const mutationRecord of records) {
+    if(mutationRecord.type === 'childList') {
+      for(const child of mutationRecord.addedNodes) {
+        if(child instanceof HTMLElement) 
+          callAllSrcfns(child)
+      }
+    }
+  }
+})
+callSrcfnObserver.observe(document.body, {childList: true, subtree: true})
+callAllSrcfns(document.body)
+
+async function callElemSrcfn(elem) {
+  const srcfn  = elem.getAttribute('srcfn')
+  if(srcfn) {
+    const lib = await import('/lib/lib.mjs')
+    let [src, fn] = lib.splitAtFirst(srcfn, /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
+    callFunctionInModule(src, fn, elem)
+    elem.classList.add('srcfn-called')
+  }
+}
+
+
+//#endregion
+
 async function callFunctionInModule(modName, fnName, ...args) {
   let mod = await import(modName)
   if(!mod)
