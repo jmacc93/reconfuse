@@ -27,7 +27,10 @@ export async function addOpenButtonFunctionality(callElem) {
   
   asFileButton.addEventListener('click', async clickEvent => {
     const lib = await import('/lib/lib.mjs')
-    let filepath = `${clientDir.endsWith('/') ? clientDir : clientDir + '/'}` + openInput.value
+    let inputValue = openInput.value
+    if(inputValue.startsWith('/'))
+      inputValue = inputValue.slice(1)
+    let filepath = `${clientDir.endsWith('/') ? clientDir : clientDir + '/'}` + inputValue
     if(clickEvent.altKey)
       lib.openPageletAt(asFileButton, '/pagelets/represent-file.jhp?file=' + filepath, 'replace-noframe this parent .pagelet')
     else
