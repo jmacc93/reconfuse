@@ -9,10 +9,8 @@ export async function setInitialState(callElem) {
   
   fetch(`/bin/user.s.js/validate`).then(async response => {
     const statusText = response.statusText
-    if(statusText === 'Bad authtoken' || statusText === 'Authtoken is expired') {
-      const validationMsgElem = pagelet.querySelector(':scope > .initial-validation-msg')
-      validationMsgElem.textContent = `${statusText}, please log in again`
-    }
+    if(statusText === 'false')
+      validationMsgElem.textContent = `Please log in again`
   })
   
   let username = window.localStorage.getItem('username')
