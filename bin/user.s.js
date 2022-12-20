@@ -172,7 +172,7 @@ exports.respondToRequest.validate = async function(request, response, getBody, a
   const authtoken = args.cookies?.loggedin ? args.cookies.authtoken : undefined
   
   response.statusCode = 200
-  response.statusMessage = validateUserWithToken(username, authtoken)
+  response.statusMessage = String(validateUserWithToken(username, authtoken))
   
   return true
 }
