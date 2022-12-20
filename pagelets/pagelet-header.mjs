@@ -272,7 +272,7 @@ async function decorateTextField(textfield) {
     })
   }
   // change functionality
-  const changeSrcFn  = textfield.getAttribute('input-srcfn')
+  const changeSrcFn  = textfield.getAttribute('change-srcfn')
   if(changeSrcFn) {
     const lib = await import('/lib/lib.mjs')
     let [changeSrc, changeFn] = lib.splitAtFirst(changeSrcFn, /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
