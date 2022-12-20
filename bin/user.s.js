@@ -147,7 +147,7 @@ exports.respondToRequest.login = async function(request, response, getBody, args
   
   ctx.fs.writeFileSync(userDir + '.last-interaction-time.txt', String(Date.now()))
   
-  let authtoken = lib.randomTokenString(6)
+  let authtoken = lib.randomAuthTokenString(32)
   ctx.fs.writeFileSync(userDir + '.authtoken.txt', authtoken)
   ctx.fs.writeFileSync(userDir + '.authtoken-time.txt', String(Date.now()))
   
