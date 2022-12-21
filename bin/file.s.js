@@ -968,7 +968,6 @@ exports.respondToRequest['raw'] = async function(request, response, getBody, arg
 }
 
 exports.respondToRequest['tail'] = async function(request, response, getBody, args) {
-  // console.log(`[${request.uid}]`, `file.s.js/raw requested to serve a ${args.file} raw`)
   const lib = await ctx.runScript('./lib/lib.s.js')
   await lib.asyncSleepFor(200) // wait for 1/5 second
   
