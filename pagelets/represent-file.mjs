@@ -20,11 +20,33 @@ export async function uploadIt(dropdownCallElem) {
     let fileObj = fakeFileInput.files.item(0) // File
     if(fileObj.size > 12e6) // too big (size > 12 MB)
       return void lib.notificationFrom(dropdownCallElem, 'File too large', {error: true})
-    let response = await fetch(`/bin/file.s.js/upload?file=${pagelet.dataset.file}`, {method: "POST", body: fileObj})
-    if(response.ok)
+    // let response = await fetch(`/bin/file.s.js/upload?file=${pagelet.dataset.file}`, {method: "POST", body: fileObj})
+    
+    const notificationElem = document.createElement('span')
+    notificationElem.innerHTML = `Upload progress: <progress></progress>`
+    const progressElem = notificationElem.querySelector('progress')
+
+    lib.notificationFrom(dropdownCallElem, notificationElem)
+
+    // await fetch(`/bin/file.s.js/upload?file=${pagelet.dataset.file}`, {method: "POST", body: fileObj})
+
+    let response = await new Promise((res) => {
+      let request = new XMLHttpRequest()
+      request.upload.addEventListener('progress', progressEvent => {
+        if(progressEvent.lengthComputable)
+          progressElem.value = progressEvent.loaded / progressEvent.total;
+      })
+      request.addEventListener('load', loadEvent => res(request))
+      request.open('POST', `/bin/file.s.js/upload?file=${pagelet.dataset.file}`, true)
+      request.send(fileObj)
+    })
+    
+    notificationElem.innerHTML = 'Upload complete'
+    
+    if(response.status === 200)
       lib.openPageletAt(dropdownCallElem, `${pagelet.dataset.doneUrl ?? `/pagelets/represent-file.jhp?file=${pagelet.dataset.file}`}`, 'replace-noframe this parent .pagelet')
     else
-      lib.notificationFrom(dropdownCallElem, ['Server returned: ', response.status, ', ', response.statusText].join(''), {error: true})
+      notificationElem.innerHTML = `Server returned ${response.status}, ${response.statusText}`
   })
   fakeFileInput.click()
 }
