@@ -145,11 +145,12 @@ exports.respondToRequest.login = async function(request, response, getBody, args
       fs.rmSync(passBypassFile)
   }
   
-  ctx.fs.writeFileSync(userDir + '.last-interaction-time.txt', String(Date.now()))
+  ctx.fs.writeFileSync(ctx.path.join(userDir, '.last-interaction-time.txt'), String(Date.now()))
   
   let authtoken = lib.randomAuthTokenString(32)
-  ctx.fs.writeFileSync(userDir + '.authtoken.txt', authtoken)
-  ctx.fs.writeFileSync(userDir + '.authtoken-time.txt', String(Date.now()))
+  ctx.fs.writeFileSync(ctx.path.join(userDir, '.authtoken.txt'), authtoken)
+  ctx.fs.writeFileSync(ctx.path.join(userDir, '.authtoken-time.txt'), String(Date.now()))
+  ctx.fs.writeFileSync(ctx.path.join(userDir, '.last-ip.txt'), String(Date.now()))
   
   let maxAgeCookieSegment = ('rememberme' in args) ? rememberMeTimeHeader : ''
   response.statusCode = 200
