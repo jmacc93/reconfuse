@@ -125,7 +125,7 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
     return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot modify the file ${args.file}`)
   // else
   
-  // is there mid-air-collision file conflict?
+  // is there a mid-air-collision file conflict?
   const stat = ctx.fs.statSync(args.file)
   const currentETag = String(stat.mtimeMs)
   if(request.headers['if-match'] !== currentETag) { // etags dont match, send current content
