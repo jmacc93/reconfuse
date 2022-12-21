@@ -141,6 +141,8 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   if(username === undefined)
     anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
   
+  const oldContent = ((filename === 'control.json') && (fs.existsSync(args.file))) ? (await fsp.readFile(args.file)) : undefined
+  
   // Update the file
   let [_contentType, isBinary] = ctx.extContentMap[ctx.path.extname(args.file)] ?? ctx.extContentMap.default
   let payload = args.body ?? (isBinary ? await getBody() : (await getBody()).toString()) // use args.body if given, else use request body
@@ -153,9 +155,28 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
     utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' updated ', ctx.path.basename(args.file), ' with ', payload.length, ' chars\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
   
-  response.statusCode = 200
-  response.statusMessage = `Updated file ${args.file}`
-  return true
+  // Does user still have the ability to edit this file?
+  if(filename === 'control.json') {
+    const isStillAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file', `file(${filename})`, `updateFile(${filename})`])
+    if(isStillAllowed) {
+      response.statusCode = 200
+      response.statusMessage = `Updated file ${args.file}`
+      return true
+    } else { // user made themselves incapable of editing again; revert the update
+      if(oldContent !== undefined) { // revert to old content
+        await fsp.writeFile(args.file, oldContent)
+        fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
+          utcDateStr(), ' reverting previous change ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' made to  ', ctx.path.basename(args.file), ' because it prevented them from undoing that change\n'
+        ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js/update: ${err.message}`))
+      } else { // file didn't exist originally, remove it
+        await fsp.rm(args.file)
+      }
+      response.statusCode = 400
+      response.statusMessage = `This change prevented you from reversing it, so it was reverted`
+      return true
+    }
+  }
+  
 }
 
 const appendHeaderMakers = {
