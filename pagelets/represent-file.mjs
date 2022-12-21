@@ -98,11 +98,18 @@ export async function initializeContentDisplay(callElem) {
   const pagelet = callElem.closest('.pagelet')
   const contentDisplay = pagelet.querySelector(':scope > .content-display')
   const focus = pagelet.dataset.focus
+  const file = pagelet.dataset.file
+  const tail = parseInt(pagelet.dataset.tail ?? 0)
   
-  const contentChannel = new BroadcastChannel(`content-${pagelet.dataset.file}`)
+  const contentChannel = new BroadcastChannel(`content-${file}`)
   contentChannel.addEventListener('message', async messageEvent => {
     let contentText = messageEvent.data
-    let fileExtension = lib.extname(pagelet.dataset.file)
+    if(tail > 0) { // only keep last N lines
+      let contentLines = contentText.split('\n')
+      contentLines = contentLines.slice(-tail)
+      contentText = contentLines.join('\n')
+    }
+    let fileExtension = lib.extname(file)
     if(contentText.length === 0) { // empty content
       let emptyMsgTemplate = document.createElement('template')
       emptyMsgTemplate.innerHTML = /*html*/`<span style="opacity: 50%">...</span>`
@@ -118,13 +125,11 @@ export async function initializeContentDisplay(callElem) {
     }
   })
   
-  let contentResponse = await fetch(`/bin/file.s.js/raw?file=${pagelet.dataset.file}`)
+  let contentResponse = await ((tail === 0) ? fetch(`/bin/file.s.js/raw?file=${file}`) : fetch(`/bin/file.s.js/tail?file=${file}&lines=${tail}`))
   if(contentResponse.ok) {
-    new BroadcastChannel(`content-${pagelet.dataset.file}`).postMessage(await contentResponse.text())
+    new BroadcastChannel(`content-${file}`).postMessage(await contentResponse.text())
   } else if(contentResponse.status === 404) {
     let fofElem = document.createElement('span')
-    // fofElem.href = `/pagelets/file-editor.jhp?file=${pagelet.dataset.file}`
-    // fofElem.setAttribute('target', "replace-noframe this parent .pagelet")
     fofElem.setAttribute('style', 'color: red')
     fofElem.textContent = '404'
     contentDisplay.innerHTML = ''

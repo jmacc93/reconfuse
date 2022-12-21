@@ -61,7 +61,7 @@ if(exists) {
 
 const isDir = clientFile.endsWith('/')
 
-const thisUrl = `/pagelets/represent-file.jhp?file=${args.file}${args.focus ? '&' + args.focus : ''}`
+const thisUrl = `/pagelets/represent-file.jhp?file=${args.file}${args.focus ? '&focus=' + args.focus : ''}${args.tail ? `&tail=${args.tail}` : ''}`
 
 let extContent  = ctx.extContentMap[ctx.path.extname(serverFile)]
 let [contentType, isBinary] = extContent ?? [undefined, undefined]
@@ -145,9 +145,9 @@ if(isBinary) {
 } else { // textual file
   if(exists) {
     html`
-    <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
+    <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}" data-tail="${args.tail ?? 0}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
-      <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
+      <title>File ${ctx.path.basename(clientFile)} - ${clientFile} ${args.tail ? `Last ${args.tail} lines` : ''}</title>
       
       <link href="/pagelets/represent-file.css" rel="stylesheet">
       
