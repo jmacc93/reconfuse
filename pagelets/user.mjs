@@ -74,7 +74,11 @@ export async function loginButtonClicked(callElemButton) {
   if(rememberMeBox.checked)
     uriSegs.push('&rememberme')
   callElemButton.classList.add('deactivated')
+  const pleaseWaitNotification = document.createElement('span')
+  pleaseWaitNotification.textContent = 'Please  wait'
+  lib.notificationFrom(callElemButton, pleaseWaitNotification)
   let response = await fetch(uriSegs.join(''))
+  pleaseWaitNotification.closest('.notification').remove()
   callElemButton.classList.remove('deactivated')
   lib.notificationFrom(loginButton, [
     response.ok ? 'Success: ' : 'Failure: ',
@@ -165,7 +169,11 @@ export async function registerButtonClicked(callElemButton) {
   if((displaynameInput.value ?? '') !== '')
     uriSegs.push('&displayname=', encodeURIComponent(displaynameInput.value))
   callElemButton.classList.add('deactivated')
+  const pleaseWaitNotification = document.createElement('span')
+  pleaseWaitNotification.textContent = 'Please  wait'
+  lib.notificationFrom(callElemButton, pleaseWaitNotification)
   let response = await fetch(uriSegs.join(''))
+  pleaseWaitNotification.closest('.notification').remove()
   callElemButton.classList.remove('deactivated')
   lib.notificationFrom(callElemButton, [
     response.ok ? 'Success: ' : 'Failure: ',
@@ -212,7 +220,11 @@ export async function setPasswordButtonClicked(callElem) {
   if(oldPasswordInput.value)
     urlSegs.push(`&oldPassword=`, encodeURIComponent(sha256(oldPasswordInput.value)))
   callElem.classList.add('deactivated')
+  const pleaseWaitNotification = document.createElement('span')
+  pleaseWaitNotification.textContent = 'Please  wait'
+  lib.notificationFrom(callElem, pleaseWaitNotification)
   let response = await fetch(urlSegs.join(''))
+  pleaseWaitNotification.closest('.notification').remove()
   callElem.classList.remove('deactivated')
   lib.notificationFrom(callElem, [
     response.ok ? 'Success: ' : 'Failure: ',
