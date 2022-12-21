@@ -119,8 +119,8 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   // else
   
   // is user allowed to do this here?
-  let parentDirectory = ctx.path.dirname(args.file)
-  let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file', `file(${filename})`, `updateFile(${filename})`])
+  const parentDirectory = ctx.path.dirname(args.file)
+  const isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file', `file(${filename})`, `updateFile(${filename})`])
   if(!isAllowed)
     return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot modify the file ${args.file}`)
   // else
