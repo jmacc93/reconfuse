@@ -175,6 +175,10 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
       response.statusMessage = `This change prevented you from reversing it, so it was reverted`
       return true
     }
+  } else { // No permission problems; all good
+    response.statusCode = 200
+    response.statusMessage = `File updated`
+    return true
   }
   
 }
