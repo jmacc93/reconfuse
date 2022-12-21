@@ -1,10 +1,9 @@
 [{
-  "file":   {"tree": {"*admin": "super-white", "*banned": "black"}},
-  "dir": {"tree": {"*admin": "super-white"}},
+  "file":   {"tree": {"*admin": "super-white", "*banned": "black", "*ipbanned": "super-black"}},
+  "dir": {"tree": {"*admin": "super-white", "*banned": "black", "*ipbanned": "super-black"}},
   "access": {"tree": {"*admin": "super-white", "*all": "white"}},
   "file(ofr-control.json)": {"tree": {"*admin": "super-white", "*mods": "super-white", "*supermods": "super-white"}}
-},
-{
+}, {
   "file(ofr-control.json)": {"tree": {"*all": "super-black"}},
   "access(mod-only.txt)": {"tree": {"*mods": "super-white", "*supermods": "super-white"}}
 }]
