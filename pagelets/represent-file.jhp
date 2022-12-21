@@ -157,9 +157,13 @@ if(isBinary) {
       <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
         <template><div class="dropdown" remove-on-click>
           ${commonFileDropdownPart}
-          <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
-          <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</button><br>
-          <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</button><br>
+          <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
+          <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</button><br>
+          <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</button><br>
+          `
+          if(clientFile.endsWith('.txt'))
+            html`<button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="/pagelets/represent-list.jhp?file=${clientFile}">Open as list</button>`
+          html`
           ${commonExistingFileOperations}
         </div></template>
       </button>
