@@ -5,8 +5,8 @@ if(!args.directory) {
 }
 // else
 
-let serverDir = ctx.escapeAllQuotes(ctx.addPathDot(args.directory))
-let clientDir = serverDir.slice(1) // trim off the dot .
+let serverDir = ctx.addPathDot(ctx.path.relative('./', ctx.addPathDot(args.directory)))
+let clientDir = ctx.sanitizeHTMLString(serverDir.slice(1)) // trim off the dot .
 
 if(!ctx.fs.existsSync(serverDir)) {
   html`<div class="error">Given directory ${clientDir} doesn't exist</div>`
