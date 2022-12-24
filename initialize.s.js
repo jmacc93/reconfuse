@@ -79,3 +79,51 @@ rootObj.unbanIp = async function(ipArg) {
     }
   }, 1000*60*15) // wait 15 minutes
 }
+
+// ------------------
+
+const consoleInputFile  = './groups/mods/console/input.txt'
+const consoleOutputFile = './groups/mods/console/output.txt'
+const consoleLogFile = './groups/mods/console/log.autogen.txt'
+
+const consoleDir = ctx.path.dirname(consoleInputFile)
+
+if(!ctx.fs.existsSync(consoleDir))
+  ctx.fs.mkdirSync(consoleDir, {recursive: true}) 
+
+const initialConsoleControlFileContent = /*json*/ `[{
+  "file": {"this": {"*all": "black"}},
+  "dir": {"this": {"*all": "black"}}
+}, {
+  "updateFile(input.txt)": {"this": {"*mods": "white", "*supermods": "white"}}
+}]`
+
+ctx.fsp.writeFile(consoleOutputFile, '')
+ctx.fsp.writeFile(consoleInputFile, '')
+ctx.fsp.writeFile('./groups/mods/console/control.json', initialConsoleControlFileContent)
+if(!ctx.fs.existsSync(consoleLogFile))
+  ctx.fsp.writeFile(consoleLogFile, '')
+
+ctx.fs.watchFile(consoleInputFile, async () => {
+  const contents = await ctx.fsp.readFile(consoleInputFile)
+  if(contents.length === 0)
+    return void 0
+  // else
+  const lines = contents.split(/\n+/g)
+  const resultSegs = []
+  for(const line of lines) {
+    const words = line.split(/\s+/g)
+    switch(words[0]) {
+      case 'ban':
+        resultSegs.push('`ban` not implemented yet')
+        break
+      default:
+        resultSegs.push(`unknown word ${words[0]}`)
+        break
+    }
+  }
+  const resultString = resultSegs.join('\n')
+  ctx.fsp.appendFile(consoleLogFile, `---\n\n${Date.now()}\nInput:\n${contents}\nOutput:\n${resultString}`)
+  ctx.fsp.writeFile(consoleOutputFile, resultString)
+  ctx.fsp.writeFile(consoleInputFile, '')
+})
