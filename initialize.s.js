@@ -119,22 +119,48 @@ if(!ctx.fs.existsSync(consoleLogFile))
   ctx.fsp.writeFile(consoleLogFile, '')
 
 ctx.fs.watchFile(consoleInputFile, async () => {
-  const contents = await ctx.fsp.readFile(consoleInputFile)
+  const contents = (await ctx.fsp.readFile(consoleInputFile)).toString()
   if(contents.length === 0)
     return void 0
   // else
   const lines = contents.split(/\n+/g)
   const resultSegs = []
-  for(const line of lines) {
-    const words = line.split(/\s+/g)
-    switch(words[0]) {
-      case 'ban':
-        resultSegs.push('`ban` not implemented yet')
-        break
-      default:
-        resultSegs.push(`unknown word ${words[0]}`)
-        break
+  try {
+    for(const line of lines) {
+      if(line.trim().length === 0)
+        continue
+      // else
+      const words = line.split(/\s+/g)
+      switch(words[0]) {
+        case 'ban-user': {
+          const result = rootObj.banUsernameIp(words[1])
+          resultSegs.push(`(${line})\nBan on user ${words[1]} ${result ? 'was successful' : 'failed'}`)
+          break
+        }
+        case 'ban-anon': {
+          const anonIp = anonIpReverseMap[parseInt(words[1])]
+          if(anonIp) {
+            let result = rootObj.banIp(anonIp)
+            resultSegs.push(`(${line})\nBan on anonymous user with id ${words[1]} ${result ? 'was successful' : 'failed'}`)
+          } else {
+            resultSegs.push(`(${line})\nNo such anonymous user with id ${anonIp}`)
+          }
+          break
+        }
+        case 'unban-ip':
+          rootObj.unbanIp(words[1])
+          resultSegs.push(`(${line})\nIp ${words[1]} unbanned`)
+          break
+        case 'echo':
+          resultSegs.push(words.slice(1).join(' '))
+          break
+        default:
+          resultSegs.push(`(${line})\nunknown word ${words[0]}`)
+          break
+      }
     }
+  } catch(genericError) {
+    resultSegs.push(`\nError: ${genericError.message}`)
   }
   const resultString = resultSegs.join('\n')
   ctx.fsp.appendFile(consoleLogFile, `---\n\n${Date.now()}\nInput:\n${contents}\nOutput:\n${resultString}`)
