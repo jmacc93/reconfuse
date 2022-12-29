@@ -17,6 +17,7 @@ if(!ctx.fs.existsSync('./logs'))
 
 let anonIpId = 0
 let anonIpMap = {}
+let anonIpReverseMap = {}
 let bannedIps
 if(ctx.fs.existsSync('./state/')) {
   anonIpId = ctx.fs.existsSync('./state/.anonipid.txt') ? parseInt(ctx.fs.readFileSync('./state/.anonipid.txt')) : 0
@@ -35,6 +36,7 @@ rootObj.registerAnonIp = function(ipArg) { // (ipArg: http.IncomingMessage | ip 
     ctx.fsp.appendFile('./logs/.anonips.txt', `${ip} ${id}\n`)
     ctx.fsp.writeFile('./state/anonipid.txt', String(id))
     anonIpMap[ip] = id
+    anonIpReverseMap[id] = ip
     return id
   }
 }
