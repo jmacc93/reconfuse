@@ -52,22 +52,33 @@ rootObj.isIpBanned = function(ipArg) {
 
 rootObj.banUsernameIp = async function(username) {
   if(!/\/\./.test(username))
-    return void 0
+    return false
   // else
   const userIpFile = `./users/${username}/.last-ip.txt`
-  lastIp = await ctx.fsp.readFile(userIpFile)
-  rootObj.banIp(lastIp)
+  try {
+    lastIp = await ctx.fsp.readFile(userIpFile)
+    return rootObj.banIp(lastIp)
+  } catch(err) {
+    return false
+  }
 }
 
 rootObj.banIp = async function(ipArg) {
   const ip = (ipArg instanceof ctx.http.IncomingMessage) ? ipArg.connection.remoteAddress : ipArg // either message or ip string
+  if(!ip || (typeof ip !== 'string'))
+    return false
+  // else
   bannedIps.add(ip)
   ctx.fsp.writeFile('./state/.banned-ips.txt', ip + '\n')
+  return true
 }
 
 let rewriteBannedListIntervalId = -1
 rootObj.unbanIp = async function(ipArg) {
   const ip = (ipArg instanceof ctx.http.IncomingMessage) ? ipArg.connection.remoteAddress : ipArg // either message or ip string
+  if(typeof ip !== 'string')
+    return false
+  // else
   bannedIps.remove(ip)
   // After awhile, if not interupted by unbanIp again, write all the ips into filesystem again
   if(rewriteBannedListIntervalId !== -1)
@@ -80,6 +91,7 @@ rootObj.unbanIp = async function(ipArg) {
       ctx.fs.write(fileId, '\n')
     }
   }, 1000*60*15) // wait 15 minutes
+  return true
 }
 
 // ------------------
