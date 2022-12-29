@@ -6,12 +6,7 @@ export async function setInitialState(callElem) {
   const rememberMeBox = pagelet.querySelector(':scope > * > .rememberme > input')
   const loggedInAsUsernameElem = pagelet.querySelector(':scope > .logged-in-as .username')
   const loggedInAsDispnameElem = pagelet.querySelector(':scope > .logged-in-as .displayname')
-  
-  fetch(`/bin/user.s.js/validate`).then(async response => {
-    const statusText = response.statusText
-    if(statusText === 'false')
-      validationMsgElem.textContent = `Please log in again`
-  })
+  const validationMsgElem = pagelet.querySelector(':scope > .initial-validation-msg')
   
   let username = window.localStorage.getItem('username')
   usernameInput.value = username ?? ''
@@ -24,6 +19,14 @@ export async function setInitialState(callElem) {
   
   let loggedIn = /loggedin=true/.test(document.cookie)
   pagelet.dataset.loggedin = loggedIn ? "true" : "false"
+  
+  if(loggedIn) {
+    fetch(`/bin/user.s.js/validate`).then(async response => {
+      const statusText = response.statusText
+      if(statusText === 'false')
+        validationMsgElem.textContent = `Please log in again`
+    })
+  }
   
   loggedInAsUsernameElem.textContent = username
   loggedInAsDispnameElem.textContent = displayname
