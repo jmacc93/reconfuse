@@ -11,6 +11,26 @@ const nullStringHash = sha256('')
 const authtokenExpirationTime = 1000*3600*24*7 // 7 days
 const rememberMeTimeHeader    =`Max-Age=${authtokenExpirationTime}` // remember for 7 days
 
+
+async function asyncSleepFor(msecs = 0) {
+  return new Promise(res => {
+    setTimeout(() => res(), msecs)
+  })
+}
+
+const ipCounts = {}
+const ipCountReductionDelay = 1000*60*60*6
+setInterval(async () => {
+  let step = 0
+  for(const ip in ipCounts) {
+    ipCounts[ip]--
+    if(ipCounts[ip] <= 0)
+      delete ipCounts[ip]
+    if(step++ % 16 === 0) // periodically yield for other processes
+      await asyncSleepFor(0)
+  }
+}, ipCountReductionDelay) // 6 hours
+
 if(!ctx.fs.existsSync('./users'))
   ctx.fs.mkdirSync('./users')
 
@@ -180,10 +200,12 @@ exports.respondToRequest.validate = async function(request, response, getBody, a
 
 exports.respondToRequest.register = async function(request, response, getBody, args) {
   const lib = await ctx.runScript('./lib/lib.s.js')
-  await lib.asyncSleepFor(2000) // wait 2 seconds
+  const ip = request.connection.remoteAddress
+  const count = ipCounts[ip] ?? 0
+  ipCounts[ip] = count + 1
+  await lib.asyncSleepFor(Math.min(2000*Math.exp(count), ipCountReductionDelay))
   
   console.log(`[${request.uid}] user.s.js/register requested to register user ${args.username}`)
-  
   
   // check username
   if(!args.username)  
