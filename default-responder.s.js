@@ -11,6 +11,7 @@ function setCodeAndMessage(response, code, msg) {
 }
 
 exports.respondToRequest = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   if(!args.requestPath)
     return setCodeAndMessage(reponse, 400, `No requestPath argument given`)
   // else
@@ -51,7 +52,7 @@ exports.respondToRequest = async function(request, response, getBody, args) {
   // is user allowed to do this here?
   const parentDirectory = ctx.path.dirname(args.requestPath)
   const groupLib = await ctx.runScript('./bin/group.s.js')
-  const isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['accessFile', `access`, `accessFile(${filename})`, `access(${filename})`])
+  const isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['accessFile', `access`, `accessFile(${filename})`, `access(${filename})`])
   if(!isAllowed)
     return setCodeAndMessage(response, 401, `Cannot access the file ${args.requestPath}`)
   // else

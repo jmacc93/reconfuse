@@ -42,7 +42,8 @@ if(!userLib.handleUserAuthcheck(response, args))
 const parentDirectory = ctx.path.dirname(serverDir)
 const basename = ctx.path.basename(serverDir)
 const groupLib = await ctx.runScript('./bin/group.s.js')
-const isAllowed = groupLib.userControlInclusionStatus(username, serverDir, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
+const ip = request.connection.remoteAddress
+const isAllowed = groupLib.userControlInclusionStatus(username, ip, serverDir, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
 if(!isAllowed) {
   html`<div class="error">${username ? 'User ' + username : 'Anonymous users '} cannot access the file ${serverDir}</div>`
   return true

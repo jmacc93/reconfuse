@@ -1,3 +1,4 @@
+const ip = request.connection.remoteAddress
 
 if(!args.file)
   return void html`<div class="pagelet error">No file argument given</div>`
@@ -17,15 +18,15 @@ const basename = ctx.path.basename(serverFile)
 
 const group = await ctx.runScript('./bin/group.s.js')
 
-let pNewDir     = group.userControlInclusionStatus(username, parentDirectory, ['newDir', 'dir'])
-let pUpdateFile = group.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file', `file(${basename})`, `updateFile(${basename})`])
-let pAppendFile = group.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file', `file(${basename})`, `updateFile(${basename})`, 'append', `append(${basename})`])
-let pMakeFile   = group.userControlInclusionStatus(username, parentDirectory, ['newFile', 'file', `file(${basename})`, `newFile(${basename})`])
-let pUploadFile = group.userControlInclusionStatus(username, parentDirectory, ['newFile', 'file', `file(${basename})`, `newFile(${basename})`])
-let pTrashFile  = group.userControlInclusionStatus(username, parentDirectory, ['trashFile', 'file', `file(${basename})`, `trashFile(${basename})`])
-let pMoveFile   = group.userControlInclusionStatus(username, parentDirectory, ['moveFile', 'file', `file(${basename})`, `moveFile(${basename})`])
-let pRenameFile = group.userControlInclusionStatus(username, parentDirectory, ['renameFile', 'file', `file(${basename})`, `renameFile(${basename})`])
-let pCopyFile   = group.userControlInclusionStatus(username, parentDirectory, ['copyFile', 'file', `file(${basename})`, `copyFile(${basename})`])
+let pNewDir     = group.userControlInclusionStatus(username, ip, parentDirectory, ['newDir', 'dir'])
+let pUpdateFile = group.userControlInclusionStatus(username, ip, parentDirectory, ['updateFile', 'file', `file(${basename})`, `updateFile(${basename})`])
+let pAppendFile = group.userControlInclusionStatus(username, ip, parentDirectory, ['updateFile', 'file', `file(${basename})`, `updateFile(${basename})`, 'append', `append(${basename})`])
+let pMakeFile   = group.userControlInclusionStatus(username, ip, parentDirectory, ['newFile', 'file', `file(${basename})`, `newFile(${basename})`])
+let pUploadFile = group.userControlInclusionStatus(username, ip, parentDirectory, ['newFile', 'file', `file(${basename})`, `newFile(${basename})`])
+let pTrashFile  = group.userControlInclusionStatus(username, ip, parentDirectory, ['trashFile', 'file', `file(${basename})`, `trashFile(${basename})`])
+let pMoveFile   = group.userControlInclusionStatus(username, ip, parentDirectory, ['moveFile', 'file', `file(${basename})`, `moveFile(${basename})`])
+let pRenameFile = group.userControlInclusionStatus(username, ip, parentDirectory, ['renameFile', 'file', `file(${basename})`, `renameFile(${basename})`])
+let pCopyFile   = group.userControlInclusionStatus(username, ip, parentDirectory, ['copyFile', 'file', `file(${basename})`, `copyFile(${basename})`])
 
 html`
 // ...

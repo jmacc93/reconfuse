@@ -85,6 +85,7 @@ Argument body gets used first if given
 */
 // args: {file, body}
 exports.respondToRequest["update"] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   console.log(`[${request.uid}]`, `file.s.js/update requested to update file ${args.file}`)
 
   if(!args.file) 
@@ -120,7 +121,7 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   
   // is user allowed to do this here?
   const parentDirectory = ctx.path.dirname(args.file)
-  const isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file', `file(${filename})`, `updateFile(${filename})`])
+  const isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['updateFile', 'file', `file(${filename})`, `updateFile(${filename})`])
   if(!isAllowed)
     return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot modify the file ${args.file}`)
   // else
@@ -157,7 +158,7 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   
   // Does user still have the ability to edit this file?
   if(filename === 'control.json') {
-    const isStillAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file', `file(${filename})`, `updateFile(${filename})`])
+    const isStillAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['updateFile', 'file', `file(${filename})`, `updateFile(${filename})`])
     if(isStillAllowed) {
       response.statusCode = 200
       response.statusMessage = `Updated file ${args.file}`
@@ -211,6 +212,7 @@ If argument tagged is given then username and time are also appended along with 
 */
 // args: {file, body, tagged}
 exports.respondToRequest["append"] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   console.log(`[${request.uid}]`, `file.s.js/append requested to update file ${args.file}`)
 
   if(!args.file) 
@@ -245,7 +247,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   
   // is user allowed to do this here?
   let parentDirectory = ctx.path.dirname(args.file)
-  let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, [
+  let isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, [
     'updateFile', 'file', `file(${filename})`, `updateFile(${filename})`,
     'appendFile', `appendFile(${filename})`
   ])
@@ -285,6 +287,7 @@ Initial content given by arguments or by http request body
 */
 // args: {file, body}
 exports.respondToRequest["make"] =  async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   console.log(`[${request.uid}]`, `file.s.js/make requested to make a new file ${args.file}`)
 
   if(args.file === undefined)
@@ -332,7 +335,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     
     // is user allowed to create directories?
     const firstExisting = getFirstExistingDirectory(parentDirectory)
-    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, firstExisting, ['newDir', 'dir'])
+    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, ip, firstExisting, ['newDir', 'dir'])
     if(!isNewdirAllowed)
       return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that directory`)
     // else
@@ -347,7 +350,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
   } else {
     
     // is user allowed to make files here?
-    let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['newFile', 'file', `file(${filename})`, `newFile(${filename})`])
+    let isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['newFile', 'file', `file(${filename})`, `newFile(${filename})`])
     if(isAllowed !== undefined && !isAllowed)
       return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that file here`)
     // else
@@ -355,7 +358,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     // does parent directory exist?
     if(!fs.existsSync(parentDirectory)) {
       const firstExisting = getFirstExistingDirectory(parentDirectory)
-      let isNewdirAllowed = groupLib.userControlInclusionStatus(username, firstExisting, ['newDir', 'dir'])
+      let isNewdirAllowed = groupLib.userControlInclusionStatus(username, ip, firstExisting, ['newDir', 'dir'])
       if(!isNewdirAllowed)
         return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that file's parent directory`)
       // else
@@ -386,6 +389,7 @@ Essentially the same as "make" above
 */
 // args: {file}
 exports.respondToRequest['upload'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   if(!args.file)
     return setCodeAndMessage(response, 400, `No \'file\' argument given`)
   // else
@@ -419,7 +423,7 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   let parentDirectory = ctx.path.dirname(args.file)
   const username = args.cookies?.loggedin ? args.cookies?.username : undefined
   const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
-  let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['newFile', 'file', `file(${filename})`, `newFile(${filename})`])
+  let isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['newFile', 'file', `file(${filename})`, `newFile(${filename})`])
   if(isAllowed !== undefined && !isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make files here`)
   // else
@@ -432,7 +436,7 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   // does parent directory exist?
   if(!fs.existsSync(parentDirectory)) {
     const firstExisting = getFirstExistingDirectory(parentDirectory)
-    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, firstExisting, ['newDir', 'dir'])
+    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, ip, firstExisting, ['newDir', 'dir'])
     if(!isNewdirAllowed)
       return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that file's parent directory (${parentDirectory})`)
     // else
@@ -461,6 +465,7 @@ Move a file to its parent directory's 'trash' directory
 */
 // args: {file}
 exports.respondToRequest["trash"] =  async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   console.log(`[${request.uid}]`, `file.s.js/trash requested to trash a file ${args.file}`)
 
   if(args.file === undefined)
@@ -495,7 +500,7 @@ exports.respondToRequest["trash"] =  async function(request, response, getBody, 
   let parentDirectory = ctx.path.dirname(args.file)
   const username = args.cookies?.loggedin ? args.cookies?.username : undefined
   const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
-  let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['trashFile', 'file', `file(${filename})`, `trashFile(${filename})`])
+  let isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['trashFile', 'file', `file(${filename})`, `trashFile(${filename})`])
   if(isAllowed !== undefined && !isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot trash files here`)
   // else
@@ -540,6 +545,7 @@ Note: File permissions are checked in the source directory (lists 'file' or 'mov
 */
 // args: {from, to}
 exports.respondToRequest['move'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   if(!args.from)
     return setCodeAndMessage(response, 400, `No \'from\' argument given`)
   // else
@@ -585,8 +591,8 @@ exports.respondToRequest['move'] = async function(request, response, getBody, ar
   let toParentDirectory   = ctx.path.dirname(args.to)
   const username = args.cookies?.loggedin ? args.cookies?.username : undefined
   const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
-  let isFromAllowed = groupLib.userControlInclusionStatus(username, fromParentDirectory, ['moveFile', 'file', `file(${frombasename})`, `moveFile(${frombasename})`])
-  let isToAllowed   = groupLib.userControlInclusionStatus(username, toParentDirectory,   ['newFile', 'file', `file(${tobasename})`, `newFile(${tobasename})`])
+  let isFromAllowed = groupLib.userControlInclusionStatus(username, ip, fromParentDirectory, ['moveFile', 'file', `file(${frombasename})`, `moveFile(${frombasename})`])
+  let isToAllowed   = groupLib.userControlInclusionStatus(username, ip, toParentDirectory,   ['newFile', 'file', `file(${tobasename})`, `newFile(${tobasename})`])
   if(isFromAllowed !== undefined && !isFromAllowed)
     return setCodeAndMessage(response, 400, `${!username ? 'Anonymous users' : `User ` + username} cannot move files from here`)
   if(isToAllowed !== undefined && !isToAllowed)
@@ -613,6 +619,7 @@ Changes the file argument file's name the name argument
 */
 // args: {file, name}
 exports.respondToRequest["rename"] =  async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   console.log(`[${request.uid}]`, `file.s.js/rename requested to rename a file ${args.file}`)
 
   if(args.file === undefined)
@@ -656,7 +663,7 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
   
   // is user allowed to do this here?
   let parentDirectory = ctx.path.dirname(args.file)
-  let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['renameFile', 'file', `file(${filename})`, `renameFile(${filename})`])
+  let isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['renameFile', 'file', `file(${filename})`, `renameFile(${filename})`])
   if(isAllowed !== undefined && !isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make files here`)
   // else
@@ -681,6 +688,7 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
 // untested, probably doesn't work correctly
 // args: {from, to}
 exports.respondToRequest["copy"] =  async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   if(args.from === undefined)
     return setCodeAndMessage(response, 400, `No from argument given`)
   // else
@@ -724,11 +732,11 @@ exports.respondToRequest["copy"] =  async function(request, response, getBody, a
   
   // is user allowed to do this here?
   let toParentDirectory = ctx.path.dirname(args.to)
-  let isAllowed = groupLib.userControlInclusionStatus(username, toParentDirectory, ['newFile', 'file', `file(${tobasename})`, `newFile(${tobasename})`])
+  let isAllowed = groupLib.userControlInclusionStatus(username, ip, toParentDirectory, ['newFile', 'file', `file(${tobasename})`, `newFile(${tobasename})`])
   if(!isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make files here`)
   // else
-  let isFromAllowed = groupLib.userControlInclusionStatus(username, toParentDirectory, ['copyFile', 'file', `file(${frombasename})`, `copyFile(${frombasename})`])
+  let isFromAllowed = groupLib.userControlInclusionStatus(username, ip, toParentDirectory, ['copyFile', 'file', `file(${frombasename})`, `copyFile(${frombasename})`])
   if(!isFromAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot copy this file`)
   // else
@@ -758,6 +766,7 @@ Pattern can be a RegExp if called form another script or a properly escaped rege
 */
 // args: {directory, pattern, afterTime}
 exports.respondToRequest['list'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   // console.log(`[${request.uid}]`, `file.s.js/list requested to list files in ${args.directory ?? ''}`)
   
   if(!args.directory)
@@ -853,6 +862,7 @@ function* walkFiles(startDir, maxDepth = -1) {
 }
 
 exports.respondToRequest['search'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   const lib = await ctx.runScript('./lib/lib.s.js')
   await lib.asyncSleepFor(200) // wait 200 ms
   
@@ -905,6 +915,7 @@ Gets exactly the contents of the given file without any parsing or anything
 */
 // args: {file}
 exports.respondToRequest['raw'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   // console.log(`[${request.uid}]`, `file.s.js/raw requested to serve a ${args.file} raw`)
   
   if(!args.file)
@@ -941,7 +952,7 @@ exports.respondToRequest['raw'] = async function(request, response, getBody, arg
   // is user allowed to do this here?
   const parentDirectory = ctx.path.dirname(args.file)
   const groupLib = await ctx.runScript('./bin/group.s.js')
-  const isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
+  const isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
   if(!isAllowed)
     return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot access the file ${args.file}`)
   // else
@@ -968,6 +979,7 @@ exports.respondToRequest['raw'] = async function(request, response, getBody, arg
 }
 
 exports.respondToRequest['tail'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   const lib = await ctx.runScript('./lib/lib.s.js')
   await lib.asyncSleepFor(200) // wait for 1/5 second
   
@@ -1017,7 +1029,7 @@ exports.respondToRequest['tail'] = async function(request, response, getBody, ar
   // is user allowed to do this here?
   const parentDirectory = ctx.path.dirname(args.file)
   const groupLib = await ctx.runScript('./bin/group.s.js')
-  const isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
+  const isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
   if(!isAllowed)
     return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot access the file ${args.file}`)
   // else
