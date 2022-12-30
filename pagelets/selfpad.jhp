@@ -19,10 +19,11 @@ html`
   <div>
     <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
       <template><div class="dropdown" remove-on-click>
-        <button class="linklike" srcfn="/pagelets/selfpad.mjs: updateButton">Update</button><br>
-        <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="after this parent .pagelet">List all</button><br>
-        <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/pad.html" target="after this parent .pagelet">Pad</button><br>
-        <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/open-dialog.html" target="after this parent .pagelet">Open</button>
+        <button srcfn="/pagelets/selfpad.mjs: updateButton">Update</button><br>
+        <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="after this parent .pagelet">List all</button><br>
+        <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/pad.html" target="after this parent .pagelet">Pad</button><br>
+        <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/open-dialog.html" target="after this parent .pagelet">Open</button><br>
+        <a href="/pagelets/selfpad.jhp?name=${args.name ?? 'misc'}" target="_blank">Open this in new tab</a>
       </div></template>
     </button>
   </div>
