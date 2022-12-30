@@ -147,6 +147,8 @@ body > * + div {
 a {
   color: blue;
   text-decoration: unset;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 1em;
 }
 a:hover {
   text-decoration: underline blue;
