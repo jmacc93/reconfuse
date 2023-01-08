@@ -1,4 +1,8 @@
 
+:root {
+  --general-button-color: rgb(43, 121, 255);
+}
+
 body {
   margin-left:    2em;
   margin-right:   2em;
@@ -137,19 +141,31 @@ body > * + div {
 .linklike {
   border: none;
   background: unset;
-  color: blue;
+  color: var(--general-button-color, blue);
   cursor: pointer;
 }
 .linklike:hover {
-  text-decoration: underline blue;
+  text-decoration: underline var(--general-button-color, blue);
 }
 
 a {
-  color: blue;
+  color: var(--general-button-color, blue);
   text-decoration: unset;
   font-size: 1em;
 }
 a:hover {
+  text-decoration: underline var(--general-button-color, blue);
+}
+
+button {
+  border: none;
+  background: unset;
+  color: blue;
+  cursor: pointer;
+  font-size: 1em;
+  padding: 0;
+}
+button:hover {
   text-decoration: underline blue;
 }
 
