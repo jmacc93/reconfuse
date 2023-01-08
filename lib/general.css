@@ -259,19 +259,21 @@ button:hover {
 .in-progress-dim { opacity: 50% }
 .in-progress-outline { outline: 1px solid gray }
 .in-progress-outline-empty {
-  outline: 1px solid gray;
-  width: 2em;
+  opacity: 20%;
+  outline: 1px dashed gray;
+  width: 100%;
   height: 2em;
-  
+  background: rgb(227, 227, 227);
 }
 
 /* ----------- Reconfuse Specific: ----------------- */
 
 html-mixin {
   opacity: 20%;
-  outline: 1px solid gray;
+  background: rgb(227, 227, 227);
+  outline: 1px dashed gray;
   display: inline-block;
-  min-width: 2em;
+  min-width: 100%;
   min-height: 2em;
 }
 
