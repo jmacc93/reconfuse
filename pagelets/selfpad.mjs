@@ -13,6 +13,7 @@ async function renderTextareaContent(textarea, contentDisplay, pagelet) {
   const contentType = pagelet.dataset.contenttype
   const name        = pagelet.dataset.name
   const itemName    = `selfpad-${name}`
+  contentDisplay.hidden = false
   let trimmedValue = textarea.value.trim()
   if(trimmedValue === '') {
     localStorage.removeItem(itemName)

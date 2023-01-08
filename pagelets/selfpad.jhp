@@ -19,10 +19,11 @@ html`
   <div>
     <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
       <template><div class="dropdown" remove-on-click>
-        <button srcfn="/pagelets/selfpad.mjs: updateButton">Update</button><br>
+        <button srcfn="/pagelets/selfpad.mjs: updateButton">Update preview</button><br>
+        <button srcfn="/lib/elem-functions.mjs: toggleHidden" which="this parent .pagelet >> child .content-display">Hide preview</button><br>
         <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="after this parent .pagelet">List all</button><br>
         <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/pad.html" target="after this parent .pagelet">Pad</button><br>
-        <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/open-dialog.html" target="after this parent .pagelet">Open</button><br>
+        <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/open-dialog.html" target="after this parent .pagelet">Open url</button><br>
         <a href="/pagelets/selfpad.jhp?name=${args.name ?? 'misc'}" target="_blank">Open this in new tab</a>
       </div></template>
     </button>
