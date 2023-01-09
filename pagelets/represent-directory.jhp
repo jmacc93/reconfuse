@@ -73,11 +73,11 @@ html`
   <title>Directory ${ctx.path.basename(clientDir)} - ${clientDir}</title>
   <div class="header">
     Files inside directory <code>${clientDir}</code>
-    <a href="${thisUrl}" title="reload" target="replace-noframe this parent .pagelet">R</a>
-    <a href="${upUrl}" title="go to parent directory" target="replace-noframe this parent .pagelet">Up</a>
     <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
       <template><div class="dropdown" remove-on-click>
+        <a href="${upUrl}" title="go to parent directory" target="replace-noframe this parent .pagelet" title="Open parent directory">Up</a><br>
         Directory: ${clientDir} <button srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy</button><br>
+        <a href="${thisUrl}" title="reload" target="replace-noframe this parent .pagelet">Reload directory</a>
         <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-message-list.jhp?directory=${clientDir}" target="replace-noframe this parent .pagelet">As message list</button><br>
         ${commonOperationOptionsHtml(clientDir, 'after this parent button.s-menu')}
         <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet >> child .open-file" pagelet-src="/pagelets/components/search-directory.html?directory=${clientDir}">Search</button>
