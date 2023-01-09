@@ -37,7 +37,7 @@ html`
     .permission-display .disallowed { color: red; text-decoration: red line-through }
   </style>
   <title>Permissions for ${args.file}</title>
-  Permissions for <code>${args.file}</code> for ${username}:
+  Permissions of <code>${args.file}</code> ${username ? `for ${username}` : 'for anonymous'}:
   <div class="permissions">
     <div class="${pUpdateFile ? 'allowed' : 'disallowed'}"> update files </div>
     <div class="${pAppendFile ? 'allowed' : 'disallowed'}"> append to files </div>
