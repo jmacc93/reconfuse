@@ -20,7 +20,8 @@ export async function installFunctionality(callElem) {
 }
   
 export async function updateButton(callElem) {
-  const pagelet = callElem.closest('.selfpad')
+  const lib = await import('/lib/lib.mjs')
+  const pagelet = lib.getParentMatching(callElem, '.selfpad')
   const textarea = pagelet.querySelector('textarea')
   const contentDisplay = pagelet.querySelector('.content-display')
   
