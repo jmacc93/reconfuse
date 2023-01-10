@@ -62,6 +62,15 @@ export async function installDragHandleFunctionality(dropdownCallElem) {
   })
 }
 
+export async function installKeepScrolledToBottomFunctionality(callElem) {
+  const container = callElem.closest('.controller-frame').querySelector('.child-container')
+  const observer = new MutationObserver(() => {
+    if(container.classList.contains('scrolled-to-bottom'))
+      container.scrollTop = container.scrollHeight - container.clientHeight
+  })
+  observer.observe(container, {subtree: true, childList: true, attributes: true})
+}
+
 function resizeContainerHandler(wheelEvent) {
   const containerElem = wheelEvent.currentTarget
   if(wheelEvent.shiftKey) {
@@ -73,6 +82,14 @@ function resizeContainerHandler(wheelEvent) {
   }
 }
 
+function scrollHandler(scrollEvent) {
+  const container = scrollEvent.target
+  if(container.scrollTop > container.scrollHeight - container.clientHeight - 10)
+    container.classList.add('scrolled-to-bottom')
+  else
+    container.classList.remove('scrolled-to-bottom')
+}
+
 export async function toggleResizable(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
   const frame = lib.getParentMatching(dropdownCallElem, '.controller-frame')
@@ -82,7 +99,9 @@ export async function toggleResizable(dropdownCallElem) {
     if(!childContainer.style.height)
       childContainer.style.height = `8em`
     childContainer.addEventListener('wheel', resizeContainerHandler)
+    childContainer.addEventListener('scroll', scrollHandler)
   } else {
     childContainer.removeEventListener('wheel', resizeContainerHandler)
+    childContainer.removeEventListener('scroll', scrollHandler)
   }
 }

@@ -60,7 +60,7 @@
 }
 
 .controller-frame.resizable > .child-container {
-  padding-bottom: 8em;
+  padding-bottom: 2em;
 }
 
 .controller-frame:not(.resizable) > .child-container {
