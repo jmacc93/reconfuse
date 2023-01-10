@@ -7,3 +7,6 @@
   margin: 0; padding: 0;
   cursor: pointer;
 }
+
+.file-representation.pagelet.show-raw > .content-display { display: none; }
+.file-representation.pagelet:not(.show-raw) > .raw-display { display: none; }

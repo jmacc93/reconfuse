@@ -152,6 +152,7 @@ if(isBinary) {
       <link href="/pagelets/represent-file.css" rel="stylesheet">
       
       <call-resource srcfn="/pagelets/represent-file.mjs: initializeContentDisplay"></call-resource>
+      <pre class="raw-display" style="white-space: pre-wrap"></pre>
       <span class="content-display"></span>
       
       <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
@@ -164,6 +165,7 @@ if(isBinary) {
           if(clientFile.endsWith('.txt'))
             html`<button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="/pagelets/represent-list.jhp?file=${clientFile}">Open as list</button>`
           html`
+          <button srcfn="/lib/elem-functions.mjs: toggleClassname" which="this parent .pagelet" classname="show-raw" title="Switch between raw and rendered markup">Switch markup display</button>
           ${commonExistingFileOperations}
         </div></template>
       </button>

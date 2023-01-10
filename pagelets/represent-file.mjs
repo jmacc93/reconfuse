@@ -96,10 +96,11 @@ export async function initializeContentDisplay(callElem) {
   const lib = await import('/lib/lib.mjs')
   
   const pagelet = callElem.closest('.pagelet')
+  const rawDisplay     = pagelet.querySelector(':scope > .raw-display')
   const contentDisplay = pagelet.querySelector(':scope > .content-display')
   const focus = pagelet.dataset.focus
   const file = pagelet.dataset.file
-  const tail = parseInt(pagelet.dataset.tail ?? 0)
+  const tail = parseInt(pagelet.dataset.tail ?? '0')
   
   const contentChannel = new BroadcastChannel(`content-${file}`)
   contentChannel.addEventListener('message', async messageEvent => {
@@ -109,6 +110,7 @@ export async function initializeContentDisplay(callElem) {
       contentLines = contentLines.slice(-tail)
       contentText = contentLines.join('\n')
     }
+    rawDisplay.textContent = contentText
     let fileExtension = lib.extname(file)
     if(contentText.length === 0) { // empty content
       let emptyMsgTemplate = document.createElement('template')
@@ -132,10 +134,12 @@ export async function initializeContentDisplay(callElem) {
     let fofElem = document.createElement('span')
     fofElem.setAttribute('style', 'color: red')
     fofElem.textContent = '404'
+    rawDisplay.textContent = '404'
     contentDisplay.innerHTML = ''
     contentDisplay.appendChild(fofElem)
   } else {
+    rawDisplay.textContent = ['Error during response, ', String(contentResponse.status), ', ', contentResponse.statusText].join('')
     contentDisplay.innerHTML = ''
-    contentDisplay.textContent = ['Error during response, ', String(contentResponse.status), ', ', contentResponse.statusText].join('')
+    contentDisplay.textContent = rawDisplay.textContent
   }
 }
