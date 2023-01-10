@@ -212,6 +212,8 @@ async function serveFile(filepath, response, contentsManipulation = undefined) {
         toWrite = insertPlaceholderValues(toWrite, contentsManipulation)
       else
         toWrite = insertPlaceholderValues(toWrite, undefined)
+      if(ext === '.html')
+        response.write('<!DOCTYPE html>\n')
       response.write(toWrite)
     }
     response.statusCode = 200
@@ -338,8 +340,12 @@ eg: jfpScript = buildJFP('./pagelets/represent-file.jhp')
 */
 function buildJFP(filepath) {
   let jfpSource = fs.readFileSync(filepath).toString('utf-8')
-  jfpSource = /*javascript*/ `const html = (stringList, ...valuesList) => {
+  jfpSource = /*javascript*/ `let wroteDoctype = false; const html = (stringList, ...valuesList) => {
     let segs = []
+    if(!wroteDoctype) {
+      response.write('<!DOCTYPE html>')
+      wroteDoctype = true
+    }
     for(let i = 0; i < valuesList.length; i++) {
       response.write(stringList[i])
       response.write(String(valuesList[i]))
