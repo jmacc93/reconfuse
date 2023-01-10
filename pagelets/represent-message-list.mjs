@@ -49,8 +49,6 @@ export async function installFunctionality(callElem) {
   
   refreshButton.addEventListener('click', async clickEvent => {
     getMessagesFromServer()
-    const lib = await import('/lib/lib.mjs')
-    lib.notificationFrom(refreshButton, 'Refreshed', {transient: true})
   })
   
   inputArea.addEventListener('keydown', async downEvent => {
@@ -78,7 +76,6 @@ export async function installFunctionality(callElem) {
     }
     const response = await fetch(['/bin/file.s.js/make?file=', newFilename].join(''), {method: "PUT", body: submissionContent})
     if(response.ok) {
-      lib.notificationFrom(submitButton, 'Created ' + newFilename, {transient: true})
       getMessagesFromServer()
       inputArea.value = ''
       preview.innerHTML = ''
