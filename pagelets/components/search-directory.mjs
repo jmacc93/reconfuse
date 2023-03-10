@@ -6,7 +6,7 @@ async function makeResultLine(file) {
   ret.innerHTML = /*html*/`
     <div class="file-search-result">
       <a href="/pagelets/represent-file.jhp?file=${sanitizedFile}">${file}</a>
-      <button is="call-resource-button" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${file}" class="linklike">Copy</button>
+      <button srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${file}" class="linklike">Copy</button>
     </div>
   `
   return ret.content

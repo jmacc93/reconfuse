@@ -1,7 +1,7 @@
 
 # Reconfuse ![](./favicon.ico)
 
-Visit [reconfuse.org](http://reconfuse.org) to see the site in action
+Visit [reconfuse.org](https://reconfuse.org) to see the site in action
 
 This contains the major components for project reconfuse
 * Fragment server -- a server which:
@@ -15,20 +15,16 @@ This contains the major components for project reconfuse
   + Manipulating files (eg: `/bin/file.s.js`)
   + Checking user permissions (in `/bin/group.s.js` and using `control.json` files)
   + Registering and validating users (in `/bin/user.s.js`)
-* Automatic recurrent processes in `/bots/` and the `/bots/ofr.s.js` file cleanup script
+* Automatic recurrent processes in `/bots/` and the `/bots/ofr.s.js` automatic file deletion script
 * Front end content universal to all instances of *reconfuse*:
   + In `/pagelets/`
   + Scripts in `/lib/`
 
-Project reconfuse is intended to provide a platform for free expression of ideas
+Project reconfuse is intended to provide a platform for free expression of ideas. However, it is specifically usable as a wiki, forum, static pagelet host, etc
 
 # Project status:
 
-Reconfuse is in-development and pretty much very unstable. Expect bugs and an irritating UI
-
-HOWEVER, it *is* currently usable and functional as a hybrid file browser / web forum / web blog / whatever
-
-The current main developer Joe / jmacc93 works on it every day despite not commiting to this repo every day, so don't consider gaps between commits as meaning slow development (well, development may be slow, but only because Joe's progress per effort has decreased)
+It is as done as it will ever be unless others take interest in the project (which is to be determined). I won't continue working on it except for my own purposes unless other people start using it and they want more features, bugs to be fixed, etc
 
 # How to run:
 

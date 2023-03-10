@@ -1,11 +1,12 @@
 <div class="dialog">
   <call-resource srcfn="/pagelets/open-dialog.mjs: installInputFunctionality"></call-resource>
   <input type="text" placeholder="Open url"/>
-  <button is="call-resource-button" class="linklike" srcfn="/pagelets/open-dialog.mjs: open">Open</button>
-  <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-    <option style="color: gray">S</option>
-    <option srcfn="/pagelets/open-dialog.mjs: openAsFileRepresentation" >As file representation</option>
-    <option srcfn="/pagelets/open-dialog.mjs: openAsDirectoryRepresentation" >As directory representation</option>
-    <option srcfn="/pagelets/open-dialog.mjs: openAsListRepresentation" >As list representation</option>
-  </select>
+  <button class="linklike" srcfn="/pagelets/open-dialog.mjs: open">Open</button>
+  <button srcfn="/lib/elem-functions.mjs: makeDropdown" class="s-menu linklike">S
+    <template><div class="dropdown" remove-on-click>
+      <button class="linklike" srcfn="/pagelets/open-dialog.mjs: openAsFileRepresentation" >As file representation</button><br>
+      <button class="linklike" srcfn="/pagelets/open-dialog.mjs: openAsDirectoryRepresentation" >As directory representation</button><br>
+      <button class="linklike" srcfn="/pagelets/open-dialog.mjs: openAsListRepresentation" >As list representation</button>
+    </div></template>
+  </button>
 </div>

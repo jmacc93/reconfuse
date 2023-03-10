@@ -49,8 +49,6 @@ export async function installFunctionality(callElem) {
   
   refreshButton.addEventListener('click', async clickEvent => {
     getMessagesFromServer()
-    const lib = await import('/lib/lib.mjs')
-    lib.notificationFrom(refreshButton, 'Refreshed', {transient: true})
   })
   
   inputArea.addEventListener('keydown', async downEvent => {
@@ -66,13 +64,18 @@ export async function installFunctionality(callElem) {
     let timeStr     =  (new Date()).toUTCString()
     if(document.cookie.indexOf('loggedin=true') !== -1) {
       let username    = document.cookie.match(/username=([^;]+)/)[1]
-      submissionContent = [timeStr, ', ', username, displayname ? [' (as ', displayname, ')'].join('') : '', ':\n', submissionContent].join('')
+      submissionContent = `${timeStr}, ${username} ${displayname ? `(as ${displayname})` : ''}:\n${submissionContent}`
     } else {
-      submissionContent = [timeStr, ', anonymous', displayname ? [' as ', displayname].join('') : '', ':\n', submissionContent].join('')
+      let anonIdResponse = await fetch(`/bin/user.s.js/getAnonId`)
+      if(anonIdResponse.ok) {
+        const anonId = anonIdResponse.statusText
+        submissionContent = `${timeStr}, anonymous(${anonId}) ${displayname ? `(as ${displayname})` : ''}:\n${submissionContent}`
+      } else {
+        console.error(anonIdResponse)
+      }
     }
     const response = await fetch(['/bin/file.s.js/make?file=', newFilename].join(''), {method: "PUT", body: submissionContent})
     if(response.ok) {
-      lib.notificationFrom(submitButton, 'Created ' + newFilename, {transient: true})
       getMessagesFromServer()
       inputArea.value = ''
       preview.innerHTML = ''
@@ -93,4 +96,21 @@ export async function updatePreview(callElemButton) {
   let splitFilename = filenameArea.value.split('.')
   let filenameExtension = splitFilename.length > 0 ? '.' + splitFilename[splitFilename.length-1] : '.txt'
   lib.renderContentTo(preview, inputArea.value, filenameExtension)
+}
+
+export async function initializeToChannelValue(inputCallElem) {
+  const lib = await import('/lib/lib.mjs')
+  const pagelet = lib.getParentMatching(inputCallElem, '.pagelet')
+  const channel = pagelet.dataset.channel
+  inputCallElem.value = channel
+}
+
+export async function changeChannel(inputCallElem) {
+  const lib = await import('/lib/lib.mjs')
+  const pagelet = lib.getParentMatching(inputCallElem, '.pagelet')
+  const currentChannel = pagelet.dataset.channel
+  if(currentChannel === inputCallElem.value)
+    return void 0
+  // else
+  lib.openPageletAt(pagelet, `/pagelets/represent-message-list.jhp?directory=${pagelet.dataset.directory}&channel=${inputCallElem.value}`, `replace-noframe this`)
 }

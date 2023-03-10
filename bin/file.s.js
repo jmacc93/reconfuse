@@ -85,6 +85,7 @@ Argument body gets used first if given
 */
 // args: {file, body}
 exports.respondToRequest["update"] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   console.log(`[${request.uid}]`, `file.s.js/update requested to update file ${args.file}`)
 
   if(!args.file) 
@@ -98,7 +99,8 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   // else
   
   const groupLib = await ctx.runScript('./bin/group.s.js')
-  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
+  const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   
   if(fileIsOffLimits(args.file))
     return setCodeAndMessage(response, 400, `Cannot edit this file`)
@@ -118,13 +120,13 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   // else
   
   // is user allowed to do this here?
-  let parentDirectory = ctx.path.dirname(args.file)
-  let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['updateFile', 'file', `file(${filename})`, `updateFile(${filename})`])
+  const parentDirectory = ctx.path.dirname(args.file)
+  const isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['updateFile', 'file', `file(${filename})`, `updateFile(${filename})`])
   if(!isAllowed)
     return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot modify the file ${args.file}`)
   // else
   
-  // is there mid-air-collision file conflict?
+  // is there a mid-air-collision file conflict?
   const stat = ctx.fs.statSync(args.file)
   const currentETag = String(stat.mtimeMs)
   if(request.headers['if-match'] !== currentETag) { // etags dont match, send current content
@@ -140,6 +142,8 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   if(username === undefined)
     anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
   
+  const oldContent = ((filename === 'control.json') && (fs.existsSync(args.file))) ? (await fsp.readFile(args.file)) : undefined
+  
   // Update the file
   let [_contentType, isBinary] = ctx.extContentMap[ctx.path.extname(args.file)] ?? ctx.extContentMap.default
   let payload = args.body ?? (isBinary ? await getBody() : (await getBody()).toString()) // use args.body if given, else use request body
@@ -149,12 +153,55 @@ exports.respondToRequest["update"] = async function(request, response, getBody, 
   response.setHeader('ETag', newETag)
   console.log(`[${request.uid}]`, `update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' updated ', ctx.path.basename(args.file), ' with ', payload.length, ' chars\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' updated ', ctx.path.basename(args.file), ' with ', payload.length, ' chars\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
   
-  response.statusCode = 200
-  response.statusMessage = `Updated file ${args.file}`
-  return true
+  // Does user still have the ability to edit this file?
+  if(filename === 'control.json') {
+    const isStillAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['updateFile', 'file', `file(${filename})`, `updateFile(${filename})`])
+    if(isStillAllowed) {
+      response.statusCode = 200
+      response.statusMessage = `Updated file ${args.file}`
+      return true
+    } else { // user made themselves incapable of editing again; revert the update
+      if(oldContent !== undefined) { // revert to old content
+        await fsp.writeFile(args.file, oldContent)
+        fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
+          utcDateStr(), ' reverting previous change ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' made to  ', ctx.path.basename(args.file), ' because it prevented them from undoing that change\n'
+        ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js/update: ${err.message}`))
+      } else { // file didn't exist originally, remove it
+        await fsp.rm(args.file)
+      }
+      response.statusCode = 400
+      response.statusMessage = `This change prevented you from reversing it, so it was reverted`
+      return true
+    }
+  } else { // No permission problems; all good
+    response.statusCode = 200
+    response.statusMessage = `File updated`
+    return true
+  }
+  
+}
+
+const appendHeaderMakers = {
+  // anonId is undefined if should use username, otherwise use anonId
+  default: (anonId, username, displayname) => `\n\n${(anonId !== undefined) ? `anonymous(${anonId})` : username} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n`,
+  ['.md']: (anonId, username, displayname) => {
+    return ['\n\n---\n',
+      (anonId !== undefined) ? `anonymous(${anonId}) ` :`[${username}](/pagelets/represent-file.jhp?file=/users/${username}/) `,
+      displayname ? `(as ${displayname}) ` : '',
+      (new Date()).toUTCString(), '\n'
+    ].join('')
+  },
+  ['.escm']: async (anonId, username, displayname) => {
+    const lib = await ctx.runScript('./lib/lib.s.js')
+    return ['\n\n\\separator() ',
+      (anonId !== undefined) ? `anonymous(${anonId}) ` :`\\link(/pagelets/represent-file.jhp?file=/users/${username}/|${username}) `,
+      displayname ? `(as ${displayname}) ` : '',
+      `\\itime(`, Date.now(), `) \\anchor(A|${lib.randomTokenString(5)})\n`
+    ].join('')
+  },
 }
 
 /**
@@ -165,6 +212,7 @@ If argument tagged is given then username and time are also appended along with 
 */
 // args: {file, body, tagged}
 exports.respondToRequest["append"] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   console.log(`[${request.uid}]`, `file.s.js/append requested to update file ${args.file}`)
 
   if(!args.file) 
@@ -178,7 +226,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   // else
   
   const groupLib = await ctx.runScript('./bin/group.s.js')
-  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
+  const username = args.cookies?.loggedin ? args.cookies?.username : undefined
   
   if(fileIsOffLimits(args.file))
     return setCodeAndMessage(response, 400, `Cannot edit this file`)
@@ -199,7 +247,7 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   
   // is user allowed to do this here?
   let parentDirectory = ctx.path.dirname(args.file)
-  let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, [
+  let isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, [
     'updateFile', 'file', `file(${filename})`, `updateFile(${filename})`,
     'appendFile', `appendFile(${filename})`
   ])
@@ -209,20 +257,23 @@ exports.respondToRequest["append"] = async function(request, response, getBody, 
   
   // Register anonymous user if anonymous
   let anonId
-  if(username === undefined)
+  if(!username)
     anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
   
   // Update the file
-  let displayname = args.displayname ?? args.cookies?.displayname
+  let displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   let [_contentType, isBinary] = ctx.extContentMap[ctx.path.extname(args.file)] ?? ctx.extContentMap.default
   let payload = args.body ?? (isBinary ? await getBody() : (await getBody()).toString()) // use args.body if given, else use request body
-  if(args.tagged ?? false) // tagged append
-    await fsp.appendFile(args.file, `\n\n${username ?? `anonymous(${anonId})`} ${displayname ? `(as ${displayname})` : ''} ${(new Date()).toUTCString()}\n${payload}`)
-  else // regular append
+  if(args.tagged ?? false) { // tagged append
+    let extension = ctx.path.extname(args.file)
+    let headerMaker = appendHeaderMakers[extension] ?? appendHeaderMakers.default
+    await fsp.appendFile(args.file, await headerMaker(anonId, username, args.displayname ?? (args.cookies?.loggedin ? args.cookies.displayname : undefined)) + payload)
+  } else { // regular append
     await fsp.appendFile(args.file, `\n\n` + payload)
+  }
   console.log(`[${request.uid}]`, `update-file.s.js successfully updated file ${args.file} with ${payload.length} chars`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' appended ', payload.length, ' chars to ', ctx.path.basename(args.file), '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' appended ', payload.length, ' chars to ', ctx.path.basename(args.file), '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
   
   response.statusCode = 200
@@ -236,6 +287,7 @@ Initial content given by arguments or by http request body
 */
 // args: {file, body}
 exports.respondToRequest["make"] =  async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   console.log(`[${request.uid}]`, `file.s.js/make requested to make a new file ${args.file}`)
 
   if(args.file === undefined)
@@ -272,7 +324,8 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
   
   // Register anonymous user if anonymous
   let anonId
-  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
+  const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   if(username === undefined)
     anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
   
@@ -282,7 +335,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     
     // is user allowed to create directories?
     const firstExisting = getFirstExistingDirectory(parentDirectory)
-    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, firstExisting, ['newDir', 'dir'])
+    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, ip, firstExisting, ['newDir', 'dir'])
     if(!isNewdirAllowed)
       return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that directory`)
     // else
@@ -290,14 +343,14 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     // make the directory
     fs.mkdirSync(args.file, {recursive: true})
     ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' made the directory ', ctx.path.basename(args.file), '\n'
+      utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' made the directory ', ctx.path.basename(args.file), '\n'
     ].join(''))
     return true
     
   } else {
     
     // is user allowed to make files here?
-    let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['newFile', 'file', `file(${filename})`, `newFile(${filename})`])
+    let isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['newFile', 'file', `file(${filename})`, `newFile(${filename})`])
     if(isAllowed !== undefined && !isAllowed)
       return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that file here`)
     // else
@@ -305,7 +358,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     // does parent directory exist?
     if(!fs.existsSync(parentDirectory)) {
       const firstExisting = getFirstExistingDirectory(parentDirectory)
-      let isNewdirAllowed = groupLib.userControlInclusionStatus(username, firstExisting, ['newDir', 'dir'])
+      let isNewdirAllowed = groupLib.userControlInclusionStatus(username, ip, firstExisting, ['newDir', 'dir'])
       if(!isNewdirAllowed)
         return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that file's parent directory`)
       // else
@@ -321,7 +374,7 @@ exports.respondToRequest["make"] =  async function(request, response, getBody, a
     await fsp.writeFile(args.file, content)
     console.log(`[${request.uid}]`, `file.s.js/make successfully made file ${args.file}`)
     ctx.fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-      utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' made ', ctx.path.basename(args.file), ' with ', content.length, ' initial chars\n'
+      utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' made ', ctx.path.basename(args.file), ' with ', content.length, ' initial chars\n'
     ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js make: ${err.message}`))
     
     response.statusCode = 200
@@ -336,6 +389,7 @@ Essentially the same as "make" above
 */
 // args: {file}
 exports.respondToRequest['upload'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   if(!args.file)
     return setCodeAndMessage(response, 400, `No \'file\' argument given`)
   // else
@@ -349,9 +403,7 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   args.file = ctx.addPathDot(args.file)
   let filename = ctx.path.basename(args.file)
   
-  if(fs.existsSync(args.file))
-    return setCodeAndMessage(response, 404, `No such file ${args.file}`)
-  // else
+  const alreadyExisted = fs.existsSync(args.file)
   
   let [_contentType, isBinary] = ctx.extContentMap[path.extname(args.file)] ?? ctx.extContentMap.default
   let body = await getBody()
@@ -369,8 +421,9 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   // is user allowed to do this here?
   const groupLib = await ctx.runScript('./bin/group.s.js')
   let parentDirectory = ctx.path.dirname(args.file)
-  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
-  let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['newFile', 'file', `file(${filename})`, `newFile(${filename})`])
+  const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
+  let isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['newFile', 'file', `file(${filename})`, `newFile(${filename})`])
   if(isAllowed !== undefined && !isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make files here`)
   // else
@@ -383,7 +436,7 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   // does parent directory exist?
   if(!fs.existsSync(parentDirectory)) {
     const firstExisting = getFirstExistingDirectory(parentDirectory)
-    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, firstExisting, ['newDir', 'dir'])
+    let isNewdirAllowed = groupLib.userControlInclusionStatus(username, ip, firstExisting, ['newDir', 'dir'])
     if(!isNewdirAllowed)
       return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make that file's parent directory (${parentDirectory})`)
     // else
@@ -394,9 +447,15 @@ exports.respondToRequest['upload'] = async function(request, response, getBody, 
   }
   
   await fsp.writeFile(args.file, body)
-  fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' uploaded ', ctx.path.basename(args.file), ' with ', body.length, ' initial chars\n'
-  ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js upload: ${err.message}`))
+  if(alreadyExisted) {
+    fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
+      utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' replaced ', ctx.path.basename(args.file), ' with new upload of', body.length, ' chars\n'
+    ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js upload: ${err.message}`))
+  } else {
+    fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
+      utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' uploaded ', ctx.path.basename(args.file), ' with ', body.length, ' initial chars\n'
+    ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js upload: ${err.message}`))
+  }
   
   return setCodeAndMessage(response, 200, 'Upload successful')
 }
@@ -406,6 +465,7 @@ Move a file to its parent directory's 'trash' directory
 */
 // args: {file}
 exports.respondToRequest["trash"] =  async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   console.log(`[${request.uid}]`, `file.s.js/trash requested to trash a file ${args.file}`)
 
   if(args.file === undefined)
@@ -438,8 +498,9 @@ exports.respondToRequest["trash"] =  async function(request, response, getBody, 
   
   // is user allowed to do this here?
   let parentDirectory = ctx.path.dirname(args.file)
-  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
-  let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['trashFile', 'file', `file(${filename})`, `trashFile(${filename})`])
+  const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
+  let isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['trashFile', 'file', `file(${filename})`, `trashFile(${filename})`])
   if(isAllowed !== undefined && !isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot trash files here`)
   // else
@@ -471,7 +532,7 @@ exports.respondToRequest["trash"] =  async function(request, response, getBody, 
   
   console.log(`[${request.uid}]`, `file.s.js/trash successfully trashed file ${args.file}`)
   fsp.appendFile(ctx.path.join(parentDirectory, 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' trashed ', args.file, ' to ', trashPath, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' trashed ', args.file, ' to ', trashPath, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(parentDirectory, 'changelog.autogen.txt')} in file.s.js trash: ${err.message}`))
   
   return setCodeAndMessage(response, 200, `Trashed file ${args.file}`)
@@ -484,6 +545,7 @@ Note: File permissions are checked in the source directory (lists 'file' or 'mov
 */
 // args: {from, to}
 exports.respondToRequest['move'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   if(!args.from)
     return setCodeAndMessage(response, 400, `No \'from\' argument given`)
   // else
@@ -527,9 +589,10 @@ exports.respondToRequest['move'] = async function(request, response, getBody, ar
   const groupLib = await ctx.runScript('./bin/group.s.js')
   let fromParentDirectory = ctx.path.dirname(args.from)
   let toParentDirectory   = ctx.path.dirname(args.to)
-  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
-  let isFromAllowed = groupLib.userControlInclusionStatus(username, fromParentDirectory, ['moveFile', 'file', `file(${frombasename})`, `moveFile(${frombasename})`])
-  let isToAllowed   = groupLib.userControlInclusionStatus(username, toParentDirectory,   ['newFile', 'file', `file(${tobasename})`, `newFile(${tobasename})`])
+  const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
+  let isFromAllowed = groupLib.userControlInclusionStatus(username, ip, fromParentDirectory, ['moveFile', 'file', `file(${frombasename})`, `moveFile(${frombasename})`])
+  let isToAllowed   = groupLib.userControlInclusionStatus(username, ip, toParentDirectory,   ['newFile', 'file', `file(${tobasename})`, `newFile(${tobasename})`])
   if(isFromAllowed !== undefined && !isFromAllowed)
     return setCodeAndMessage(response, 400, `${!username ? 'Anonymous users' : `User ` + username} cannot move files from here`)
   if(isToAllowed !== undefined && !isToAllowed)
@@ -544,7 +607,7 @@ exports.respondToRequest['move'] = async function(request, response, getBody, ar
   // Move the file (rename is equivalent to move in node api)
   await fsp.rename(args.from, args.to)
   fsp.appendFile(ctx.path.join(ctx.path.dirname(args.to), 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' moved ', args.from, ' to ', args.to, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' moved ', args.from, ' to ', args.to, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(ctx.path.dirname(args.to), 'changelog.autogen.txt')} in file.s.js move: ${err.message}`))
   
   return setCodeAndMessage(response, 200, `Moved ${args.from} to ${args.to}`)
@@ -556,6 +619,7 @@ Changes the file argument file's name the name argument
 */
 // args: {file, name}
 exports.respondToRequest["rename"] =  async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   console.log(`[${request.uid}]`, `file.s.js/rename requested to rename a file ${args.file}`)
 
   if(args.file === undefined)
@@ -577,7 +641,8 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
   // else
   
   let groupLib = await ctx.runScript('./bin/group.s.js')
-  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
+  const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   if(fileIsOffLimits(args.file))
     return setCodeAndMessage(response, 400, `Cannot rename this file`)
   // else
@@ -598,7 +663,7 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
   
   // is user allowed to do this here?
   let parentDirectory = ctx.path.dirname(args.file)
-  let isAllowed = groupLib.userControlInclusionStatus(username, parentDirectory, ['renameFile', 'file', `file(${filename})`, `renameFile(${filename})`])
+  let isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['renameFile', 'file', `file(${filename})`, `renameFile(${filename})`])
   if(isAllowed !== undefined && !isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make files here`)
   // else
@@ -612,7 +677,7 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
   await ctx.fsp.rename(args.file, `${parentDirectory}/${args.name}`)
   console.log(`[${request.uid}]`, `file.s.js/rename successfully renamed file ${args.file}`)
   ctx.fsp.appendFile(ctx.path.join(ctx.path.dirname(args.file), 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' renamed ', ctx.path.basename(args.file), ' to ', args.name, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' renamed ', ctx.path.basename(args.file), ' to ', args.name, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(ctx.path.dirname(args.file), 'changelog.autogen.txt')} in file.s.js rename: ${err.message}`))
   
   response.statusCode = 200
@@ -623,6 +688,7 @@ exports.respondToRequest["rename"] =  async function(request, response, getBody,
 // untested, probably doesn't work correctly
 // args: {from, to}
 exports.respondToRequest["copy"] =  async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   if(args.from === undefined)
     return setCodeAndMessage(response, 400, `No from argument given`)
   // else
@@ -637,8 +703,9 @@ exports.respondToRequest["copy"] =  async function(request, response, getBody, a
     return setCodeAndMessage(response, 400, 'File arguments cant start at directories higher than working directory')
   // else
   
-  let groupLib = await ctx.runScript('./bin/group.s.js')
-  let username = args.username ?? (args.cookies?.loggedin ? args.cookies?.username : undefined)
+  const groupLib = await ctx.runScript('./bin/group.s.js')
+  const username = args.cookies?.loggedin ? args.cookies?.username : undefined
+  const displayname = args.displayname ?? (args.cookies?.loggedin ? args.cookies?.displayname : undefined)
   
   if(fileIsOffLimits(args.to))
     return setCodeAndMessage(response, 400, `Cannot copy file to this location with this file extension`)
@@ -665,11 +732,11 @@ exports.respondToRequest["copy"] =  async function(request, response, getBody, a
   
   // is user allowed to do this here?
   let toParentDirectory = ctx.path.dirname(args.to)
-  let isAllowed = groupLib.userControlInclusionStatus(username, toParentDirectory, ['newFile', 'file', `file(${tobasename})`, `newFile(${tobasename})`])
+  let isAllowed = groupLib.userControlInclusionStatus(username, ip, toParentDirectory, ['newFile', 'file', `file(${tobasename})`, `newFile(${tobasename})`])
   if(!isAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot make files here`)
   // else
-  let isFromAllowed = groupLib.userControlInclusionStatus(username, toParentDirectory, ['copyFile', 'file', `file(${frombasename})`, `copyFile(${frombasename})`])
+  let isFromAllowed = groupLib.userControlInclusionStatus(username, ip, toParentDirectory, ['copyFile', 'file', `file(${frombasename})`, `copyFile(${frombasename})`])
   if(!isFromAllowed)
     return setCodeAndMessage(response, 401, `${!username ? 'Anonymous users' : `User ` + username} cannot copy this file`)
   // else
@@ -683,7 +750,7 @@ exports.respondToRequest["copy"] =  async function(request, response, getBody, a
   await ctx.fsp.copyFile(args.from, args.to)
   console.log(`[${request.uid}]`, `file.s.js/copy successfully copied file ${args.from} to ${args.to}`)
   ctx.fsp.appendFile(ctx.path.join(toParentDirectory, 'changelog.autogen.txt'), [
-    utcDateStr(), ' ', username ?? `anonymous(${anonId})`, ' copied ', args.from, ' to ', args.to, '\n'
+    utcDateStr(), ' ', username ?? `anonymous(${anonId}) `, displayname ? `(as ${displayname})` : '', ' copied ', args.from, ' to ', args.to, '\n'
   ].join('')).catch(err=> console.error(`Error writing to ${ctx.path.join(toParentDirectory, 'changelog.autogen.txt')} in file.s.js copy: ${err.message}`))
   
   response.statusCode = 200
@@ -699,6 +766,7 @@ Pattern can be a RegExp if called form another script or a properly escaped rege
 */
 // args: {directory, pattern, afterTime}
 exports.respondToRequest['list'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   // console.log(`[${request.uid}]`, `file.s.js/list requested to list files in ${args.directory ?? ''}`)
   
   if(!args.directory)
@@ -794,6 +862,7 @@ function* walkFiles(startDir, maxDepth = -1) {
 }
 
 exports.respondToRequest['search'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   const lib = await ctx.runScript('./lib/lib.s.js')
   await lib.asyncSleepFor(200) // wait 200 ms
   
@@ -846,6 +915,7 @@ Gets exactly the contents of the given file without any parsing or anything
 */
 // args: {file}
 exports.respondToRequest['raw'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   // console.log(`[${request.uid}]`, `file.s.js/raw requested to serve a ${args.file} raw`)
   
   if(!args.file)
@@ -872,6 +942,20 @@ exports.respondToRequest['raw'] = async function(request, response, getBody, arg
     return setCodeAndMessage(response, 400, `Given file is a directory`)
   // else
   
+  // is user actually who they say they are?
+  let userLib = await ctx.runScript('./bin/user.s.js')
+  let username = args.cookies?.loggedin ? args.cookies.username : undefined
+  if(!userLib.handleUserAuthcheck(response, args))
+    username = undefined
+  // else
+  
+  // is user allowed to do this here?
+  const parentDirectory = ctx.path.dirname(args.file)
+  const groupLib = await ctx.runScript('./bin/group.s.js')
+  const isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
+  if(!isAllowed)
+    return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot access the file ${args.file}`)
+  // else
   
   // Set / check ETag header
   let etag = String(stat.mtimeMs)
@@ -883,8 +967,90 @@ exports.respondToRequest['raw'] = async function(request, response, getBody, arg
   // else
   
   // serve the file
+  if(response.statusCode === 401) // possibly set by handleUserAuthcheck
+    response.statusMessage = 'File served; please log in again'
+  else
+    response.statusMessage = 'File served'
+  response.statusCode = 200
   await ctx.serveFile(args.file, response)
   
   
   return setCodeAndMessage(response, 200, `Served ${args.file}`)
+}
+
+exports.respondToRequest['tail'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(200) // wait for 1/5 second
+  
+  if(!args.file)
+    return setCodeAndMessage(response, 400, `No file argument given`)
+  // else
+  
+  if(!args.lines)
+    return setCodeAndMessage(response, 400, `No lines argument given`)
+  // else
+  const lineCount = parseInt(args.lines)
+  if(isNaN(lineCount))
+    return setCodeAndMessage(response, 400, `Lines argument is not a number: ${lineCount}`)
+  // else
+  if(lineCount <= 0)
+    return setCodeAndMessage(response, 400, `Lines argument must be greater than 0: ${lineCount}`)
+  // else
+    
+  
+  // Is file outside working directory tree
+  args.file = ctx.addPathDot(path.relative('./', ctx.addPathDot(args.file)))
+  if(args.file.startsWith('..'))
+    return setCodeAndMessage(response, 400, 'File argument cant start at directories higher than working directory')
+  // else
+  
+  let basename = path.basename(args.file)
+  if(basename.startsWith('.'))
+    return setCodeAndMessage(response, 400, `Cannot access dot files`)
+  // else
+  
+  if(!ctx.fs.existsSync(args.file))
+    return setCodeAndMessage(response, 404, `File doesn't exist`)
+  // else
+  
+  let stat = ctx.fs.statSync(args.file)
+  if(!stat.isFile())
+    return setCodeAndMessage(response, 400, `Given file is a directory`)
+  // else
+  
+  // is user actually who they say they are?
+  let userLib = await ctx.runScript('./bin/user.s.js')
+  let username = args.cookies?.loggedin ? args.cookies.username : undefined
+  if(!userLib.handleUserAuthcheck(response, args))
+    username = undefined
+  // else
+  
+  // is user allowed to do this here?
+  const parentDirectory = ctx.path.dirname(args.file)
+  const groupLib = await ctx.runScript('./bin/group.s.js')
+  const isAllowed = groupLib.userControlInclusionStatus(username, ip, parentDirectory, ['accessFile', `access`, `accessFile(${basename})`, `access(${basename})`])
+  if(!isAllowed)
+    return setCodeAndMessage(response, 401, `${username ? 'User ' + username : 'Anonymous users '} cannot access the file ${args.file}`)
+  // else
+  
+  // Set / check ETag header
+  let etag = String(stat.mtimeMs)
+  response.setHeader('ETag', etag)
+  if((request.headers['if-none-match'] ?? '') === etag) {
+    response.statusCode = 304 // no change
+    return true
+  }
+  // else
+  
+  // serve the file (definitely needs optimization)
+  let fileContents = await ctx.fsp.readFile(args.file)
+  let lineArray = fileContents.toString().split('\n')
+  let tailArray = lineArray.slice(lineArray.length - lineCount)
+  
+  response.statusCode = 200
+  response.statusText = `Served tail of ${args.file}`
+  response.write(tailArray.join('\n'))
+  
+  return true
 }

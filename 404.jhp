@@ -27,7 +27,7 @@ html`
 
   <span>The requested file ${clientFile} doesn't exist</span>
   
-  <button is="call-resource-button" class="linklike"
+  <button class="linklike"
     srcfn="/lib/elem-functions.mjs: mixinRemotePagelet"
     pagelet-src="${ clientFile }"
     mixin-target="replace this parent .pagelet"

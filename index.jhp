@@ -1,5 +1,3 @@
-const todoElem = (str) => /*html*/`<span style="color:yellow; border: 1px solid yellow">to do: ${str}</span>`
-
 html`
 <!DOCTYPE html>
 <html>
@@ -11,54 +9,38 @@ html`
     <script type="module" src="/lib/mixin.mjs"></script>
     <script type="module" src="/lib/callib/callib0.mjs"></script>
     <link rel="stylesheet" href="/lib/callib/callib0.css"/>
+    <link rel="stylesheet" href="/index.css"/>
     
     `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
   </head>
   
-  
-  <!-- Body looks like: -->
-  <!-- 
-    Reconfuse [About] [Search] [User]
-    --------------------------------------
-    [
-    
-      plmx target area
-    
-    ]
-    Notifications
-  -->
   <body class="centered">
     <div class="pagelet root-pagelet separated-children">
       
-      <!-- <style>
-        .header > * + * {
-          margin-left: 0.25em
-        }
-      </style> -->
-      
       <div class="goarea boxed padded" style="margin-bottom: 0; border-bottom: none">
-        <call-resource srcnf="/pagelets/index-jhp.mjs: installGoFieldFunctionality"></call-resource>
-        <input is="substituting-input" type="text" placeholder="open pagelet" style="width: 80%"/>
-        <button class="linklike">Go</button>
+        <input ctrl-enter-srcfn="/pagelets/index-jhp.mjs: goClicked" type="text" placeholder="Open pagelet" style="width: 80%"/>
+        <button srcfn="/pagelets/index-jhp.mjs: goClicked" class="linklike">Go</button>
       </div>
       
       <div class="header darker-background boxed padded" style="margin-top: 0; border-top: none">
         
         <span>Reconfuse</span>
-        <a href="/pagelets/represent-file.jhp?file=/intro.md">Intro</a>
-        <a href="/pagelets/settings.html">Settings</a>
-        <a href="/pagelets/user.jhp">User</a>
-        <a href="/pagelets/represent-directory.jhp?directory=/">Root</a>
+        <a href="/pagelets/represent-file.jhp?file=/intro.md">Intro</a>, 
+        <a href="/pagelets/settings.html">Settings</a>, 
+        <a href="/pagelets/user.jhp">User</a>, 
+        <a href="/pagelets/represent-directory.jhp?directory=/">Root</a>, 
         `
         let username = (args.cookies?.loggedin ? args.cookies?.username : undefined)
         if(username)
-          html`<a href="/pagelets/represent-directory.jhp?directory=/users/${username}/">${username}</a>`
+          html`<a href="/pagelets/represent-directory.jhp?directory=/users/${username}/">${username}</a>, `
         html`
-        
+        <a href="/pagelets/open-dialog.html">New frame</a>, 
+        <a href="/pagelets/two-column-dropframe.html">2-column frame</a>
       </div>
+      <div class="droptarget general-styling width100p" style="height: 1em" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="after this"></div>
       
       `
-      if(args.mixin) {
+      if(args.mixin !== undefined) {
         let splitMixinArg = args.mixin.split(/\s*,\s*/g).map(x =>x.replaceAll(/\\([\&\=\?])/g, (_str,cap)=>cap))
         for(const url of splitMixinArg)
           html`<html-mixin src="${url}" framed></html-mixin>`
@@ -71,6 +53,7 @@ html`
       html`
       
     </div>
+    <div class="droptarget general-styling absolute-styling width100p" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementBefore"></div>
     <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent body"></call-resource>
     <div class="overscroll" style="height: 16em"></div>
   </body>

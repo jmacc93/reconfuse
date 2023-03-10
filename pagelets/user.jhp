@@ -24,10 +24,11 @@ html`
     <span>(as <span class="displayname"></span>)</span> 
   </div>
   <div class="logged-out logged-in-hide"> Logged out </div>
+  <div class="initial-validation-msg"></div>
   
   <div>
     <input class="displayname" type="displayname" placeholder="displayname" maxlength="32"/>
-    <button is="call-resource-button" srcfn="/pagelets/user.mjs: saveDisplaynameClicked" class="save-displayname linklike">Save</button> <br>
+    <button srcfn="/pagelets/user.mjs: saveDisplaynameClicked" class="save-displayname linklike">Save</button> <br>
     <input class="username logged-in-fade" type="username" placeholder="username" minlength="1" maxlength="16" pattern="[a-zA-Z_\\-0-9]+"/><br>
     <input class="password logged-in-fade" type="password" placeholder="password" minlength="4"/>
   </div>
@@ -39,12 +40,12 @@ html`
   </div>
   
   <div>
-    <button is="call-resource-button" srcfn="/pagelets/user.mjs: logoutButtonClicked" class="logout linklike logged-out-fade">Log out</button>
-    <button is="call-resource-button" srcfn="/pagelets/user.mjs: loginButtonClicked" class="login linklike">Log in</button>
-    <button is="call-resource-button" srcfn="/pagelets/user.mjs: registerButtonClicked" class="register linklike">Register</button>
+    <button srcfn="/pagelets/user.mjs: logoutButtonClicked" class="logout linklike logged-out-fade">Log out</button>
+    <button srcfn="/pagelets/user.mjs: loginButtonClicked" class="login linklike">Log in</button>
+    <button srcfn="/pagelets/user.mjs: registerButtonClicked" class="register linklike">Register</button>
     <span class="rememberme logged-in-fade">Remember? <input type="checkbox"></span>, 
     <button
-      is="call-resource-button"
+     
       srcfn="/lib/elem-functions.mjs: mixinRemotePagelet"
       class="linklike"
       pagelet-src="/pagelets/dialog/forgot-password-challenge.html"
@@ -56,7 +57,7 @@ html`
     <div class="change-password">
       <input class="old" type="password" placeholder="Old password">
       <input class="new" type="password" placeholder="New password">
-      <button is="call-resource-button" class="linklike" srcfn="/pagelets/user.mjs: setPasswordButtonClicked">Change password</button>
+      <button class="linklike" srcfn="/pagelets/user.mjs: setPasswordButtonClicked">Change password</button>
     </div>
     
     <details class="challenge-response">
@@ -64,7 +65,7 @@ html`
       <div>Create a new forgotten password challenge</div>
       <div><input class="challenge" style="width: 48em"  type="text" placeholder="Challenge prompt"></div>
       <div><input class="response"  style="width: 48em" type="text" placeholder="Challenge response"></div>
-      <button class="linklike" is="call-resource-button" srcfn="/pagelets/user.mjs: submitNewChallenge">Submit</button>
+      <button class="linklike" srcfn="/pagelets/user.mjs: submitNewChallenge">Submit</button>
       <div>
         <div>When you've forgotten your password you may respond to a self-given challenge prompt to reset your password</div>
         <div>The challenge can be anything</div>
@@ -83,10 +84,9 @@ html`
     
     <details>
       <summary class="linklike">Mod-only contact information</summary>
-      <textarea class="mod-contact-info width100p" change-srcfn="/pagelets/user.mjs: updateModContactInfo"></textarea>
+      <button srcfn="/pagelets/user.mjs: openModInfoFile">Mod info file</button>
       <div>
-        <div>Anything written is saved to a private dot file in your user directory</div>
-        <div>Only admins and mods may access it</div>
+        <div>Anything written in the above file is only visible to mods, unless you've given others permission to view it</div>
         <div>Its intended purpose is for mods to be able to contact you privately, primarily for password reset purposes</div>
       </div>
     </details>

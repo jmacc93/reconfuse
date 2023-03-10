@@ -27,7 +27,10 @@ export async function addOpenButtonFunctionality(callElem) {
   
   asFileButton.addEventListener('click', async clickEvent => {
     const lib = await import('/lib/lib.mjs')
-    let filepath = `${clientDir.endsWith('/') ? clientDir : clientDir + '/'}` + openInput.value
+    let inputValue = openInput.value
+    if(inputValue.startsWith('/'))
+      inputValue = inputValue.slice(1)
+    let filepath = `${clientDir.endsWith('/') ? clientDir : clientDir + '/'}` + inputValue
     if(clickEvent.altKey)
       lib.openPageletAt(asFileButton, '/pagelets/represent-file.jhp?file=' + filepath, 'replace-noframe this parent .pagelet')
     else
@@ -35,51 +38,11 @@ export async function addOpenButtonFunctionality(callElem) {
   })
 }
 
-
-export async function openSimpleEditDialog(optionCallElem) {
+export async function openAsList(dropdownCallElem) {
   const lib = await import('/lib/lib.mjs')
-  const dialog = await import('/pagelets/dialog/dialog.mjs')
-  const file   = optionCallElem.closest('*[data-file]')?.dataset.file
+  const file   = lib.getParentMatching(dropdownCallElem, '*[data-file]')?.dataset.file
   if(file === undefined)
-    return void lib.notificationFrom(optionCallElem, 'Error, no data-file attribute given', {error: true})
+    return void lib.notificationFrom(dropdownCallElem, 'Error, no data-file attribute given', {error: true})
   // else
-  const initialValue = await fetch(`/bin/file.s.js/raw?file=${file}`).then(response=> response.text())
-  const editor = await dialog.simpleEditDialog(initialValue, async (value) => {
-    let response = await fetch(`/bin/file.s.js/update?file=${file}`, {method: "PUT", body: value})
-    if(response.ok) {
-      lib.notificationFrom(editor, `Success, updated file`, {transient: true})
-      return true
-    } else {
-      lib.notificationFrom(editor, `Error: ${response.status}, ${response.statusText}`, {error:true})
-    }
-  })
-  optionCallElem.parentElement.insertAdjacentElement('afterend', editor)
-}
-
-export async function openSimpleAppendDialog(optionCallElem) {
-  const lib = await import('/lib/lib.mjs')
-  const dialog = await import('/pagelets/dialog/dialog.mjs')
-  const file   = optionCallElem.closest('*[data-file]')?.dataset.file
-  if(file === undefined)
-    return void lib.notificationFrom(optionCallElem, 'Error, no data-file attribute given', {error: true})
-  // else
-  const editor = await dialog.simpleEditDialog('', async (value) => {
-    let response = await fetch(`/bin/file.s.js/append?file=${file}`, {method: "PUT", body: value})
-    if(response.ok) {
-      lib.notificationFrom(editor, `Success, appended to file`, {transient: true})
-      return true
-    } else {
-      lib.notificationFrom(editor, `Error: ${response.status}, ${response.statusText}`, {error:true})
-    }
-  })
-  optionCallElem.parentElement.insertAdjacentElement('afterend', editor)
-}
-
-export async function openAsList(optionCallElem) {
-  const lib = await import('/lib/lib.mjs')
-  const file   = optionCallElem.closest('*[data-file]')?.dataset.file
-  if(file === undefined)
-    return void lib.notificationFrom(optionCallElem, 'Error, no data-file attribute given', {error: true})
-  // else
-  lib.openPageletAt(optionCallElem.parentElement, `/pagelets/represent-list.jhp?file=${file}`, 'after this')
+  lib.openPageletAt(dropdownCallElem.parentElement, `/pagelets/represent-list.jhp?file=${file}`, 'after this')
 }

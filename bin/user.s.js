@@ -11,18 +11,39 @@ const nullStringHash = sha256('')
 const authtokenExpirationTime = 1000*3600*24*7 // 7 days
 const rememberMeTimeHeader    =`Max-Age=${authtokenExpirationTime}` // remember for 7 days
 
+
+async function asyncSleepFor(msecs = 0) {
+  return new Promise(res => {
+    setTimeout(() => res(), msecs)
+  })
+}
+
+const ipCounts = {}
+const ipCountReductionDelay = 1000*60*60*6
+setInterval(async () => {
+  let step = 0
+  for(const ip in ipCounts) {
+    ipCounts[ip]--
+    if(ipCounts[ip] <= 0)
+      delete ipCounts[ip]
+    if(step++ % 16 === 0) // periodically yield for other processes
+      await asyncSleepFor(0)
+  }
+}, ipCountReductionDelay) // 6 hours
+
 if(!ctx.fs.existsSync('./users'))
   ctx.fs.mkdirSync('./users')
 
 const initialUserControlFileContent = (username)=> /*json*/ `[{
-  "file": {"tree": {"*all": "black"}}
+  "file": {"tree": {"*all": "black"}},
+  "dir": {"tree": {"*all": "black"}},
+  "access": {"tree": {"*all": "black"}}
 }, {
-  "modifyFile": {"tree": {"${username}": "white"}},
-  "newFile":    {"tree": {"${username}": "white"}},
-  "trashFile":  {"tree": {"${username}": "white"}},
-  "renameFile": {"tree": {"${username}": "white"}},
-  "newDir":     {"tree": {"${username}": "white"}},
-  "modifyFile": {"tree": {"${username}": "white"}}
+  "file": {"tree": {"${username}": "super-white"}},
+  "dir":    {"tree": {"${username}": "super-white"}},
+  "access": {"tree": {"${username}": "super-white"}}
+}, {
+  "access(mod-only.txt)": {"tree": {"*all": "black"}}
 }]`
 
 function setCodeAndMessage(response, code, msg) {
@@ -36,40 +57,40 @@ Returns string validation status
 Returns 'valid' if valid, otherwise username - token pair given is invalid
 */
 function validateUserWithToken(username, authtoken) {
-  if(!username)
-    return `No username given`
-  // else 
+  // if(!username)
+  //   return `No username given`
+  // // else 
   
-  if(/[\.\/]/g.test(username)) // contains . or /
-    return 'Username contains invalid characters'
-  // else
+  // if(/[\.\/]/g.test(username)) // contains . or /
+  //   return 'Username contains invalid characters'
+  // // else
   
   let userDir = `./users/${username}/`
   if(!ctx.fs.existsSync(userDir))
-    return `User ${username} doesn't exist`
+    return false
   // else
   
   const userAuthtoken     = ctx.fs.readFileSync(userDir + '.authtoken.txt').toString()
   const userAuthtokenTime = parseInt(ctx.fs.readFileSync(userDir + '.authtoken-time.txt').toString())
   
   if(userAuthtoken !== authtoken)
-    return `Bad authtoken`
+    return false
   // else
   
   if(userAuthtokenTime + authtokenExpirationTime < Date.now())
-    return `Authtoken is expired`
+    return false
   // else
   
-  return 'Valid'
+  return true
 }
 exports.validateUserWithToken = validateUserWithToken
 
 function handleUserAuthcheck(response, args) {
-  if(!args.cookies.loggedin)
+  if(!args.cookies?.loggedin)
     return true // anonymous user
   // else
-  let username  = args.username ?? args.cookies?.username
-  let authtoken = args.authtoken ?? args.cookies?.authtoken
+  let username  = args.cookies.username
+  let authtoken = args.cookies.authtoken
   if(username) { // not anonymous (username === undefined <=> user is anonymous)
     if(!authtoken) {
       setCodeAndMessage(response, 401, 'No authtoken given; try logging in again')
@@ -77,8 +98,8 @@ function handleUserAuthcheck(response, args) {
     }
     // else
     let validationStr = validateUserWithToken(username, authtoken) // 'Valid' | 'Bad authtoken' | ...
-    if(validationStr !== 'Valid') {
-      setCodeAndMessage(response, 401, validationStr)
+    if(!validationStr) {
+      setCodeAndMessage(response, 401, `Username - authtoken is invalid, please log in again`)
       return false
     }
     // else
@@ -121,7 +142,7 @@ exports.respondToRequest.login = async function(request, response, getBody, args
   
   let userDir = `./users/${args.username}/`
   if(!ctx.fs.existsSync(userDir))  
-    return setCodeAndMessage(response, 400,  `User ${args.username} doesn't exist`)
+    return setCodeAndMessage(response, 400,  `Bad username - password pair`)
   // else
   
   const salt     = ctx.fs.readFileSync(userDir + '.salt.txt').toString()
@@ -133,22 +154,23 @@ exports.respondToRequest.login = async function(request, response, getBody, args
     if(ctx.fs.existsSync(oneTimePetFile)) {
       let pet = ctx.fs.readFileSync(oneTimePetFile).toString()
       if(args.password !== pet)
-        return setCodeAndMessage(response, 400,  `Incorrect password`)
+        return setCodeAndMessage(response, 400,  `Bad username - password pair`)
       // else
       fsp.writeFile(passBypassFile, '')
     } else {
-      return setCodeAndMessage(response, 400,  `Incorrect password`)
+      return setCodeAndMessage(response, 400,  `Bad username - password pair`)
     }
   } else { // correct password given
     if(fs.existsSync(passBypassFile))
       fs.rmSync(passBypassFile)
   }
   
-  ctx.fs.writeFileSync(userDir + '.last-interaction-time.txt', String(Date.now()))
+  ctx.fs.writeFileSync(ctx.path.join(userDir, '.last-interaction-time.txt'), String(Date.now()))
   
-  let authtoken = lib.randomTokenString(6)
-  ctx.fs.writeFileSync(userDir + '.authtoken.txt', authtoken)
-  ctx.fs.writeFileSync(userDir + '.authtoken-time.txt', String(Date.now()))
+  let authtoken = lib.randomAuthTokenString(32)
+  ctx.fs.writeFileSync(ctx.path.join(userDir, '.authtoken.txt'), authtoken)
+  ctx.fs.writeFileSync(ctx.path.join(userDir, '.authtoken-time.txt'), String(Date.now()))
+  ctx.fs.writeFileSync(ctx.path.join(userDir, '.last-ip.txt'), String(Date.now()))
   
   let maxAgeCookieSegment = ('rememberme' in args) ? rememberMeTimeHeader : ''
   response.statusCode = 200
@@ -163,12 +185,27 @@ exports.respondToRequest.login = async function(request, response, getBody, args
   return true
 }
 
+exports.respondToRequest.validate = async function(request, response, getBody, args) {
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(200) // wait 1/5 second
+  
+  const username  = args.cookies?.loggedin ? args.cookies.username : undefined
+  const authtoken = args.cookies?.loggedin ? args.cookies.authtoken : undefined
+  
+  response.statusCode = 200
+  response.statusMessage = String(validateUserWithToken(username, authtoken))
+  
+  return true
+}
+
 exports.respondToRequest.register = async function(request, response, getBody, args) {
   const lib = await ctx.runScript('./lib/lib.s.js')
-  await lib.asyncSleepFor(2000) // wait 2 seconds
+  const ip = request.connection.remoteAddress
+  const count = ipCounts[ip] ?? 0
+  ipCounts[ip] = count + 1
+  await lib.asyncSleepFor(Math.min(2000*Math.exp(count), ipCountReductionDelay))
   
   console.log(`[${request.uid}] user.s.js/register requested to register user ${args.username}`)
-  
   
   // check username
   if(!args.username)  
@@ -361,4 +398,21 @@ exports.respondToRequest.validateChallengeResponse = async function(request, res
   } else {
     return setCodeAndMessage(response, 400, 'Bad response or no challenge associated with this username')
   }
+}
+
+exports.respondToRequest.getAnonId = async function(request, response, getBody, args) {
+  const lib = await ctx.runScript('./lib/lib.s.js')
+  await lib.asyncSleepFor(200) // wait 1/5 second
+  
+  // is logged in?
+  if(args.cookies?.loggedin)
+    return setCodeAndMessage(response, 400, 'Logged in already; you arent anonymous')
+  // else
+  
+  // Register anonymous user if anonymous
+  const anonId = ctx.scriptStorage['./'].registerAnonIp(request.socket.remoteAddress)
+  
+  response.statusCode = 200
+  response.statusMessage = String(anonId)
+  return true
 }

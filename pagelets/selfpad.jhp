@@ -1,11 +1,14 @@
 html`
 <div class="pagelet selfpad" data-name="${args.name ?? 'misc'}" ${args.contentType ? `data-contenttype="${args.contentType}"` : ''}>
   `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
+  <style>body > .pagelet.selfpad {outline: 1px solid lightblue}</style>
   
   <title>Selfpad ${ args.name ?? 'misc'}</title>
   
   <call-resource srcfn="/pagelets/selfpad.mjs: installFunctionality"></call-resource>
   
+  <div class="droptarget general-styling absolute-styling width100p" style="height: 1em" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="before this parent .pagelet"></div>
+    
   <div class="content-display padded"></div>
   <textarea 
     class="input fullwidth vertical-resizable" 
@@ -14,12 +17,18 @@ html`
     placeholder="Write here. It gets stored in local storage on your computer"
   ></textarea>
   <div>
-    <select is="call-selection" class="linklike" style="appearance: none; width: 1em">
-      <option style="color: gray">S</option>
-      <option srcfn="/pagelets/selfpad.mjs: updateButton">Update</option>
-      <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="after this parent .pagelet">List all</option>
-    </select>
+    <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <template><div class="dropdown" remove-on-click>
+        <button srcfn="/pagelets/selfpad.mjs: updateButton">Update preview</button>, 
+        <button srcfn="/lib/elem-functions.mjs: toggleHidden" which="this parent .pagelet >> child .content-display">Hide preview</button><br>
+        <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/list-selfpads.html" target="after this parent .pagelet">List all selfpads</button><br>
+        <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/pad.html" target="after this parent .pagelet">Scratch pad</button><br>
+        <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/open-dialog.html" target="after this parent .pagelet">Open url</button><br>
+        <a href="/pagelets/selfpad.jhp?name=${args.name ?? 'misc'}" target="_blank">Open this in new tab</a>
+      </div></template>
+    </button>
   </div>
   
+  <div class="droptarget general-styling absolute-styling width100p" style="height: 1em" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="after this parent .pagelet"></div>
 </div>
 `

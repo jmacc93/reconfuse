@@ -117,7 +117,10 @@ function step(data) {
       try { // follow symlinks so we don't use the wrong .ofr-on files for linked directories 
         realFilepath = ctx.addPathDot(path.relative('./', fs.realpathSync(filepath)))
       } catch(err) { continue } // silently ignore bad symlinks
-      let stat = fs.statSync(realFilepath, {throwIfNoEntry: false})
+      let stat
+      try {
+        stat = fs.statSync(realFilepath, {throwIfNoEntry: false})
+      } catch(err) { continue } // file probably already deleted
       if(data.activated && isRemoveableName(filename)) { // is regular filename and ofr can remove files
         if(Date.now() > stat.birthtimeMs + data.maxAge) {
           if(stat.isDirectory) {

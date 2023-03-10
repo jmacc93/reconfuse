@@ -3,14 +3,21 @@ if(args.file === undefined) { // no file argument given
   if(args.directory !== undefined)
     return ctx.serveJHP('./pagelets/represent-directory.jhp', request, response, args)
   // else
-  html`<div class="pagelet file-representation" data-url="/pagelets/represent-file.jhp?file=undefined">`
-    await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response)
-    html`<title>Bad file representation</title>`
-    html`<div>No <code>file</code> argument given (use <code>/pagelets/represent-file.jhp?file=<span style="red">...</span></code> to specify the file to represent)</div>`
-  html`</div>`
+  html`
+  <div class="pagelet file-representation" data-url="/pagelets/represent-file.jhp?file=undefined">
+    <title>Bad file representation</title>
+    <div>No <code>file</code> argument given (use <code>/pagelets/represent-file.jhp?file=<span style="color: red">...</span></code> to specify the file to represent)</div>
+  </div>
+  `
   return true
 }
 // else
+
+// Is file actually hosted on this server?
+if(args.file.startsWith('http://') || args.file.startsWith('https://')) {
+  html`<div class="pagelet file-representation">Trying to get a file outside this webpage, don't use represent-file for this!</div>`
+  return true
+}
 
 let serverFile = ctx.sanitizeHTMLString(ctx.addPathDot(args.file))
 let clientFile = ctx.sanitizeHTMLString(serverFile.slice(1))
@@ -52,7 +59,9 @@ if(exists) {
   // else
 }
 
-const thisUrl = `/pagelets/represent-file.jhp?file=${args.file}${args.focus ? '&' + args.focus : ''}`
+const isDir = clientFile.endsWith('/')
+
+const thisUrl = `/pagelets/represent-file.jhp?file=${args.file}${args.focus ? '&focus=' + args.focus : ''}${args.tail ? `&tail=${args.tail}` : ''}`
 
 let extContent  = ctx.extContentMap[ctx.path.extname(serverFile)]
 let [contentType, isBinary] = extContent ?? [undefined, undefined]
@@ -61,131 +70,127 @@ if(contentType === undefined)
   
 principleContentType = ctx.splitAtFirst(contentType, ';')?.[0] ?? contentType
 
+const commonExistingFileOperations = /*HTML*/ `
+  <details>
+    <summary class="linklike" no-removal-on-click>File operations</summary>
+    <div class="indented">
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=move">Move to</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/rename-file.html?file=${clientFile}">Rename</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</button><br>
+      <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</button>
+    </div>
+  </details>
+`
+
+const commonNonExistingFileOperations = /*HTML*/ `
+  <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</button><br>
+  <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</button><br>
+`
+
+const commonFileDropdownPart = /*HTML*/`<div>File <code>${clientFile}</code> <button class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy</button></div>`
+
 if(isBinary) {
   if(exists) {
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
+    <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
-      
-      <script src="/lib/callib/callib0.mjs" type="module"></script>
-      <script src="/lib/mixin.mjs" type="module"></script>
       
       <link href="/pagelets/represent-file.css" rel="stylesheet">
       `
       if(principleContentType.startsWith('image/')) // is an image, use <img> element
-        html`<img class="current-content" src="${clientFile}?random=${fileMTime}" style="padding: 4px" cache="no-cache" title="Current content"/>`
+        html`<img class="current-content" src="${clientFile}?random=${fileMTime}" style="padding: 4px; width: 16em; height: auto" cache="no-cache" title="Current content"/>`
       else
         html`<div>File</div>`
       html`
       
-      <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
-        <option style="color:gray">S</option>
-        ${!exists ? /*html*/`<option srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</option>` : ''}
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent select" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent select" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=move">Move to</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/rename-file.html?file=${clientFile}">Rename</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</option>
-      </select>
+      <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+        <template><div class="dropdown" remove-on-click>
+          ${commonFileDropdownPart}
+          <button is="call-resource-element" class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
+          <button class="linklike" srcfn="/pagelets/represent-file.mjs: uploadIt">Replace with upload</button><br>
+          ${commonExistingFileOperations}
+        </div></template>
+      </button>
     </div>
     `
     return true
   } else { // binary file, doesn't exist
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
+    <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
       <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
-      <script src="/lib/callib/callib0.mjs" type="module"></script>
-      <script src="/lib/mixin.mjs" type="module"></script>
       <link href="/pagelets/represent-file.css" rel="stylesheet">
-      
       `
       if(principleContentType.startsWith('image/')) // is an image, use <img> element
         html`<span style="color: red">Image 404</span>`
       else
         html`<span style="color: red">File 404</span>`
+        
       html`
-      
-      <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
-        <option style="color:gray">S</option>
-        <option srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=move">Move to</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/rename-file.html?file=${clientFile}">Rename</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</option>
-      </select>
-    </div>
+      <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+        <template><div class="dropdown" remove-on-click>
+          ${commonFileDropdownPart}
+          <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
+          <button class="linklike" srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</button><br>
+          ${commonNonExistingFileOperations}
+        </div></template>
+      </button>
+    </span>
     `
     return true
   }
 } else { // textual file
   if(exists) {
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
+    <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}" data-tail="${args.tail ?? 0}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
-      <title>File ${ctx.path.basename(clientFile)} - ${clientFile}</title>
+      <title>File ${ctx.path.basename(clientFile)} - ${clientFile} ${args.tail ? `Last ${args.tail} lines` : ''}</title>
       
-      <script src="/lib/callib/callib0.mjs" type="module"></script>
-      <script src="/lib/mixin.mjs" type="module"></script>
       <link href="/pagelets/represent-file.css" rel="stylesheet">
       
       <call-resource srcfn="/pagelets/represent-file.mjs: initializeContentDisplay"></call-resource>
+      <pre class="raw-display" style="white-space: pre-wrap"></pre>
       <span class="content-display"></span>
       
-      <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
-        <option style="color:gray">S</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent select" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent select" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=move">Move to</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/rename-file.html?file=${clientFile}">Rename</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</option>
-      </select>
-    </div>
+      <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+        <template><div class="dropdown" remove-on-click>
+          ${commonFileDropdownPart}
+          <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
+          <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/edit-file.html?file=${clientFile}">Edit</button><br>
+          <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/append-to-file.jhp?file=${clientFile}">Append</button><br>
+          `
+          if(clientFile.endsWith('.txt'))
+            html`<button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="/pagelets/represent-list.jhp?file=${clientFile}">Open as list</button>`
+          html`
+          <button srcfn="/lib/elem-functions.mjs: toggleClassname" which="this parent .pagelet" classname="show-raw" title="Switch between raw and rendered markup">Switch markup display</button>
+          ${commonExistingFileOperations}
+        </div></template>
+      </button>
+    </span>
     `
     return true
   } else { // textual file, doesn't exist
     html`
-    <div class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
+    <span class="pagelet file-representation" data-file="${clientFile}" data-url="${thisUrl}" data-focus="${args.focus ?? ''}">
       `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response); html`
-      <title>Non existent file ${ctx.path.basename(clientFile)} - ${clientFile}</title>
-      <script src="/lib/callib/callib0.mjs" type="module"></script>
-      <script src="/lib/mixin.mjs" type="module"></script>
+      <title>Non existent ${isDir ? 'directory' : 'file'} ${ctx.path.basename(clientFile)} - ${clientFile}</title>
       <link href="/pagelets/represent-file.css" rel="stylesheet">
       
       <span style="color:red" title="${clientFile} doesn't exist">404</span>
       
-      <select is="call-selection" class="operation linklike" style="appearance: none; width: 1em">
-        <option style="color:gray">S</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</option>
-        <option srcfn="/pagelets/represent-file.mjs: makeIt">Make it</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/represent-directory.jhp?directory=${ctx.path.dirname(clientFile)}">Directory</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=copy">Copy to</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientFile}&operation=move">Move to</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/rename-file.html?file=${clientFile}">Rename</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientFile}">Trash</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="after this parent .pagelet" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientFile}">Permissions</option>
-        <option srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="${thisUrl}" target="after this parent *:is(.controller-frame, body)">Enframe pagelet</option>
-        <option srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientFile}">Copy url</option>
-      </select>
-    </div>
+      <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+        <template><div class="dropdown" remove-on-click>
+          ${commonFileDropdownPart}
+          <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" target="replace-noframe this parent .pagelet" pagelet-src="${thisUrl}">Reload</button><br>
+          <button class="linklike" srcfn="/pagelets/represent-file.mjs: uploadIt">Upload</button><br>
+          <button class="linklike" srcfn="/pagelets/represent-file.mjs: makeIt">Make it</button><br>
+          ${commonNonExistingFileOperations}
+        </div></template>
+      </button>
+    </span>
     `
     return true
   }

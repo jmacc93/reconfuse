@@ -1,4 +1,8 @@
 
+:root {
+  --general-button-color: rgb(43, 121, 255);
+}
+
 body {
   margin-left:    2em;
   margin-right:   2em;
@@ -49,6 +53,10 @@ pre > code {
 }
 .quarterwidth {
   width: 25%;
+}
+
+.indented {
+  margin-left: 1em;
 }
 
 .flex-columns {
@@ -133,8 +141,32 @@ body > * + div {
 .linklike {
   border: none;
   background: unset;
-  color: blue;
+  color: var(--general-button-color, blue);
   cursor: pointer;
+}
+.linklike:hover {
+  text-decoration: underline var(--general-button-color, blue);
+}
+
+a {
+  color: var(--general-button-color, blue);
+  text-decoration: unset;
+  font-size: 1em;
+}
+a:hover {
+  text-decoration: underline var(--general-button-color, blue);
+}
+
+button {
+  border: none;
+  background: unset;
+  color: var(--general-button-color, blue);
+  cursor: pointer;
+  font-size: 1em;
+  padding: 0;
+}
+button:hover {
+  text-decoration: underline blue;
 }
 
 .no-border {
@@ -197,44 +229,28 @@ body > * + div {
   margin-top: 1em
 }
 
-
-
-/* ---------------------------- */
-/*      Element dragging        */
-
-
 .unselectable {
   user-select: none;
 }
 
-body.dragging-element {
-  cursor: crosshair
-}
-body.dragging-element .drop-hovered {
-  cursor: move
-}
-
-
-
-
 /* ---------------------------- */
 
-.attention-flashing            { animation: af-outline-pulse    .5s ease; }
-.attention-flashing-color      { animation: af-color-pulse      .5s ease; }
-.attention-flashing-outline    { animation: af-outline-pulse    .5s ease; }
-.attention-flashing-background { animation: af-background-pulse .5s ease; }
+.attention-flashing            { animation: af-outline-pulse    .2s ease; }
+.attention-flashing-color      { animation: af-color-pulse      .2s ease; }
+.attention-flashing-outline    { animation: af-outline-pulse    .2s ease; }
+.attention-flashing-background { animation: af-background-pulse .2s ease; }
 
 @keyframes af-color-pulse {
-  0%   {color:  #86ff86}
+  0%   {color:  #86a6ff}
   100% {color:    unset  }
 }
 @keyframes af-outline-pulse {
-  0%   {outline: 4px solid  #86ff86}
-  100% {outline: 0px dashed #80ff80}
+  0%   {outline: 4px solid  #8696ff}
+  100% {outline: 0px dashed #80c8ff}
 }
 @keyframes af-background-pulse {
-  0%   {background: #98ff98  }
-  40%  {background: #76ff7633}
+  0%   {background: #ab98ff  }
+  40%  {background: #768fff33}
   100% {background:   unset    }
 }
 
@@ -243,18 +259,73 @@ body.dragging-element .drop-hovered {
 .in-progress-dim { opacity: 50% }
 .in-progress-outline { outline: 1px solid gray }
 .in-progress-outline-empty {
-  outline: 1px solid gray;
-  width: 2em;
+  opacity: 20%;
+  outline: 1px dashed gray;
+  width: 100%;
   height: 2em;
-  
+  background: rgb(227, 227, 227);
 }
 
 /* ----------- Reconfuse Specific: ----------------- */
 
 html-mixin {
   opacity: 20%;
-  outline: 1px solid gray;
+  background: rgb(227, 227, 227);
+  outline: 1px dashed gray;
   display: inline-block;
-  min-width: 2em;
+  min-width: 100%;
   min-height: 2em;
+}
+
+
+
+/* ---------------------------- */
+/*      Element dragging        */
+
+
+body.dragging-element {
+  cursor: crosshair
+}
+body.dragging-element .drop-hovered {
+  cursor: move
+}
+
+*[droptarget-srcfn].absolute-styling {
+  position: absolute;
+  height: 1em; width: 4em;
+}
+body:not(.dragging-element) *[droptarget-srcfn].absolute-styling {
+  display: none;
+}
+body.dragging-element *[droptarget-srcfn].absolute-styling {
+  display: unset;
+}
+
+body.dragging-element *[droptarget-srcfn].general-styling {
+  outline: 2px dashed lightgray;
+}
+body.dragging-element *[droptarget-srcfn].general-styling.drop-hovered {
+  outline: 2px dashed orange;
+}
+body.dragging-element *[droptarget-srcfn].general-styling.drop-hovered::before {
+  content: "Drop";
+  position: relative;
+  /* top: 0px; left: 45%; */
+  color: orange
+}
+
+
+/* ---------------------------- */
+/*          Dropdown            */
+
+
+.dropdown-root {
+  position: absolute;
+}
+.dropdown-relative {
+  position: relative;
+  min-width: 8em;
+  background: white;
+  border: 1px solid gray;
+  padding: 4px;
 }

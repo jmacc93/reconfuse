@@ -3,40 +3,47 @@ if(!args.channel)
   args.channel = 'std'
 
 if(!args.directory) {
-  html`<div class="pagelet error">No directory argument given</div>`
+  html`
+  <div class="pagelet error">No directory argument given</div>
+  `
   return true
 }
 
-args.directory = ctx.addPathDot(ctx.path.relative('./', ctx.addPathDot(args.directory)))
+let serverDir = ctx.addPathDot(ctx.path.relative('./', ctx.addPathDot(args.directory)))
+if(!serverDir.endsWith('/'))
+  serverDir += '/'
+const clientDir = serverDir.slice(1) // remove dot
 
-if(args.directory.startsWith('..')) {
-  html`<div class="pagelet error">Cannot use ${args.directory} because it references a directory outside of the server's directory tree</div>`
+if(serverDir.startsWith('..')) {
+  html`<div class="pagelet error">Cannot use ${serverDir} because it references a directory outside of the server's directory tree</div>`
   return true
 }
 // else
 
-if(!args.directory.endsWith('/'))
-  args.directory += '/'
+if(!ctx.fs.existsSync(serverDir)) {
+  return ctx.serveFile('./pagelets/dialog/make-dir.html', response, {
+    ['arg-directory']: clientDir,
+    ['arg-after-url']: `/pagelets/represent-message-list.jhp?directory=${clientDir}&channel=${args.channel}`
+  })
+  // return ctx.serveJHP('./pagelets/non-existent-file.jhp', request, response, {...args, doneUrl:`/pagelets/represent-message-list.jhp?directory=${args.directory}&channel=${args.channel}`})
+}
 
-if(!ctx.fs.existsSync(args.directory))
-  return ctx.serveJHP('./pagelets/non-existent-file.jhp', request, response, {...args, doneUrl:`/pagelets/represent-message-list.jhp?directory=${args.directory}&channel=${args.channel}`})
-
-let dirStat = ctx.fs.statSync(args.directory)
+let dirStat = ctx.fs.statSync(serverDir)
 if(!dirStat.isDirectory()) {
-  html`<div class="pagelet error">Given directory ${args.directory} isn't a directory</div>`
+  html`<div class="pagelet error">Given directory ${clientDir} isn't a directory</div>`
   return true
 }
 // else
 
 html`
-<div class="pagelet" data-channel=${args.channel ?? 'nochannel'} data-directory=${args.directory ?? 'nodir'}>
+<div class="pagelet" data-channel=${args.channel ?? 'nochannel'} data-directory=${clientDir}>
   `; await ctx.serveJHP('./pagelets/pagelet-header.jhp', request, response, args); html`
   
   <call-resource srcfn="/pagelets/represent-message-list.mjs: installFunctionality"></call-resource>
   
-  <title>${args.channel} message list in ${args.directory}</title>
+  <title>${args.channel} message list in ${clientDir}</title>
   
-  <div class="message-list vertical-resizable height32">
+  <div class="message-list">
     <!--
     <div class="message" data-mtime="...">...</div>
     -->
@@ -47,8 +54,26 @@ html`
       <button class="submit linklike clickable">Submit</button> as
       <input class="filename-input" type="text" placeholder="filename" value=".md" pattern="[^\.]*\.\S+"/>  <span class="filename-input-error-msg"></span>
       <button class="refresh linklike">Refresh</button>, 
-      <button is="call-resource-button" srcfn="/pagelets/represent-message-list.mjs: updatePreview" class="linklike">Update preview</button>, 
-      <button is="call-resource-button" srcfn="/lib/elem-functions.mjs: toggleHidden" which="this parent .submission-area >> child .submission-preview" class="linklike">Toggle preview</button>
+      <button srcfn="/pagelets/represent-message-list.mjs: updatePreview" class="linklike">Update preview</button>, 
+      <button srcfn="/lib/elem-functions.mjs: toggleHidden" which="this parent .submission-area >> child .submission-preview" class="linklike">Toggle preview</button>
+      <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+        <template><div class="dropdown" remove-on-click>
+          Directory: ${clientDir} <button srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy</button><br>
+          <button srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" pagelet-src="/pagelets/represent-file.jhp?directory=${clientDir}" target="replace-noframe this parent .pagelet">As directory</button><br>
+          <input type="text" srcfn="/pagelets/represent-message-list.mjs: initializeToChannelValue" change-srcfn="/pagelets/represent-message-list.mjs: changeChannel" no-removal-on-click>
+          <details>
+            <summary class="linklike" no-removal-on-click>File operations</summary>
+            <div class="indented">
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: copyToClipboard" data-payload="${clientDir}">Copy path</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .submission-area" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientDir}&operation=copy">Copy to</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .submission-area" pagelet-src="/pagelets/dialog/file-to-operation.html?file=${clientDir}&operation=move">Move to</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .submission-area" pagelet-src="/pagelets/dialog/rename-file.html?file=${clientDir}">Rename</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .submission-area" pagelet-src="/pagelets/dialog/trash-file.html?file=${clientDir}">Trash</button><br>
+              <button class="linklike" srcfn="/lib/elem-functions.mjs: mixinRemotePagelet" mixin-target="after this parent .submission-area" pagelet-src="/pagelets/components/file-permissions.jhp?file=${clientDir}">Permissions</button>
+            </div>
+          </details>
+        </div></template>
+      </button>
     </div>
     <div class="submission-preview"></div>
     <textarea class="submission-input fullwidth vertical-resizable" placeholder="Submission input"></textarea>

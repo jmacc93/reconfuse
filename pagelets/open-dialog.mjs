@@ -1,7 +1,7 @@
 
 export async function installInputFunctionality(callElem) {
   const lib = await import('/lib/lib.mjs')
-  const dialog = callElem.closest('.dialog')
+  const dialog = lib.getParentMatching(callElem, '.dialog')
   const input  = dialog.querySelector('input') 
   const openButton  = dialog.querySelector('button')
   
@@ -20,7 +20,7 @@ export async function installInputFunctionality(callElem) {
 
 export async function open(callElem) {
   const lib = await import('/lib/lib.mjs')
-  const dialog = callElem.closest('.dialog')
+  const dialog = lib.getParentMatching(callElem, '.dialog')
   const input  = dialog.querySelector('input')
   
   const destyle = lib.styleInProgress(dialog)
@@ -36,7 +36,7 @@ export async function open(callElem) {
 
 export async function openAsDirectoryRepresentation(callElem) {
   const lib = await import('/lib/lib.mjs')
-  const dialog = callElem.closest('.dialog')
+  const dialog = lib.getParentMatching(callElem, '.dialog')
   const input  = dialog.querySelector('input')
   
   const destyle = lib.styleInProgress(dialog)
@@ -52,7 +52,7 @@ export async function openAsDirectoryRepresentation(callElem) {
 
 export async function openAsFileRepresentation(callElem) {
   const lib = await import('/lib/lib.mjs')
-  const dialog = callElem.closest('.dialog')
+  const dialog = lib.getParentMatching(callElem, '.dialog')
   const input  = dialog.querySelector('input')
   
   const destyle = lib.styleInProgress(dialog)
@@ -68,7 +68,7 @@ export async function openAsFileRepresentation(callElem) {
 
 export async function openAsListRepresentation(callElem) {
   const lib = await import('/lib/lib.mjs')
-  const dialog = callElem.closest('.dialog')
+  const dialog = lib.getParentMatching(callElem, '.dialog')
   const input  = dialog.querySelector('input')
   
   const destyle = lib.styleInProgress(dialog)

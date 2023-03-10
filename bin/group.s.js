@@ -21,7 +21,7 @@ exports.respondToRequest = async function(request, response, getBody, args) {
 
 const lib = await ctx.runScript('./lib/lib.s.js')
 controlObjArrayCache = new lib.Cache(
-  (path) => JSON.parse(ctx.fs.readFileSync(path).toString()), // generator
+  (path) => JSON.parse(ctx.fs.readFileSync(path).toString())?.reverse(), // generator
   (path) => String(ctx.fs.statSync(path).mtimeMs) // etagger
 )
 
@@ -57,7 +57,7 @@ Checks if given username is in the given group's members.txt file
 username: username string eg: "jmacc93"
 groupArg: groupname string eg: "*admin" or "admin"
 */
-function userInGroup(username, groupArg) {
+function userInGroup(username, ip, groupArg) {
   if(/[\.\/]/g.test(username) || /[\.\/]/g.test(groupArg)) // contains . or /
     return false
   // else
@@ -67,6 +67,8 @@ function userInGroup(username, groupArg) {
   // else
   if(!username) { // username is undefined ie: anonymous user
     if(group === 'anonymous')
+      return true
+    else if(group === 'ipbanned' && ctx.scriptStorage['./']?.isIpBanned(ip))
       return true
     else
       return false
@@ -94,7 +96,7 @@ username: string eg: jmacc93
 startDirectory: directory string eg: ./aaa/bbb/ccc/
 names: array of privilege strings eg: ['newFile', 'file', 'file(control.json)']
 */
-function userControlInclusionStatus(username, startDirectory, names) {
+function userControlInclusionStatus(username, ip, startDirectory, names) {
   if(typeof names === 'string')
     return userControlInclusionStatus(username, startDirectory, [names])
   // else, names should be an array
@@ -102,7 +104,7 @@ function userControlInclusionStatus(username, startDirectory, names) {
   /**
   Only yields white/black/super-* lists the given username appears in (also if username is in the list's group)
   */
-  function* allListsUserAppearsIn(username, startDirectory, names) {
+  function* allListsUserAppearsIn(username, ip, startDirectory, names) {
     for(const [controlObj, controlDir] of getAllControlObjDirs(startDirectory)) { // N controlObj for each directory (from control.json files) going toward root
       for(const name of names) {
         if(!(name in controlObj)) // name = "modifyFile" | "deleteFile" | "deleteDir" | "newFile" | "newDir" | "accessFile" | "accessDir" | etc
@@ -119,7 +121,7 @@ function userControlInclusionStatus(username, startDirectory, names) {
           for(const group in dirControl[key]) { // dirControl[key] = {group1: "white" | "black" | ..., group2: "white" | ..., ...}
             // note: group can also be a username (groupnames start with *, usernames don't). think of it like: usernames are groups of size 1
             if(group.startsWith('*')) { // group is an actual groupname
-              if(userInGroup(username, group))
+              if(userInGroup(username, ip, group))
                 yield dirControl[key][group] // yields "white" | "black" | "super-white" | "super-black"
             } else { // group is actually a username (group of size 1)
               if(username === group)
@@ -143,7 +145,7 @@ function userControlInclusionStatus(username, startDirectory, names) {
   let lastSuperListSeen  = undefined
   // The *first* 'white' or 'black' list seen is used unless a super-list has been seen, then
   // the *last* super list seen is used (ie: regular: from below; super: from above)
-  for(const list of allListsUserAppearsIn(username, startDirectory, names)) {
+  for(const list of allListsUserAppearsIn(username, ip, startDirectory, names)) {
     if(list.startsWith('super'))
       lastSuperListSeen = list
     else if(firstListSeen === undefined)
@@ -161,6 +163,7 @@ Checks if the given username is in the given group
 */
 // args: {username, group} and cookies.username
 exports.respondToRequest['in-group'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   let username = args.username ?? (args.cookies?.loggedin ? args.cookies.username : undefined)
   if(!username) 
     return setCodeAndMessage(response, 400, `No username argument given (use ?argname=... or log in)`)
@@ -170,7 +173,7 @@ exports.respondToRequest['in-group'] = async function(request, response, getBody
     return setCodeAndMessage(response, 400, `No group argument given (use ?group=...)`)
   // else
   
-  let inGroup = userInGroup(username, args.group)
+  let inGroup = userInGroup(username, request.connection.remoteAddress, args.group)
   response.statusCode = 200
   response.write(inGroup ? 'true' : 'false')
   return true
@@ -190,12 +193,12 @@ exports.respondToRequest['has-access'] = async function(request, response, getBo
   
   if(args.file) {
     response.statusCode = 200
-    let allowedAccess = userControlInclusionStatus(args.username, ctx.path.dirname(args.file), ['accessFile', 'access', `access(${ctx.path.basename(args.file)})`])
+    let allowedAccess = userControlInclusionStatus(args.username, ip, ctx.path.dirname(args.file), ['accessFile', 'access', `access(${ctx.path.basename(args.file)})`])
     response.write(allowedAccess ? 'true' : 'false')
     return true
   } else if(args.directory) {
     response.statusCode = 200
-    let allowedAccess = userControlInclusionStatus(args.username, args.directory, ['accessDirectory', 'access', `access(${ctx.path.basename(args.directory)})`])
+    let allowedAccess = userControlInclusionStatus(args.username, ip, args.directory, ['accessDirectory', 'access', `access(${ctx.path.basename(args.directory)})`])
     response.write(allowedAccess ? 'true' : 'false')
     return true
   } else {
@@ -231,7 +234,7 @@ for(const names of respondToRequestNameMap) {
     // else
     
     response.statusCode = 200
-    let isAllowed = userControlInclusionStatus(args.username, args[names.primaryArg], names.controlName)
+    let isAllowed = userControlInclusionStatus(args.username, ip, args[names.primaryArg], names.controlName)
     response.write(isAllowed ? 'true' : 'false')
     return true
   }
@@ -246,6 +249,7 @@ Writes either 'true' or 'false' to body to indicate having the privilege or not 
 */
 // args: {username, file, directory, controlName} and cookies.username
 exports.respondToRequest['has-privilege'] = async function(request, response, getBody, args) {
+  const ip = request.connection.remoteAddress
   let username = args.username ?? (args.cookies?.loggedin ? args.cookies.username : undefined)
   
   if(!args.privilege)
@@ -258,7 +262,7 @@ exports.respondToRequest['has-privilege'] = async function(request, response, ge
   //
   
   response.statusCode = 200
-  let isAllowed = userControlInclusionStatus(username, args.file ?? args.directory, privilegeArray)
+  let isAllowed = userControlInclusionStatus(username, ip, args.file ?? args.directory, privilegeArray)
   response.write(isAllowed ? 'true' : 'false')
   return true
 }

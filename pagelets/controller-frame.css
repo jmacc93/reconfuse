@@ -15,19 +15,21 @@
 .controller-frame > .infobar  {
   background: var(--infobar-background, rgba(72, 151, 254, 0.481));
   border-bottom: 1px solid var(--infobar-border-color, rgba(128, 128, 128, 0.09));
-  margin-bottom: 4px
+  margin-bottom: 4px;
+  font-size: 0.85em;
 }
 
-.controller-frame.highlighted[data-color="red"   ] { outline: 4px solid red   }
-.controller-frame.highlighted[data-color="blue"  ] { outline: 4px solid blue  }
-.controller-frame.highlighted[data-color="green" ] { outline: 4px solid green }
-.controller-frame:not(.highlighted) > .infobar > select.color-selector { display: none }
+.controller-frame[data-color="red"   ] { outline: 4px solid red   }
+.controller-frame[data-color="blue"  ] { outline: 4px solid blue  }
+.controller-frame[data-color="green" ] { outline: 4px solid green }
 
-.controller-frame button {
+.controller-frame > .infobar > button:first-of-type {
+  margin-left: 0.25em
+}
+
+.controller-frame > .infobar > button {
   padding: 1px;
   border: none;
-  cursor: pointer;
-  color: rgb(28, 147, 251);
 }
 .controller-frame > .infobar .filename {
   color: var(--light-text-color, rgb(140, 140, 140))
@@ -57,6 +59,10 @@
   resize: vertical;
 }
 
+.controller-frame.resizable > .child-container {
+  padding-bottom: 2em;
+}
+
 .controller-frame:not(.resizable) > .child-container {
   height: fit-content !important
 }
@@ -66,14 +72,14 @@
 }
 
 
-.drop-hovered {
+.controller-frame.drop-hovered {
   outline: 1px solid orange
 }
-.drop-hovered.top-hovered::before {
+.controller-frame.drop-hovered.top-hovered::before {
   content: 'Drop';
   color: orange;
 }
-.drop-hovered.bottom-hovered::after {
+.controller-frame.drop-hovered.bottom-hovered::after {
   content: 'Drop';
   color: orange;
 }

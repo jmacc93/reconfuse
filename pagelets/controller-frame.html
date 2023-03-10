@@ -1,37 +1,39 @@
-<div class="controller-frame" data-expanded="true" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElement">
+<div class="controller-frame" data-expanded="true">
   <!-- This isn't actually a pagelet, but its in the pagelet folder anyway -->
+  -:[/pagelets/pagelet-header.html]:-
   <script src="/lib/callib/callib0.mjs" type="module"></script>
-  <link rel="stylesheet" href="/pagelets/controller-frame.css"></link>
-  <link href="/lib/general.css" rel="stylesheet"></link>
+  <call-resource srcfn="/lib/elem-functions.mjs: addStyleToHead" href="/pagelets/controller-frame.css"></call-resource>
   
   <call-resource srcfn="/pagelets/controller-frame.mjs: installTitleMirrorFunctionality"></call-resource>
   <!-- <call-resource srcfn="/pagelets/controller-frame.mjs: installDragHandleFunctionality"></call-resource> -->
   
+  <div class="droptarget general-styling absolute-styling width100p" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="before this parent .controller-frame"></div>
   <div class="infobar">
-    <button is="call-resource-button" srcfn="/lib/elem-functions.mjs: removeElement" class="linklike" which="this parent .controller-frame">X</button>
+    <button srcfn="/lib/elem-functions.mjs: removeElement" class="linklike" which="this parent .controller-frame">X</button>
     <span class="child-title-mirror"></span>
-    <button is="call-resource-button" class="expander linklike" srcfn="/lib/elem-functions.mjs: toggleClassname" which="this parent .controller-frame" classname="collapsed"></button> <!-- Content set in css file -->
+    <button class="expander linklike" srcfn="/lib/elem-functions.mjs: toggleClassname" which="this parent .controller-frame" classname="collapsed"></button> <!-- Content set in css file -->
     <!-- <span class="drag-handle" draggable="true">///</span> -->
     <call-resource srcfn="/lib/elem-functions.mjs: makeIntoDragHandle" draggable-target="this parent .controller-frame" class="unselectable">///</call-resource>
-    <select is="call-selection" class="linklike" style="appearance:none; width: 1em">
-      <option style="color: gray">S</option>
-      <option srcfn="/pagelets/controller-frame.mjs: newFrameAfter">New frame</option>
-      <option srcfn="/lib/elem-functions.mjs: toggleClassname" which="this parent .controller-frame" classname="resizable">Toggle resizable</option>
-      <option srcfn="/lib/elem-functions.mjs: toggleClassname" which="this parent .controller-frame" classname="highlighted">Highlight</option>
-    </select>
-    <select is="call-selection" class="linklike color-selector" style="appearance:none; width: 3em">
-      <option style="color: gray">color</option>
-      <option srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="red">Red</option>
-      <option srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="blue">Blue</option>
-      <option srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="green">Green</option>
-    </select>
+    <button class="s-menu linklike" srcfn="/lib/elem-functions.mjs: makeDropdown">S
+      <template><div class="dropdown" remove-on-click>
+        <button class="linklike" srcfn="/pagelets/controller-frame.mjs: newFrameAfter">New frame</button><br>
+        <button class="linklike" srcfn="/pagelets/controller-frame.mjs: toggleResizable">Toggle resizable</button><br>
+        Highlight: 
+        <button class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="red">red</button>, 
+        <button class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="blue">blue</button>, 
+        <button class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="green">green</button>, 
+        <button class="linklike" no-removal-on-click srcfn="/lib/elem-functions.mjs: setAttributeValue" which="this parent .controller-frame" attribute="data-color" value="">none</button><br>
+      </div></template>
+    </button>
   </div>
   
+  <call-resource srcfn="/pagelets/controller-frame.mjs: installKeepScrolledToBottomFunctionality"></call-resource>
   <div class="child-container">
     <slot name="child-mixin-target">
       <!-- Elements are put here on mixin -->
     </slot>
   </div>
   
+  <div class="droptarget general-styling absolute-styling width100p" droptarget-srcfn="/lib/elem-functions.mjs: insertDroppedElementAt" where="after this parent .controller-frame"></div>
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .controller-frame"></call-resource>
 </div>

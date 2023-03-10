@@ -6,6 +6,7 @@ export async function setInitialState(callElem) {
   const rememberMeBox = pagelet.querySelector(':scope > * > .rememberme > input')
   const loggedInAsUsernameElem = pagelet.querySelector(':scope > .logged-in-as .username')
   const loggedInAsDispnameElem = pagelet.querySelector(':scope > .logged-in-as .displayname')
+  const validationMsgElem = pagelet.querySelector(':scope > .initial-validation-msg')
   
   let username = window.localStorage.getItem('username')
   usernameInput.value = username ?? ''
@@ -18,6 +19,14 @@ export async function setInitialState(callElem) {
   
   let loggedIn = /loggedin=true/.test(document.cookie)
   pagelet.dataset.loggedin = loggedIn ? "true" : "false"
+  
+  if(loggedIn) {
+    fetch(`/bin/user.s.js/validate`).then(async response => {
+      const statusText = response.statusText
+      if(statusText === 'false')
+        validationMsgElem.textContent = `Please log in again`
+    })
+  }
   
   loggedInAsUsernameElem.textContent = username
   loggedInAsDispnameElem.textContent = displayname
@@ -48,6 +57,12 @@ export async function loginButtonClicked(callElemButton) {
   const loggedInAsUsernameElem = pagelet.querySelector(':scope > .logged-in-as .username')
   const loggedInAsDispnameElem = pagelet.querySelector(':scope > .logged-in-as .displayname')
   const loginButton = pagelet.querySelector(':scope > * > .login')
+  const validationMsgElem = pagelet.querySelector(':scope > .initial-validation-msg')
+  
+  if(callElemButton.classList.contains('deactivated'))
+    return void lib.notificationFrom(callElemButton, 'Please wait!', {transient: true})
+  
+  validationMsgElem.textContent = ''
   
   if(pagelet.dataset.loggedin === 'true')
     return void lib.notificationFrom(callElemButton, 'Already logged in')
@@ -61,7 +76,13 @@ export async function loginButtonClicked(callElemButton) {
     uriSegs.push('&displayname=', encodeURIComponent(displaynameInput.value))
   if(rememberMeBox.checked)
     uriSegs.push('&rememberme')
+  callElemButton.classList.add('deactivated')
+  const pleaseWaitNotification = document.createElement('span')
+  pleaseWaitNotification.textContent = 'Please  wait'
+  lib.notificationFrom(callElemButton, pleaseWaitNotification)
   let response = await fetch(uriSegs.join(''))
+  pleaseWaitNotification.closest('.notification').remove()
+  callElemButton.classList.remove('deactivated')
   lib.notificationFrom(loginButton, [
     response.ok ? 'Success: ' : 'Failure: ',
     response.statusText, ' (', String(response.status), ')'
@@ -98,8 +119,16 @@ export async function installCheckOnInputFunctionality(callElem) {
   let usernameHadInput = false
   let passwordHadInput = false
   
-  const checkOnInput = () => {
-    // check username
+  let timeoutId = -1
+  
+  displaynameInput.addEventListener('input', () => { if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=> {
+    if(displaynameInput.value.length > 32) {
+      displaynameValidMsg.innerText = 'Displayname too long'
+    } else {
+      displaynameValidMsg.innerHTML = ''
+    }
+  }, 500) })
+  usernameInput.addEventListener(   'input', () => { usernameHadInput = true; if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=> {
     if(usernameInput.value.length === 0) {
       if(usernameHadInput) {
         usernameValidMsg.innerText = 'Username is empty'
@@ -112,15 +141,8 @@ export async function installCheckOnInputFunctionality(callElem) {
     } else {
       usernameValidMsg.innerHTML = ''
     }
-    
-    // check displayname
-    if(displaynameInput.value.length > 32) {
-      displaynameValidMsg.innerText = 'Displayname too long'
-    } else {
-      displaynameValidMsg.innerHTML = ''
-    }
-    
-    // check password
+  }, 500) })
+  passwordInput.addEventListener(   'input', () => { passwordHadInput = true; if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=> {
     if(passwordInput.value.length < 4) {
       if(passwordHadInput) {
         passwordValidMsg.innerText = 'Password is too short (must be length > 3; highly recommend a random password using all available characters with length > 8)'
@@ -128,16 +150,7 @@ export async function installCheckOnInputFunctionality(callElem) {
     } else {
       passwordValidMsg.innerHTML = ''
     }
-    
-    
-  }
-  checkOnInput()
-  
-  let timeoutId = -1
-  
-  displaynameInput.addEventListener('input', () => { if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=>checkOnInput(), 500) })
-  usernameInput.addEventListener(   'input', () => { usernameHadInput = true; if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=>checkOnInput(), 500) })
-  passwordInput.addEventListener(   'input', () => { passwordHadInput = true; if(timeoutId) clearTimeout(timeoutId); timeoutId = setTimeout(()=>checkOnInput(), 500) })
+  }, 500) })
 }
 
 export async function registerButtonClicked(callElemButton) {
@@ -148,13 +161,23 @@ export async function registerButtonClicked(callElemButton) {
   const usernameInput = pagelet.querySelector(':scope > * > input.username')
   const passwordInput = pagelet.querySelector(':scope > * > input.password')
   
+  if(callElemButton.classList.contains('deactivated'))
+    return void lib.notificationFrom(callElemButton, 'Please wait!')
+  // else
+  
   let uriSegs = [
     '/bin/user.s.js/register?username=', encodeURIComponent(usernameInput.value),
     '&password=', encodeURIComponent(sha256(passwordInput.value))
   ]
   if((displaynameInput.value ?? '') !== '')
     uriSegs.push('&displayname=', encodeURIComponent(displaynameInput.value))
+  callElemButton.classList.add('deactivated')
+  const pleaseWaitNotification = document.createElement('span')
+  pleaseWaitNotification.textContent = 'Please  wait'
+  lib.notificationFrom(callElemButton, pleaseWaitNotification)
   let response = await fetch(uriSegs.join(''))
+  pleaseWaitNotification.closest('.notification').remove()
+  callElemButton.classList.remove('deactivated')
   lib.notificationFrom(callElemButton, [
     response.ok ? 'Success: ' : 'Failure: ',
     response.statusText, ' (', String(response.status), ')'
@@ -188,13 +211,24 @@ export async function setPasswordButtonClicked(callElem) {
   const pagelet = callElem.closest('.pagelet')
   const newPasswordInput = pagelet.querySelector(':scope > * > .change-password > input.new')
   const oldPasswordInput = pagelet.querySelector(':scope > * > .change-password > input.old')
+  
+  if(callElem.classList.contains('deactivated'))
+    return void lib.notificationFrom(callElem, 'Please wait!')
+  // else
+  
   let urlSegs = [
     `/bin/user.s.js/changePassword`,
     `?newPassword=`, encodeURIComponent(sha256(newPasswordInput.value))
   ]
   if(oldPasswordInput.value)
-    urlSegs.push(`?oldPassword=`, encodeURIComponent(sha256(oldPasswordInput.value)))
+    urlSegs.push(`&oldPassword=`, encodeURIComponent(sha256(oldPasswordInput.value)))
+  callElem.classList.add('deactivated')
+  const pleaseWaitNotification = document.createElement('span')
+  pleaseWaitNotification.textContent = 'Please  wait'
+  lib.notificationFrom(callElem, pleaseWaitNotification)
   let response = await fetch(urlSegs.join(''))
+  pleaseWaitNotification.closest('.notification').remove()
+  callElem.classList.remove('deactivated')
   lib.notificationFrom(callElem, [
     response.ok ? 'Success: ' : 'Failure: ',
     response.statusText, ' (', String(response.status), ')'
@@ -209,11 +243,17 @@ export async function submitNewChallenge(callElem) {
   const challengeInput = pagelet.querySelector(':scope .challenge-response input.challenge')
   const responseInput  = pagelet.querySelector(':scope .challenge-response input.response')
   
+  if(callElem.classList.contains('deactivated'))
+    return void lib.notificationFrom(callElem, 'Please wait!')
+  // else
+  
+  callElem.classList.add('deactivated')
   const response = await fetch([
     `/bin/user.s.js/newPasswordChallenge`,
       `?challenge=`, encodeURIComponent(challengeInput.value),
       `&response=`, encodeURIComponent(sha256(responseInput.value))
   ].join(''))
+  callElem.classList.remove('deactivated')
   
   if(response.ok) {
     lib.notificationFrom(callElem, `Success: challenge created`)
@@ -225,9 +265,11 @@ export async function submitNewChallenge(callElem) {
   }
 }
 
-export async function updateModContactInfo(callElem) {
+export async function openModInfoFile(callElem) {
   const lib = await import('/lib/lib.mjs')
-  const pagelet = callElem.closest('.pagelet')
-  const infoTextarea = pagelet.querySelector(':scope textarea.mod-contact-info')
-  // ...  
+  const username = document.cookie.match(/username=(\w+);/)[1]
+  if(!username)
+    return void lib.notificationFrom(callElem, `Error: not logged in (how?)`, {error: true})
+  // else
+  lib.openPageletAt(callElem, `/pagelets/represent-file.jhp?file=/users/${username}/mod-only.txt`, `after this`)
 }

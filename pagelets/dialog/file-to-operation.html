@@ -2,6 +2,6 @@
   -:[/pagelets/pagelet-header.html]:-
   <title> -[arg-operation|capitalize]- -[arg-file]- </title>
   <input autofocus type="text" placeholder="Location to -[arg-operation]- to" data-substitute="DIR:-[arg-file|dirname]-" ctrl-enter-srcfn="/pagelets/dialog/file-to-operation.mjs: submitOperation">
-  <button is="call-resource-button" class="linklike" srcfn="/pagelets/dialog/file-to-operation.mjs: submitOperation">Submit</button>
+  <button class="linklike" srcfn="/pagelets/dialog/file-to-operation.mjs: submitOperation">Submit</button>
   <call-resource srcfn="/lib/elem-functions.mjs: displayNotifications" watch="this parent .pagelet"><call-resource>
 </div>

@@ -163,15 +163,15 @@ function decorateImage(img) {
 //#endregion
 
 
-//#region automatically decorate textareas
+//#region automatically decorate textareas, input fields
 
 function decorateTextFieldChildren(elem) {
   if(elem.matches('textarea:not(.decorated-textfield)') || elem.matches('input[type="text"]:not(.decorated-textfield)'))
-    decorateTextField(img)
-  for(const img of elem.querySelectorAll('textarea:not(.decorated-textfield)'))
-    decorateTextField(img)
-  for(const img of elem.querySelectorAll('input[type="text"]:not(.decorated-textfield)'))
-    decorateTextField(img)
+    decorateTextField(elem)
+  for(const textarea of elem.querySelectorAll('textarea:not(.decorated-textfield)'))
+    decorateTextField(textarea)
+  for(const input of elem.querySelectorAll('input[type="text"]:not(.decorated-textfield)'))
+    decorateTextField(input)
 }
 
 const textareaObserver = new MutationObserver((records) => {
@@ -203,8 +203,8 @@ async function decorateTextField(textfield) {
     if(pagelet) {
       if(pagelet.dataset.file)
         textExpansionSpec['!FILE'] = {to: ()=>pagelet.dataset.file, endPosition: -1}
-      if(pagelet.dataset.dir)
-        textExpansionSpec['!DIR'] = {to: ()=>pagelet.dataset.dir, endPosition: -1}
+      if(pagelet.dataset.dir || pagelet.dataset.directory)
+        textExpansionSpec['!DIR'] = {to: ()=>(pagelet.dataset.dir ?? pagelet.dataset.directory), endPosition: -1}
       if(pagelet.dataset.url)
         textExpansionSpec['!URL'] = {to: ()=>pagelet.dataset.url, endPosition: -1}
     }
@@ -225,6 +225,8 @@ async function decorateTextField(textfield) {
         let height = parseInt(window.getComputedStyle(textfield).height.slice(0, -2))
         height = Math.max(height + Math.ceil(wheelEvent.deltaY / 4), 92)
         textfield.style.height = `${height}px`
+        wheelEvent.stopImmediatePropagation()
+        wheelEvent.stopPropagation()
       }
     })
   }
@@ -270,7 +272,7 @@ async function decorateTextField(textfield) {
     })
   }
   // change functionality
-  const changeSrcFn  = textfield.getAttribute('input-srcfn')
+  const changeSrcFn  = textfield.getAttribute('change-srcfn')
   if(changeSrcFn) {
     const lib = await import('/lib/lib.mjs')
     let [changeSrc, changeFn] = lib.splitAtFirst(changeSrcFn, /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
@@ -279,6 +281,67 @@ async function decorateTextField(textfield) {
     })
   }
 }
+
+//#endregion
+
+//#region automatically decorate buttons
+
+document.addEventListener('click', async clickEvent => {
+  const parentButton = clickEvent.target.closest('button')
+  const parentLink   = clickEvent.target.closest('a')
+  if(parentButton || parentLink) {
+    const button = parentButton ?? parentLink
+    const lib = await import('/lib/lib.mjs')
+    lib.attentionFlashElement(button)
+    
+    if(button.getAttribute('is') !== 'call-resource-button') {
+      const srcfn = button.getAttribute('srcfn')
+      if(srcfn) {
+        const lib = await import('/lib/lib.mjs')
+        let [src, fnName] = lib.splitAtFirst(srcfn  , /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
+        callFunctionInModule(src, fnName, button)
+      }
+    }
+  }
+})
+
+//#endregion
+
+//#region automatically call all srcfn
+
+
+function callAllSrcfns(elem) {
+  if(elem.matches('*[srcfn]:not(.srcfn-called):not(call-resource):not(button):not(.latent)'))
+    callElemSrcfn(elem)
+  for(const textarea of elem.querySelectorAll('*[srcfn]:not(.srcfn-called):not(call-resource):not(button):not(.latent)'))
+    callElemSrcfn(textarea)
+}
+
+const callSrcfnObserver = new MutationObserver((records) => {
+  for(const mutationRecord of records) {
+    if(mutationRecord.type === 'childList') {
+      for(const child of mutationRecord.addedNodes) {
+        if(child instanceof HTMLElement) 
+          callAllSrcfns(child)
+      }
+    }
+  }
+})
+callSrcfnObserver.observe(document.body, {childList: true, subtree: true})
+callAllSrcfns(document.body)
+
+async function callElemSrcfn(elem) {
+  const srcfn  = elem.getAttribute('srcfn')
+  if(srcfn) {
+    const lib = await import('/lib/lib.mjs')
+    let [src, fn] = lib.splitAtFirst(srcfn, /:/)?.map(x=>x?.trim()) ?? [undefined, undefined]
+    callFunctionInModule(src, fn, elem)
+    elem.classList.add('srcfn-called')
+  }
+}
+
+
+//#endregion
 
 async function callFunctionInModule(modName, fnName, ...args) {
   let mod = await import(modName)
@@ -291,37 +354,3 @@ async function callFunctionInModule(modName, fnName, ...args) {
   // else
   fn(...args)
 }
-
-//#endregion
-
-class DecoratedTextareaElement extends HTMLTextAreaElement {
-  constructor() {
-    super()
-    this.addEventListener('wheel', wheelEvent => {
-      if(wheelEvent.shiftKey) {
-        let height = parseInt(window.getComputedStyle(this).height.slice(0, -2))
-        height = Math.max(height + Math.ceil(wheelEvent.deltaY / 4), 92)
-        this.style.height = `${height}px`
-      }
-    })
-  }
-}
-if(!customElements.get('decorated-textarea'))
-  customElements.define('decorated-textarea', DecoratedTextareaElement, {extends: 'textarea'})
-
-
-function makeTemplate(source) {
-  let template = document.createElement('template')
-  template.innerHTML = source
-  return template
-}
-
-let headerTemplate
-setTimeout(async ()=>{
-  let response = await fetch('/pagelets/pagelet-header.html')
-  if(!response.ok)
-    return void console.error(`ERROR: pagelet-header.mjs could not get pagelet-header.html`)
-  // else
-  headerTemplate = makeTemplate(await response.text())
-})
-
