@@ -1,8 +1,6 @@
 
 # Reconfuse ![](./favicon.ico)
 
-Visit [reconfuse.org](https://reconfuse.org) to see the site in action
-
 This contains the major components for project reconfuse
 * Fragment server -- a server which:
   + Calls arbitrary initialization scripts
@@ -24,7 +22,9 @@ Project reconfuse is intended to provide a platform for free expression of ideas
 
 # Project status:
 
-It is as done as it will ever be unless others take interest in the project (which is to be determined). I won't continue working on it except for my own purposes unless other people start using it and they want more features, bugs to be fixed, etc
+Reconfuse is no longer in development and is only fairly stable. Expect bugs and an irritating UI
+
+HOWEVER, it *is* currently usable and functional as a hybrid file browser / web forum / web blog / whatever
 
 # How to run:
 
